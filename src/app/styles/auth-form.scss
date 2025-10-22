@@ -1,0 +1,136 @@
+/* File này sẽ được import vào
+  cả login.component.scss và register.component.scss
+*/
+
+// Biến màu (lấy từ homepage.component.scss)
+:host {
+  --gradient: linear-gradient(135deg, #007BFF 0%, #00B09B 100%);
+  --primary-blue: #007BFF;
+  --glow-shadow: 0 0 25px rgba(0, 123, 255, 0.5);
+  --text-dark: #212529;
+  --text-light: #6c757d;
+  --bg-white: #FFFFFF;
+  --border-color: #dee2e6;
+}
+
+/* Nút CTA Gradient (Lấy từ homepage) */
+.cta-gradient-button {
+  background: var(--gradient);
+  color: white;
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--glow-shadow);
+  }
+}
+
+/* Hiệu ứng "Glow" cho Form (Lấy từ homepage) */
+.mat-mdc-form-field.mat-focused {
+  .mdc-notched-outline > * {
+    border-color: var(--primary-blue) !important;
+  }
+  .mdc-floating-label {
+    color: var(--primary-blue) !important;
+  }
+  box-shadow: var(--glow-shadow);
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+/* === BỐ CỤC TRANG AUTH === */
+
+/* Container chính, full màn hình, nền gradient */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; // Full chiều cao
+  padding: 2rem 1rem;
+  background: var(--gradient); // Nền gradient
+}
+
+/* Thẻ Card ở giữa */
+.auth-card {
+  max-width: 450px;
+  width: 100%;
+  padding: 1rem 1.5rem 2rem 1.5rem; // Tăng padding
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Header: Logo + Tiêu đề */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .logo-text {
+    font-weight: 800;
+    font-size: 2.2rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Style cho các ô input */
+.auth-form {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+}
+
+/* Khu vực nút bấm */
+.auth-actions {
+  padding: 0;
+  margin-top: 1rem;
+
+  .submit-button {
+    width: 100%;
+    height: 50px; // Nút to, rõ ràng
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 25px; // Bo tròn
+  }
+}
+
+/* Link "Quên mật khẩu?" */
+.forgot-password {
+  display: block;
+  text-align: right;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Footer: Link Đăng ký / Đăng nhập */
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 1rem;
+  color: var(--text-light);
+
+  a {
+    color: var(--primary-blue);
+    font-weight: 700;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

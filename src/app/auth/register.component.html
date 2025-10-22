@@ -1,0 +1,59 @@
+<div class="auth-container">
+  <mat-card class="auth-card" data-aos="zoom-in">
+
+    <div class="auth-header">
+      <a href="/" class="logo-text">[LOGO]</a>
+      <h2>Đăng Ký Dùng Thử Miễn Phí</h2>
+      <p>Chỉ 30 giây để bắt đầu quản lý chuyên nghiệp.</p>
+    </div>
+
+    <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <mat-card-content>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tên cửa hàng</mat-label>
+          <mat-icon matPrefix>store</mat-icon>
+          <input matInput formControlName="storeName" placeholder="Ví dụ: Cầm đồ Minh Long">
+          @if (registerForm.controls['storeName'].hasError('required')) {
+            <mat-error>Vui lòng nhập tên cửa hàng</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Số điện thoại</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="phone" placeholder="09xxxxxxx">
+          @if (registerForm.controls['phone'].hasError('required')) {
+            <mat-error>Vui lòng nhập số điện thoại</mat-error>
+          }
+          @if (registerForm.controls['phone'].hasError('pattern')) {
+            <mat-error>Số điện thoại không hợp lệ</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mật khẩu</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput formControlName="password" type="password">
+          @if (registerForm.controls['password'].hasError('minlength')) {
+            <mat-error>Mật khẩu cần ít nhất 6 ký tự</mat-error>
+          }
+        </mat-form-field>
+
+      </mat-card-content>
+      <mat-card-actions class="auth-actions">
+        <button mat-raised-button
+                class="submit-button cta-gradient-button"
+                type="submit"
+                [disabled]="registerForm.invalid">
+          ĐĂNG KÝ NGAY
+        </button>
+      </mat-card-actions>
+    </form>
+
+    <div class="auth-footer">
+      <span>Bạn đã có tài khoản? <a routerLink="/login">Đăng nhập ngay</a></span>
+    </div>
+
+  </mat-card>
+</div>
