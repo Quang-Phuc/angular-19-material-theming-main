@@ -1,0 +1,119 @@
+<mat-toolbar color="primary" class="navbar sticky-nav">
+  <span>LOGO</span>
+  <span class="navbar-spacer"></span>
+  <a mat-button href="#features">Tính năng</a>
+  <a mat-button href="#signup">Bảng giá</a>
+  <button mat-button class="login-button">Đăng nhập</button>
+  <button mat-flat-button color="accent" href="#signup" class="cta-pulse">Đăng Ký Dùng Thử</button>
+</mat-toolbar>
+
+<div class="hero-section">
+  <div class="hero-content" data-aos="fade-up">
+    <h1>Nền Tảng Quản Lý Cầm Đồ Toàn Diện</h1>
+    <p>Tối ưu vận hành, giảm thất thoát, kiểm soát rủi ro và tăng trưởng doanh thu.</p>
+    <div class="cta-buttons">
+      <button mat-raised-button color="primary" href="#signup" class="cta-pulse">Dùng Thử Miễn Phí 15 Ngày</button>
+      <button mat-stroked-button class="hero-stroked-button">Liên Hệ Tư Vấn</button>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="features-section">
+  <h2 data-aos="fade-up">Giải Pháp Quản Lý 4.0 Cho Tiệm Cầm Đồ</h2>
+
+  <div class="feature-grid">
+    @for (feature of features; track feature.title; let i = $index) {
+      <mat-card
+        class="feature-card"
+        data-aos="fade-up"
+        [attr.data-aos-delay]="i * 100"
+      >
+        <mat-card-header>
+          <div mat-card-avatar class="feature-icon-wrapper">
+            <mat-icon>{{ feature.icon }}</mat-icon>
+          </div>
+          <mat-card-title>{{ feature.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ feature.description }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</section>
+
+<section id="signup" class="signup-section">
+  <h2 data-aos="fade-up">Sẵn sàng Chuyển Đổi Số Cửa Hàng Của Bạn?</h2>
+  <p data-aos="fade-up" data-aos-delay="100">Đăng ký ngay để trải nghiệm 15 ngày miễn phí.</p>
+
+  <form [formGroup]="signUpForm" novalidate (ngSubmit)="onSubmit()">
+    <mat-card class="signup-card" data-aos="zoom-in-up">
+      <mat-card-header>
+        <mat-card-title>Tạo Tài Khoản Miễn Phí</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Họ và tên</mat-label>
+              <input matInput placeholder="Họ và tên" formControlName="fullName">
+              @if (signUpForm.controls['fullName'].hasError('required')) {
+                <mat-error>Họ tên là <strong>bắt buộc</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Số điện thoại</mat-label>
+              <input matInput placeholder="Số điện thoại" formControlName="phone">
+              @if (signUpForm.controls['phone'].hasError('required')) {
+                <mat-error>Số điện thoại là <strong>bắt buộc</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="col">
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput placeholder="Email" formControlName="email">
+              @if (signUpForm.controls['email'].hasError('email')) {
+                <mat-error>Email không hợp lệ</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Mật khẩu</mat-label>
+              <input matInput placeholder="Mật khẩu" type="password" formControlName="password">
+              @if (signUpForm.controls['password'].hasError('minlength')) {
+                <mat-error>Mật khẩu cần ít nhất <strong>6 ký tự</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+      </mat-card-content>
+      <mat-card-actions class="signup-actions">
+        <button mat-raised-button color="primary" class="submit-button" type="submit" [disabled]="signUpForm.invalid">
+          Tạo Tài Khoản Miễn Phí
+        </button>
+      </mat-card-actions>
+      <mat-card-footer class="signup-footer">
+        Bạn đã có tài khoản? <a href="#">Đăng nhập tại đây</a>
+      </mat-card-footer>
+    </mat-card>
+  </form>
+</section>
+
+<footer class="footer">
+  <p>&copy; 2025 [Tên Công Ty Của Bạn]. Đã đăng ký bản quyền.</p>
+  <p>
+    <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a>
+  </p>
+</footer>

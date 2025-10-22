@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AddressFormComponent } from './address-form/address-form.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TableComponent } from './table/table.component';
+import {HomepageComponent} from './homepage/homepage.component';
 
 export const routes: Routes = [
     {
@@ -15,5 +16,9 @@ export const routes: Routes = [
     {
         path: 'table',
         component: TableComponent
+    },
+    {
+      path: 'home',
+      component: HomepageComponent
     }
 ];
