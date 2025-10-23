@@ -1,16 +1,18 @@
 <div class="auth-container">
-  <mat-card class="auth-card" data-aos="zoom-in">
 
-    <div class="auth-header">
+  <mat-card class="auth-card">
+
+    <div class="auth-header" data-aos="fade-down">
       <a href="/" class="logo-text">[LOGO]</a>
       <h2>Đăng Ký Dùng Thử Miễn Phí</h2>
       <p>Chỉ 30 giây để bắt đầu quản lý chuyên nghiệp.</p>
     </div>
 
     <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
       <mat-card-content>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" data-aos="fade-right" data-aos-delay="100">
           <mat-label>Tên cửa hàng</mat-label>
           <mat-icon matPrefix>store</mat-icon>
           <input matInput formControlName="storeName" placeholder="Ví dụ: Cầm đồ Minh Long">
@@ -19,7 +21,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" data-aos="fade-left" data-aos-delay="200">
           <mat-label>Số điện thoại</mat-label>
           <mat-icon matPrefix>phone</mat-icon>
           <input matInput formControlName="phone" placeholder="09xxxxxxx">
@@ -31,7 +33,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" data-aos="fade-right" data-aos-delay="300">
           <mat-label>Mật khẩu</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
           <input matInput formControlName="password" type="password">
@@ -41,7 +43,8 @@
         </mat-form-field>
 
       </mat-card-content>
-      <mat-card-actions class="auth-actions">
+
+      <mat-card-actions class="auth-actions" data-aos="fade-up" data-aos-delay="400">
         <button mat-raised-button
                 class="submit-button cta-gradient-button"
                 type="submit"
@@ -51,7 +54,7 @@
       </mat-card-actions>
     </form>
 
-    <div class="auth-footer">
+    <div class="auth-footer" data-aos="fade-up" data-aos-delay="500">
       <span>Bạn đã có tài khoản? <a routerLink="/login">Đăng nhập ngay</a></span>
     </div>
 
