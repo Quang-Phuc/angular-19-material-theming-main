@@ -1,0 +1,22 @@
+<mat-sidenav-container class="admin-container">
+
+  <mat-sidenav #sidenav
+               mode="side"
+               [opened]="isSidenavOpen"
+               class="admin-sidenav">
+    <app-sidenav></app-sidenav>
+  </mat-sidenav>
+
+
+  <mat-sidenav-content class="admin-content-area">
+
+    <app-header (sidenavToggle)="onToggleSidenav()"></app-header>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <app-footer></app-footer>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

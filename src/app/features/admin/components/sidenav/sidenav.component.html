@@ -1,0 +1,146 @@
+<div class="logo-container">
+  [ADMIN PANEL]
+</div>
+
+<mat-nav-list>
+
+  <!-- A. Dashboard (Cấp 1) -->
+  <a mat-list-item
+     routerLink="/admin/dashboard"
+     routerLinkActive="active"
+     [routerLinkActiveOptions]="{exact: true}"
+     class="nav-item">
+    <mat-icon matListItemIcon>dashboard</mat-icon>
+    <span matListItemTitle>Tổng quan</span>
+  </a>
+
+  <!-- C. Quản lý Tiệm (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel" [expanded]="true"> <!-- Mở sẵn -->
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>storefront</mat-icon>
+        <span matListItemTitle>Quản lý Tiệm</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/stores/list" routerLinkActive="active" class="nav-item-child">
+      Danh sách Tiệm
+    </a>
+    <a mat-list-item routerLink="/admin/stores/pending" routerLinkActive="active" class="nav-item-child">
+      Tiệm chờ duyệt
+    </a>
+  </mat-expansion-panel>
+
+  <!-- D. Quản lý Chủ tiệm & Người dùng (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Quản lý Người dùng</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/owners" routerLinkActive="active" class="nav-item-child">
+      Danh sách Chủ tiệm
+    </a>
+    <a mat-list-item routerLink="/admin/users/all" routerLinkActive="active" class="nav-item-child">
+      Tất cả Người dùng
+    </a>
+    <a mat-list-item routerLink="/admin/roles" routerLinkActive="active" class="nav-item-child">
+      Phân quyền
+    </a>
+  </mat-expansion-panel>
+
+  <!-- B. Quản lý License (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>card_membership</mat-icon>
+        <span matListItemTitle>Quản lý License</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/licenses/list" routerLinkActive="active" class="nav-item-child">
+      Danh sách License
+    </a>
+    <a mat-list-item routerLink="/admin/licenses/expiring" routerLinkActive="active" class="nav-item-child">
+      Sắp hết hạn
+    </a>
+    <a mat-list-item routerLink="/admin/license-keys" routerLinkActive="active" class="nav-item-child">
+      Key kích hoạt
+    </a>
+  </mat-expansion-panel>
+
+  <!-- E. Quản lý Gói Dịch vụ & Bảng giá (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>sell</mat-icon>
+        <span matListItemTitle>Gói & Bảng giá</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/plans" routerLinkActive="active" class="nav-item-child">
+      Các Gói dịch vụ
+    </a>
+    <a mat-list-item routerLink="/admin/coupons" routerLinkActive="active" class="nav-item-child">
+      Mã giảm giá
+    </a>
+    <a mat-list-item routerLink="/admin/features" routerLinkActive="active" class="nav-item-child">
+      Quản lý Tính năng
+    </a>
+  </mat-expansion-panel>
+
+  <!-- F. Quản lý Thanh toán & Hóa đơn (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>receipt_long</mat-icon>
+        <span matListItemTitle>Thanh toán & Hóa đơn</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/payments/history" routerLinkActive="active" class="nav-item-child">
+      Lịch sử Thanh toán
+    </a>
+    <a mat-list-item routerLink="/admin/invoices" routerLinkActive="active" class="nav-item-child">
+      Danh sách Hóa đơn
+    </a>
+    <a mat-list-item routerLink="/admin/payment-gateways" routerLinkActive="active" class="nav-item-child">
+      Cổng Thanh toán
+    </a>
+  </mat-expansion-panel>
+
+  <!-- G. Báo cáo & Thống kê (Cấp 1) -->
+  <a mat-list-item routerLink="/admin/reports" routerLinkActive="active" class="nav-item">
+    <mat-icon matListItemIcon>analytics</mat-icon>
+    <span matListItemTitle>Báo cáo & Thống kê</span>
+  </a>
+
+  <!-- I. Trung tâm Hỗ trợ (Cấp 1) -->
+  <a mat-list-item routerLink="/admin/support" routerLinkActive="active" class="nav-item">
+    <mat-icon matListItemIcon>contact_support</mat-icon>
+    <span matListItemTitle>Hỗ trợ (Tickets)</span>
+  </a>
+
+  <!-- H. Hệ thống & Cấu hình (Cấp 2) -->
+  <mat-expansion-panel class="nav-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Hệ thống</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <a mat-list-item routerLink="/admin/settings/general" routerLinkActive="active" class="nav-item-child">
+      Cài đặt Chung
+    </a>
+    <a mat-list-item routerLink="/admin/settings/admins" routerLinkActive="active" class="nav-item-child">
+      Quản lý Admin
+    </a>
+    <a mat-list-item routerLink="/admin/settings/integrations" routerLinkActive="active" class="nav-item-child">
+      Tích hợp (API Keys)
+    </a>
+    <a mat-list-item routerLink="/admin/settings/emails" routerLinkActive="active" class="nav-item-child">
+      Mẫu Email/SMS
+    </a>
+    <a mat-list-item routerLink="/admin/settings/logs" routerLinkActive="active" class="nav-item-child">
+      Nhật ký Hệ thống
+    </a>
+  </mat-expansion-panel>
+
+</mat-nav-list>
