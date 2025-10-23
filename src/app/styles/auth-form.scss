@@ -1,5 +1,5 @@
 /* =======================================
-   BIẾN MÀU & FONT CHỮ ĐẸP HƠN
+   BIẾN MÀU & FONT CHỮ (CÂN ĐỐI)
    ======================================= */
 :host {
   --gradient: linear-gradient(135deg, #007BFF 0%, #00B09B 100%);
@@ -43,7 +43,7 @@
 }
 
 /* =======================================
-   BỐ CỤC TRANG AUTH (TO HƠN)
+   BỐ CỤC TRANG AUTH (NHỎ HƠN XÍU)
    ======================================= */
 
 .auth-container {
@@ -55,29 +55,29 @@
   background: var(--gradient);
 }
 
-/* Thẻ Card (TO HƠN) */
+/* Thẻ Card (NHỎ HƠN) */
 .auth-card {
-  max-width: 520px; // <-- TO HƠN (từ 450px)
+  max-width: 480px; // <-- NHỎ HƠN (từ 520px)
   width: 100%;
-  padding: 2rem 2.5rem 2.5rem 2.5rem; // <-- Tăng padding (thoáng hơn)
+  padding: 2rem 2.2rem 2.2rem 2.2rem; // <-- Giảm padding ngang
   border-radius: 16px;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1); // Shadow "mềm" hơn
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
 }
 
-/* Header (FONT ĐẸP HƠN) */
+/* Header (FONT NHỎ HƠN) */
 .auth-header {
   text-align: center;
-  margin-bottom: 2rem; // Tăng khoảng cách
+  margin-bottom: 2rem;
 
   .logo-text {
     font-weight: 800;
-    font-size: 2.5rem; // <-- FONT TO HƠN
+    font-size: 2.3rem; // <-- NHỎ HƠN (từ 2.5rem)
     color: var(--primary-blue);
     text-decoration: none;
   }
 
   h2 {
-    font-size: 2rem; // <-- FONT TO HƠN
+    font-size: 1.8rem; // <-- NHỎ HƠN (từ 2rem)
     font-weight: 700;
     color: var(--text-dark);
     margin-top: 1rem;
@@ -85,7 +85,7 @@
   }
 
   p {
-    font-size: 1.1rem; // FONT TO HƠN
+    font-size: 1.05rem; // <-- NHỎ HƠN (từ 1.1rem)
     color: var(--text-light);
   }
 }
@@ -95,28 +95,23 @@
    ======================================= */
 .auth-form {
 
-  // *** THÊM PHẦN NÀY ĐỂ TẠO KHOẢNG CÁCH ***
   mat-card-content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; // <-- Tạo khoảng cách giữa các ô
+    gap: 1.3rem; // <-- Giảm khoảng cách (từ 1.5rem)
   }
 
   .mat-mdc-form-field {
     width: 100%;
 
-    // Style cho ô input "chưa focus" (ĐẸP HƠN)
+    // Style cho ô input "chưa focus"
     &:not(.mat-focused) {
-      // Đổi màu viền mặc định (không còn là màu đen)
       .mdc-notched-outline > * {
         border-color: var(--border-color);
       }
-      // Đổi màu label
       .mdc-floating-label {
         color: var(--text-light);
       }
-
-      // Thêm màu nền "smart" cho ô input
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
@@ -131,22 +126,22 @@
   }
 }
 
-/* Nút bấm (TO HƠN) */
+/* Nút bấm (NHỎ HƠN) */
 .auth-actions {
   padding: 0;
-  margin-top: 2rem; // Tăng khoảng cách
+  margin-top: 2rem;
 
   .submit-button {
     width: 100%;
-    height: 54px; // <-- NÚT CAO HƠN
+    height: 52px; // <-- NHỎ HƠN (từ 54px)
     padding: 0.75rem 1.5rem;
-    font-size: 1.15rem; // FONT TO HƠN
+    font-size: 1.1rem; // <-- NHỎ HƠN (từ 1.15rem)
     font-weight: 500;
     border-radius: 25px;
   }
 }
 
-/* Footer (FONT ĐẸP HƠN) */
+/* Footer (FONT VỪA PHẢI) */
 .auth-footer {
   text-align: center;
   margin-top: 2rem;
