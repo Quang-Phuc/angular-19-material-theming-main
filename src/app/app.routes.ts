@@ -10,6 +10,7 @@ import { AdminDashboardComponent } from './features/admin/pages/dashboard/admin-
 
 // *** 1. IMPORT COMPONENT "DANH SÁCH TIỆM" CỦA BẠN VÀO ĐÂY ***
 import { StoreListComponent } from './features/admin/pages/store-list/store-list.component';
+import {PlanListComponent} from './features/admin/components/plan-list/plan-list.component';
 
 
 export const routes: Routes = [
@@ -44,6 +45,10 @@ export const routes: Routes = [
       {
         path: 'stores/list', // <-- Đường dẫn này khớp với routerLink
         component: StoreListComponent // <-- Component sẽ hiển thị
+      },
+      {
+        path: 'plans', // <-- Đường dẫn này khớp với routerLink
+        component: PlanListComponent // <-- Component sẽ hiển thị
       },
       // *******************************************
 
