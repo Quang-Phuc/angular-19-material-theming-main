@@ -1,5 +1,5 @@
 /* Import file style chung */
-@import '../styles/auth-form';
+@use 'auth-form' as *;
 
 /* Style riêng cho trang login (nếu có) */
 :host {
