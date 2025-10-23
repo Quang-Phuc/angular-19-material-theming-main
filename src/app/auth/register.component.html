@@ -1,5 +1,4 @@
 <div class="auth-container">
-
   <mat-card class="auth-card">
 
     <div class="auth-header" data-aos="fade-down">
@@ -9,14 +8,14 @@
     </div>
 
     <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-
       <mat-card-content>
 
         <mat-form-field appearance="outline" data-aos="fade-right" data-aos-delay="100">
           <mat-label>Tên cửa hàng</mat-label>
           <mat-icon matPrefix>store</mat-icon>
-          <input matInput formControlName="storeName" placeholder="Ví dụ: Cầm đồ Minh Long">
-          @if (registerForm.controls['storeName'].hasError('required')) {
+          <input matInput formControlName="storeName" placeholder="Ví dụ: Cầm đồ Minh Long" [errorStateMatcher]="matcher">
+
+          @if (storeName.hasError('required')) {
             <mat-error>Vui lòng nhập tên cửa hàng</mat-error>
           }
         </mat-form-field>
@@ -24,11 +23,12 @@
         <mat-form-field appearance="outline" data-aos="fade-left" data-aos-delay="200">
           <mat-label>Số điện thoại</mat-label>
           <mat-icon matPrefix>phone</mat-icon>
-          <input matInput formControlName="phone" placeholder="09xxxxxxx">
-          @if (registerForm.controls['phone'].hasError('required')) {
+          <input matInput formControlName="phone" placeholder="09xxxxxxx" [errorStateMatcher]="matcher">
+
+          @if (phone.hasError('required')) {
             <mat-error>Vui lòng nhập số điện thoại</mat-error>
           }
-          @if (registerForm.controls['phone'].hasError('pattern')) {
+          @if (phone.hasError('pattern')) {
             <mat-error>Số điện thoại không hợp lệ</mat-error>
           }
         </mat-form-field>
@@ -36,8 +36,9 @@
         <mat-form-field appearance="outline" data-aos="fade-right" data-aos-delay="300">
           <mat-label>Mật khẩu</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
-          <input matInput formControlName="password" type="password">
-          @if (registerForm.controls['password'].hasError('minlength')) {
+          <input matInput formControlName="password" type="password" [errorStateMatcher]="matcher">
+
+          @if (password.hasError('minlength')) {
             <mat-error>Mật khẩu cần ít nhất 6 ký tự</mat-error>
           }
         </mat-form-field>
