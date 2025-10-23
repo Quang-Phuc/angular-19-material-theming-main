@@ -1,62 +1,56 @@
 import { Routes } from '@angular/router';
-// Các component cũ của bạn
-import { AddressFormComponent } from './address-form/address-form.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { TableComponent } from './table/table.component';
+// ... (các import cũ của bạn)
 import { HomepageComponent } from './features/homepage/homepage.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 
 // === CÁC IMPORT MỚI CHO BỐ CỤC ADMIN ===
-// 1. Import "Vỏ" Layout (chứa Header, Sidenav, Footer)
 import { AdminLayoutComponent } from './features/admin/layout/admin-layout/admin-layout.component';
-// 2. Import trang "Tổng quan" (sẽ nằm BÊN TRONG vỏ)
 import { AdminDashboardComponent } from './features/admin/pages/dashboard/admin-dashboard.component';
 
+// *** 1. IMPORT COMPONENT "DANH SÁCH TIỆM" CỦA BẠN VÀO ĐÂY ***
+import { StoreListComponent } from './features/admin/pages/store-list/store-list.component';
+
+
 export const routes: Routes = [
-  // --- CÁC ROUTE CŨ CỦA BẠN (Giữ nguyên) ---
-  {
-    path: '',
-    component: DashboardComponent //
-  },
-  {
-    path: 'address',
-    component: AddressFormComponent //
-  },
-  {
-    path: 'table',
-    component: TableComponent //
-  },
+  // ... (các route cũ: home, login, register...)
   {
     path: 'home',
-    component: HomepageComponent //
+    component: HomepageComponent
   },
   {
     path: 'login',
-    component: LoginComponent //
+    component: LoginComponent
   },
   {
     path: 'register',
-    component: RegisterComponent //
+    component: RegisterComponent
   },
+  // ... (các route cũ khác)
 
-  // --- CẤU TRÚC ROUTE MỚI CHO ADMIN (Chuyên nghiệp) ---
+  // --- CẤU TRÚC ROUTE CHO ADMIN ---
   {
     path: 'admin',
     component: AdminLayoutComponent, // 1. Tải "Vỏ" (Layout)
-    // canActivate: [authGuard], // (Bạn sẽ thêm Guard bảo vệ ở đây sau)
+    // canActivate: [authGuard],
 
-    // 2. Các trang con sẽ được hiển thị bên trong <router-outlet> của AdminLayoutComponent
-    children: [
+    children: [ // 2. Các trang con
       {
         path: 'dashboard',
         component: AdminDashboardComponent // Trang Tổng quan
       },
-      // (Đây là nơi bạn thêm các trang admin khác sau này)
-      // { path: 'stores', component: StoreListComponent },
+
+      // *** 3. THÊM ROUTE CHO "DANH SÁCH TIỆM" TẠI ĐÂY ***
+      {
+        path: 'stores/list', // <-- Đường dẫn này khớp với routerLink
+        component: StoreListComponent // <-- Component sẽ hiển thị
+      },
+      // *******************************************
+
+      // (Thêm các trang admin khác ở đây)
+      // { path: 'stores/pending', component: StorePendingComponent },
       // { path: 'plans', component: PlanListComponent },
 
-      // 3. Tự động chuyển hướng /admin -> /admin/dashboard
       {
         path: '',
         redirectTo: 'dashboard',

@@ -20,8 +20,10 @@ import { startWith, switchMap, map, catchError, debounceTime, distinctUntilChang
 import { Store } from '../../../../core/models/store.model';
 import { StoreService } from '../../../../core/services/store.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-// (Bạn sẽ tạo component dialog này ở bước sau)
-// import { StoreDialogComponent } from '../../components/store-dialog/store-dialog.component';
+
+// *** 1. IMPORT MatCardModule VÀO ĐÂY ***
+import { MatCardModule } from '@angular/material/card';
+
 
 @Component({
   selector: 'app-store-list',
@@ -30,12 +32,15 @@ import { NotificationService } from '../../../../core/services/notification.serv
     CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
     MatSortModule, MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatProgressSpinnerModule, MatDialogModule, MatSelectModule,
-    MatDatepickerModule, MatNativeDateModule
+    MatDatepickerModule, MatNativeDateModule,
+    MatCardModule // <-- *** 2. THÊM NÓ VÀO MẢNG IMPORTS ***
   ],
   templateUrl: './store-list.component.html',
   styleUrl: './store-list.component.scss'
 })
 export class StoreListComponent implements AfterViewInit, OnInit {
+
+  // ... (Phần còn lại của file giữ nguyên) ...
 
   // Các cột hiển thị trong bảng
   displayedColumns: string[] = ['name', 'ownerName', 'phone', 'status', 'licensePlan', 'expiryDate', 'actions'];
@@ -102,6 +107,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
       map(response => {
         this.isLoading = false;
         this.resultsLength = response.total; // Tổng số bản ghi
+        this.dataSource.data = response.data; // Gán dữ liệu cho dataSource
         return response.data; // Dữ liệu cho bảng
       }),
       catchError((error: Error) => {
@@ -155,7 +161,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   onAdvancedSearch(): void {
     this.paginator.pageIndex = 0;
-    this.loadStores().subscribe(data => this.dataSource.data = data);
+    this.loadStores(); // Chỉ cần gọi loadStores
   }
 
   /**
@@ -163,7 +169,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   resetSearch(): void {
     this.searchForm.reset();
-    this.onAdvancedSearch();
+    this.searchSubject.next(''); // Trigger tìm kiếm cơ bản (với chuỗi rỗng)
   }
 
   /**
@@ -179,7 +185,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         // Nếu dialog trả về true (lưu thành công) -> tải lại danh sách
-        this.loadStores().subscribe(data => this.dataSource.data = data);
+        this.loadStores();
       }
     });
     */
@@ -195,7 +201,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
         next: () => {
           this.notification.showSuccess(`Đã xóa tiệm "${name}" thành công.`);
           // Tải lại danh sách
-          this.loadStores().subscribe(data => this.dataSource.data = data);
+          this.loadStores();
         },
         error: (error: Error) => {
           this.notification.showError(error.message);
