@@ -1,0 +1,23 @@
+.admin-toolbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+  position: sticky; // <-- "Dính" trên cùng
+  top: 0;
+  z-index: 100;
+}
+
+.toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-left: 16px;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.user-menu-button {
+  font-size: 1rem;
+  mat-icon { margin-right: 8px; }
+}
