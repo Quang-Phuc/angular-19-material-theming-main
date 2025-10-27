@@ -18,3 +18,23 @@ html {
 html.dark {
     color-scheme: dark;
 }
+
+/* Định nghĩa màu sắc cho snackbar */
+
+/* Lớp cho thông báo lỗi (màu đỏ) */
+.snackbar-error {
+  background-color: #f44336; /* Màu đỏ */
+  color: white; /* Chữ màu trắng */
+}
+
+/* Lớp cho thông báo thành công (màu xanh) */
+.snackbar-success {
+  background-color: #4CAF50; /* Màu xanh lá */
+  color: white; /* Chữ màu trắng */
+}
+
+/* Tùy chỉnh nút "Đóng" nếu cần */
+.snackbar-error .mat-simple-snackbar-action,
+.snackbar-success .mat-simple-snackbar-action {
+  color: white;
+}

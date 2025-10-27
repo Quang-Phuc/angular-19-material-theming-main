@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root'
@@ -7,11 +7,18 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class NotificationService {
   private snackBar = inject(MatSnackBar);
 
+  // Cấu hình chung cho vị trí
+  private commonConfig: MatSnackBarConfig = {
+    horizontalPosition: 'right',
+    verticalPosition: 'top',
+  };
+
   /**
    * Hiển thị thông báo thành công (màu xanh)
    */
   showSuccess(message: string): void {
     this.snackBar.open(message, 'Đóng', {
+      ...this.commonConfig, // Áp dụng cấu hình vị trí
       duration: 3000,
       panelClass: ['snackbar-success'] // (Bạn cần định nghĩa class này trong styles.scss)
     });
@@ -22,6 +29,7 @@ export class NotificationService {
    */
   showError(message: string): void {
     this.snackBar.open(message, 'Đóng', {
+      ...this.commonConfig, // Áp dụng cấu hình vị trí
       duration: 5000,
       panelClass: ['snackbar-error'] // (Bạn cần định nghĩa class này trong styles.scss)
     });
