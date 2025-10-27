@@ -32,8 +32,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
     MatSortModule, MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatProgressSpinnerModule, MatDialogModule, MatSelectModule,
-    MatCardModule, MatCheckboxModule, MatTooltipModule,
-    CurrencyPipe, DatePipe, DecimalPipe
+    MatCardModule, MatCheckboxModule, MatTooltipModule, DecimalPipe
   ],
   templateUrl: './plan-list.component.html',
   styleUrl: './plan-list.component.scss' // Sử dụng file SCSS tương tự

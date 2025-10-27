@@ -1,6 +1,6 @@
 /* purchase-license.component.scss */
 @use '@angular/material' as mat;
-
+@use 'sass:color';
 // Biến cục bộ
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
@@ -21,18 +21,124 @@ $color-purple-text: #ffffff;
   padding-bottom: 60px;
   position: relative;
   overflow-x: hidden;
-  background-color: #f4f7fa;
-  background-image:
-    radial-gradient(circle at 0% 0%, rgba(63, 81, 181, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(255, 64, 129, 0.06) 0%, transparent 45%);
-  background-repeat: no-repeat;
+
+  /* Nền Gradient (Đã có) */
+  background: linear-gradient(135deg, #e8f0fe 0%, #f8faff 100%);
   background-attachment: fixed;
-}
+
+
+  /* Style cho Stepper (Đã có) */
+  ::ng-deep .mat-step-header {
+    transition: all 0.3s ease !important;
+
+    .mat-step-label {
+      color: #757575 !important;
+      font-weight: 500 !important;
+      transition: all 0.3s ease;
+    }
+
+    .mat-step-icon {
+      background-color: #e0e0e0;
+      color: #757575;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    &:not(.mat-step-header-selected):not(.mat-step-header-done) {
+      .mat-step-label { color: #888 !important; }
+    }
+
+    &.mat-step-header-done {
+      .mat-step-label {
+        color: #333 !important;
+      }
+      .mat-step-icon {
+        background-color: #4caf50;
+        color: white;
+      }
+    }
+
+    &.mat-step-header-selected {
+      transform: scale(1.05);
+
+      .mat-step-label {
+        color: $popular-border-color !important;
+        font-weight: 700 !important;
+      }
+
+      .mat-step-icon {
+        background-color: $popular-border-color;
+        color: white;
+        @include mat.elevation(4);
+      }
+    }
+  } // Hết ::ng-deep .mat-step-header
+
+
+  /* =======================================================
+    CẬP NHẬT STYLE CHO NÚT BẤM (DÙNG SELECTOR MẠNH HƠN)
+  =======================================================
+  */
+  ::ng-deep .stepper-actions {
+
+    /* 1. Nút "Quay lại" (mat-stroked-button không có color) */
+    .mat-stroked-button:not([color]) {
+      border-width: 1px;
+      border-color: #b0b0b0; /* Viền đậm hơn */
+      color: #444; /* Chữ đậm hơn */
+      font-weight: 500;
+      background-color: #ffffff; /* Nền trắng */
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: #f5f5f5; /* Nền xám rất nhạt khi hover */
+        border-color: #888;
+        color: #111;
+      }
+    }
+
+    /* 2. Nút Primary (Tôi đã chuyển khoản...) - TRẠNG THÁI ENABLED */
+    .mat-raised-button[color="primary"]:not([disabled]) {
+      background-color: $popular-border-color;
+      color: white;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 4px 14px 0 rgba(63, 81, 181, 0.25);
+
+      &:hover {
+        background-color: color.adjust($popular-border-color, $lightness: -7%);
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px 0 rgba(63, 81, 181, 0.3);
+      }
+    }
+
+    /* 3. Nút Primary - TRẠNG THÁI DISABLED (Màu xám thay vì xanh nhạt) */
+    .mat-raised-button[color="primary"][disabled] {
+      /* Nhắm thẳng vào nút primary khi disabled */
+      background-color: #e0e0e0 !important;
+      color: #a0a0a0 !important;
+      box-shadow: none !important;
+    }
+
+  } // Hết ::ng-deep .stepper-actions
+
+} // <-- HẾT :HOST
+
 
 /* ===============================================
-  STYLE MỚI CHO STEPPER VÀ CÁC BƯỚC
+  STYLE CHUNG (NẰM NGOÀI :HOST)
+  (Không thay đổi)
 ===============================================
 */
+
+@keyframes contentFadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-grid,
+.success-container {
+  animation: contentFadeInUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
 .stepper-container {
   max-width: 1200px;
@@ -43,6 +149,8 @@ $color-purple-text: #ffffff;
 .mat-stepper-horizontal {
   background-color: #ffffff;
   border-radius: 16px;
+  @include mat.elevation(8);
+  overflow: hidden;
 }
 
 .step-content-container {
@@ -50,12 +158,10 @@ $color-purple-text: #ffffff;
   min-height: 400px;
 }
 
-/* Style cho Bước 2: Thanh toán */
 .payment-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 32px;
-
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -68,7 +174,6 @@ $color-purple-text: #ffffff;
   padding: 12px 0;
   border-bottom: 1px dashed #e0e0e0;
   font-size: 0.95rem;
-
   span { color: #666; }
   strong.highlight {
     color: $popular-border-color;
@@ -88,15 +193,10 @@ $color-purple-text: #ffffff;
   }
 }
 
-/* ... các style khác ... */
-
 .qr-container {
   img {
-    /* THÊM 2 DÒNG NÀY ĐỂ CĂN GIỮA */
     display: block;
-    margin: 0 auto 16px auto; /* Căn giữa và thêm khoảng cách bên dưới */
-
-    /* Các thuộc tính cũ giữ nguyên */
+    margin: 0 auto 16px auto;
     width: 100%;
     max-width: 250px;
     height: auto;
@@ -109,8 +209,6 @@ $color-purple-text: #ffffff;
   }
 }
 
-/* ... các style khác ... */
-
 .qr-loading {
   display: flex;
   flex-direction: column;
@@ -121,7 +219,6 @@ $color-purple-text: #ffffff;
   margin: 0 auto;
   background-color: #f9f9f9;
   border-radius: 8px;
-
   p {
     margin-top: 16px;
     font-weight: 500;
@@ -191,16 +288,10 @@ $color-purple-text: #ffffff;
   padding: 100px 0;
 }
 
-/* === SỬA LỖI 1 CỘT (ĐÃ CẬP NHẬT) === */
 .pricing-grid {
   display: grid;
   gap: 32px;
   align-items: stretch;
-
-  /* Sử dụng 'auto-fit' để trình duyệt TỰ ĐỘNG quyết định số cột.
-    - Nó sẽ cố gắng tạo các cột rộng tối thiểu (min) 300px.
-    - Nó sẽ chia đều không gian còn lại (max: 1fr).
-  */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
@@ -289,7 +380,7 @@ $color-purple-text: #ffffff;
       background-color: $color-green-bg;
       color: $color-green-text;
       &:hover {
-        background-color: darken($color-green-bg, 8%);
+        background-color: color.adjust($color-green-bg, $lightness: -8%);
         transform: translateY(-2px);
       }
     }
@@ -297,7 +388,7 @@ $color-purple-text: #ffffff;
       background-color: $color-blue-bg;
       color: $color-blue-text;
       &:hover {
-        background-color: darken($color-blue-bg, 8%);
+        background-color: color.adjust($color-blue-bg, $lightness: -8%);
         transform: translateY(-2px);
       }
     }
@@ -305,7 +396,7 @@ $color-purple-text: #ffffff;
       background-color: $color-purple-bg;
       color: $color-purple-text;
       &:hover {
-        background-color: darken($color-purple-bg, 8%);
+        background-color: color.adjust($color-purple-bg, $lightness: -8%);
         transform: translateY(-2px);
       }
     }
@@ -313,7 +404,7 @@ $color-purple-text: #ffffff;
       background-color: $color-orange-bg;
       color: $color-orange-text;
       &:hover {
-        background-color: darken($color-orange-bg, 8%);
+        background-color: color.adjust($color-orange-bg, $lightness: -8%);
         transform: translateY(-2px);
       }
     }
