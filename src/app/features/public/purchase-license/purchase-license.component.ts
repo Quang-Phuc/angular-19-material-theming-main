@@ -1,10 +1,11 @@
 // purchase-license.component.ts
 
-// 1. IMPORT THÊM ChangeDetectorRef
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+// 1. IMPORT THÊM ChangeDetectorRef và AOS
+import { Component, inject, OnInit, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import * as AOS from 'aos'; // <-- Import AOS
 
 // Services
 import { LicenseService, LicensePlan } from '../../../core/services/license.service';
@@ -17,6 +18,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider'; // <-- Thêm MatDividerModule
 
 @Component({
   selector: 'app-purchase-license',
@@ -29,7 +31,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatListModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule // <-- Thêm vào imports
   ],
   templateUrl: './purchase-license.component.html',
   styleUrl: './purchase-license.component.scss'
@@ -39,7 +42,6 @@ export class PurchaseLicenseComponent implements OnInit {
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private router = inject(Router);
-
   // 2. INJECT ChangeDetectorRef
   private cdr = inject(ChangeDetectorRef);
 
@@ -47,6 +49,13 @@ export class PurchaseLicenseComponent implements OnInit {
   isLoading = false;
 
   ngOnInit(): void {
+    // 3. Khởi tạo AOS khi component load
+    AOS.init({
+      duration: 600, // Thời gian animation
+      once: true, // Chỉ animate 1 lần
+      offset: 50 // Bắt đầu animate sớm hơn
+    });
+
     this.loadPlans();
   }
 
@@ -55,23 +64,22 @@ export class PurchaseLicenseComponent implements OnInit {
     this.licenseService.getLicensePlans().pipe(
       finalize(() => {
         this.isLoading = false;
-        // 4. Đánh dấu để kiểm tra lại khi finalize (quan trọng)
         this.cdr.markForCheck();
       })
     ).subscribe({
       next: (plans) => {
-        console.log('Tải gói thành công:', plans); // Log này đã chạy
+        this.licensePlans = plans;
+        this.cdr.markForCheck(); // Yêu cầu Angular cập nhật view
 
-        this.licensePlans = plans; // Dữ liệu đã được gán
-
-        // 3. THÊM DÒNG NÀY: Ra lệnh cho Angular "Vẽ lại giao diện!"
-        this.cdr.markForCheck();
+        // 4. SMART ANIMATION:
+        // Refresh AOS sau khi view đã cập nhật
+        // để nó "thấy" các card mới và bắt đầu animate
+        setTimeout(() => {
+          AOS.refresh();
+        }, 100); // Delay 100ms để đảm bảo DOM đã render
       },
       error: (err) => {
-        console.error('Lỗi khi tải gói:', err);
         this.notification.showError('Không thể tải danh sách gói. Vui lòng thử lại.');
-
-        // Đánh dấu kiểm tra ngay cả khi có lỗi
         this.cdr.markForCheck();
       }
     });

@@ -1,6 +1,6 @@
 <div class="page-container">
 
-  <div class="page-header">
+  <div class="page-header" data-aos="fade-down">
     <h1>Chọn gói License phù hợp</h1>
     <p>Bắt đầu hành trình của bạn với một gói dịch vụ tối ưu nhất.</p>
   </div>
@@ -17,7 +17,9 @@
       @for (plan of licensePlans; track plan.id) {
 
         <mat-card class="license-card"
-                  [class.popular]="plan.isPopular">
+                  [class.popular]="plan.isPopular"
+                  data-aos="fade-up"
+                  [attr.data-aos-delay]="100 * $index">
 
           @if (plan.isPopular) {
             <mat-chip-listbox class="popular-badge">
@@ -34,13 +36,13 @@
             <div class="price-display">
               @if (plan.discount > 0) {
                 <span class="original-price">
-                  {{ plan.price | currency:'VND' }}
+                  {{ plan.price | currency:'VND':'symbol':'1.0-0' }}
                 </span>
                 <span class="discount-percent">-{{ plan.discount }}%</span>
               }
 
               <span class="final-price">
-                {{ calculateFinalPrice(plan) | currency:'VND' }}
+                {{ calculateFinalPrice(plan) | currency:'VND':'symbol':'1.0-0' }}
               </span>
               <span class="duration">
                 / {{ plan.durationDays }} ngày
@@ -63,8 +65,7 @@
           <mat-card-actions>
             <button mat-raised-button
                     class="select-button"
-                    [color]="plan.isPopular ? 'primary' : 'basic'"
-                    (click)="onSelectPlan(plan)">
+                    [color]="plan.isPopular ? 'primary' : 'basic'">
               {{ plan.isPopular ? 'Bắt đầu ngay' : 'Chọn gói này' }}
             </button>
           </mat-card-actions>
