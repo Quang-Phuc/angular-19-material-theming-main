@@ -6,61 +6,53 @@
     </div>
 
     <mat-nav-list>
-      @for (item of menuItems; track item.name) {
-
-        @if (!item.children) {
-          <a mat-list-item
-             [routerLink]="item.route"
-             routerLinkActive="active-link">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span>{{ item.name }}</span>
-          </a>
-        }
-
-        @if (item.children) {
-          <mat-expansion-panel [hideToggle]="true" class="menu-expansion-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-                <span>{{ item.name }}</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-
-            @for (child of item.children; track child.name) {
-              <a mat-list-item
-                 [routerLink]="child.route"
-                 routerLinkActive="active-link"
-                 class="submenu-item">
-                <mat-icon matListItemIcon>{{ child.icon }}</mat-icon>
-                <span>{{ child.name }}</span>
-              </a>
-            }
-          </mat-expansion-panel>
-        }
-      }
+      <ng-container *ngTemplateOutlet="menuTemplate; context: { items: menuItems }"></ng-container>
     </mat-nav-list>
+
   </mat-sidenav>
 
   <mat-sidenav-content class="store-content">
-
     <mat-toolbar class="store-toolbar">
       <button mat-icon-button (click)="sidenav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
       <span>Trang quản lý Tiệm</span>
-
       <span class="spacer"></span>
-
       <button mat-button (click)="logout()">
         <mat-icon>logout</mat-icon>
         Đăng xuất
       </button>
     </mat-toolbar>
-
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
-
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+
+
+<ng-template #menuTemplate let-items="items">
+  @for (item of items; track item.name) {
+    @if (!item.children) {
+      <a mat-list-item
+         [routerLink]="item.route"
+         routerLinkActive="active-link"
+         [ngClass]="'menu-item-level-' + (item.level || 1)">
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span>{{ item.name }}</span>
+      </a>
+    }
+
+    @if (item.children) {
+      <div class="sub-menu-container" [ngClass]="'menu-item-level-' + (item.level || 1)">
+        <div class="sub-menu-header">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span>{{ item.name }}</span>
+        </div>
+        <div class="sub-menu-items">
+          <ng-container *ngTemplateOutlet="menuTemplate; context: { items: item.children }"></ng-container>
+        </div>
+      </div>
+    }
+  }
+</ng-template>

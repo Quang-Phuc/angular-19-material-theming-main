@@ -1,78 +1,84 @@
-/* store-layout.component.scss (Giao diện SÁNG) */
+/* store-layout.component.scss (Nâng cấp giao diện + Multi-level) */
 @use '@angular/material' as mat;
 
-// Biến màu SÁNG (Bạn có thể tùy chỉnh)
-$sidenav-bg: #ffffff; // Màu nền trắng
-$sidenav-text: #4b5563; // Màu chữ xám đậm
-$sidenav-text-hover: #1f2937; // Màu chữ khi hover/active (đậm hơn)
-$sidenav-icon: #6b7280; // Màu icon xám
-$sidenav-icon-hover: #1f2937; // Màu icon khi hover/active (đậm hơn)
-$sidenav-active-bg: #e0f2fe; // Nền xanh nhạt cho active
-$sidenav-active-border: #3b82f6; // Viền trái xanh dương cho active
-$sidenav-hover-bg: #f3f4f6; // Nền xám rất nhạt khi hover
-$sidenav-border: #e5e7eb; // Màu border phân cách
+// Biến màu SÁNG
+$sidenav-bg: #ffffff;
+$sidenav-text: #4b5563;
+$sidenav-text-hover: #1f2937;
+$sidenav-icon: #6b7280;
+$sidenav-icon-hover: #1f2937;
+$sidenav-active-bg: #e0f2fe;
+$sidenav-active-border: #3b82f6;
+$sidenav-hover-bg: #f3f4f6;
+$sidenav-border: #e5e7eb;
+
+// Biến cho thụt lề
+$level-indentation: 20px; // Khoảng cách thụt lề mỗi cấp
 
 .store-container {
   width: 100%;
   height: 100vh;
-  background-color: #f9fafb; // Màu nền chính
+  background-color: #f9fafb;
 }
 
-/* === NÂNG CẤP SIDENAV (SÁNG) === */
 .store-sidenav {
-  width: 260px;
+  width: 280px; // Rộng hơn một chút
   background: $sidenav-bg;
   color: $sidenav-text;
-  border-right: 1px solid $sidenav-border; // Thêm border phải nhẹ nhàng
-  box-shadow: none; // Bỏ bóng đổ
+  border-right: 1px solid $sidenav-border;
+  box-shadow: none;
 }
 
-/* Header logo */
 .sidenav-header {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center; // Hoặc 'flex-start'
+  justify-content: center;
   padding: 0 20px;
-  font-size: 1.5rem;
+  font-size: 1.6rem; // To hơn
   font-weight: 700;
-  color: #1f2937; // Màu chữ tối cho header
-  border-bottom: 1px solid $sidenav-border; // Border dưới header
-  background: $sidenav-bg; // Nền trắng đồng bộ
+  color: #1f2937;
+  border-bottom: 1px solid $sidenav-border;
+  background: $sidenav-bg;
 }
 
-/* List menu */
 .mat-nav-list {
-  padding-top: 16px;
+  padding: 16px 0; // Padding trên dưới cho cả list
 }
 
-/* Từng item menu */
-.mat-nav-list a.mat-list-item,
-.mat-expansion-panel-header {
+/* === STYLE CHUNG CHO ITEM & SUB-MENU HEADER === */
+a.mat-list-item,
+.sub-menu-header {
+  display: flex; // Cần thiết để căn chỉnh
+  align-items: center; // Căn giữa theo chiều dọc
   color: $sidenav-text;
-  height: 52px;
-  margin: 0 12px 8px 12px;
+  height: 48px; // Giảm chiều cao một chút
+  margin: 0 12px 6px 12px; // Giảm margin dưới
+  padding: 0 16px; // Padding ngang
   border-radius: 8px;
-  transition: all 0.2s ease-in-out; // Hiệu ứng nhanh hơn
-  // Thêm border trái trong suốt để giữ layout khi active
-  border-left: 3px solid transparent;
+  transition: all 0.2s ease-in-out;
+  border-left: 3px solid transparent; // Giữ layout
+  cursor: pointer; // Thêm con trỏ cho sub-menu header
 
   .mat-icon,
-  mat-icon {
+  mat-icon { // Style icon chung
     color: $sidenav-icon;
     margin-right: 16px;
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
-    transition: color 0.2s ease-in-out; // Hiệu ứng màu icon
+    font-size: 20px; // Giảm kích thước icon
+    width: 20px;
+    height: 20px;
+    transition: color 0.2s ease-in-out;
   }
 
-  span {
+  span { // Style chữ chung
     font-weight: 500;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
+    white-space: nowrap; // Chống xuống dòng
+    overflow: hidden; // Ẩn phần thừa
+    text-overflow: ellipsis; // Thêm dấu ...
   }
 
-  // Hiệu ứng HOVER
+  // Hiệu ứng HOVER (áp dụng cho cả link và header)
   &:hover {
     background: $sidenav-hover-bg;
     color: $sidenav-text-hover;
@@ -83,97 +89,74 @@ $sidenav-border: #e5e7eb; // Màu border phân cách
   }
 }
 
-/* Item menu đang ACTIVE */
-.mat-nav-list a.active-link {
+/* Item menu đang ACTIVE (chỉ áp dụng cho link <a>) */
+a.mat-list-item.active-link {
   background: $sidenav-active-bg;
   color: $sidenav-text-hover;
-  font-weight: 600; // Chữ active đậm hơn
-  border-left: 3px solid $sidenav-active-border; // Hiển thị border trái
+  font-weight: 600;
+  border-left: 3px solid $sidenav-active-border;
 
   .mat-icon,
   mat-icon {
-    color: $sidenav-active-border; // Icon active màu xanh
+    color: $sidenav-active-border;
   }
 }
 
-/* === NÂNG CẤP MENU ĐA CẤP (Expansion Panel) === */
-.menu-expansion-panel {
-  background: transparent !important;
-  box-shadow: none !important;
-  margin: 0 12px 8px 12px;
+/* === STYLE CHO CÁC CẤP MENU === */
 
-  .mat-expansion-panel-header {
-    padding: 0 16px;
-    margin: 0;
-    border-radius: 8px;
-    border-left: 3px solid transparent; // Giữ layout
-  }
-
-  // Khi panel mở, header cũng giống trạng thái hover
-  &.mat-expanded .mat-expansion-panel-header,
-  .mat-expansion-panel-header:hover {
-    background: $sidenav-hover-bg;
-    color: $sidenav-text-hover;
-    .mat-icon,
-    mat-icon {
-      color: $sidenav-icon-hover;
-    }
-  }
-
-  .mat-expansion-panel-content { padding: 0 !important; }
-  .mat-expansion-panel-body { padding: 8px 0 0 0 !important; }
-
-  // Item con trong submenu
-  a.submenu-item {
-    height: 44px;
-    margin: 0 0 4px 12px; // Giảm thụt lề trái
-    padding-left: 31px !important; // Căn chỉnh chữ con (16px padding gốc + 15px thụt lề)
-    color: $sidenav-text;
-    border-left: 3px solid transparent; // Giữ layout
-
-    .mat-icon,
-    mat-icon {
-      margin-right: 12px;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      color: $sidenav-icon;
-    }
-
-    &:hover {
-      background: $sidenav-hover-bg;
-      color: $sidenav-text-hover;
-      .mat-icon,
-      mat-icon {
-        color: $sidenav-icon-hover;
-      }
-    }
-
-    // Item con active
-    &.active-link {
-      background: transparent; // Active con không cần nền
-      color: $sidenav-active-border; // Màu chữ xanh
-      font-weight: 600;
-      .mat-icon,
-      mat-icon {
-        color: $sidenav-active-border;
-      }
-      border-left: 3px solid $sidenav-active-border; // Hiển thị border trái
-    }
-  }
+/* Level 1 (Mặc định) */
+.menu-item-level-1 {
+  // Không cần style đặc biệt
 }
+
+/* Level 2 */
+.menu-item-level-2 {
+  margin-left: $level-indentation + 12px; // Thụt lề = indent + margin gốc
+  margin-right: 12px;
+  height: 40px; // Thấp hơn level 1
+
+  .mat-icon, mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 12px; }
+  span { font-size: 0.9rem; }
+}
+
+/* Level 3 */
+.menu-item-level-3 {
+  margin-left: (2 * $level-indentation) + 12px; // Thụt lề gấp đôi
+  margin-right: 12px;
+  height: 36px; // Thấp hơn level 2
+
+  .mat-icon, mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 10px; }
+  span { font-size: 0.85rem; font-weight: 400; }
+}
+
+/* Container cho sub-menu */
+.sub-menu-container {
+  // Không cần style đặc biệt ở đây
+}
+
+/* Header của sub-menu (chứa icon và tên nhóm) */
+.sub-menu-header {
+  font-weight: 600; // Header nhóm đậm hơn
+  color: darken($sidenav-text, 10%); // Màu đậm hơn chút
+  // Có thể thêm icon dropdown nếu muốn toggle
+  // .sub-menu-toggle-icon { margin-left: auto; font-size: 20px; }
+}
+
+/* Vùng chứa các item con */
+.sub-menu-items {
+  padding-top: 4px; // Khoảng cách nhẹ giữa header và item con đầu tiên
+}
+
 
 /* === TOOLBAR VÀ NỘI DUNG CHÍNH (Giữ nguyên) === */
 .store-toolbar {
   background: #ffffff;
   color: #333;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); // Bóng đổ nhẹ hơn nữa
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid $sidenav-border;
 }
 
-.spacer {
-  flex: 1 1 auto;
-}
+.spacer { flex: 1 1 auto; }
 
 .main-content {
   padding: 32px;
