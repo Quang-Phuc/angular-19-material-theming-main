@@ -1,4 +1,4 @@
-// store-layout.component.ts (Updated for Multi-level Menu)
+// store-layout.component.ts (Updated for New Template)
 
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,19 +10,17 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-// Keep Expansion Module for potential top-level grouping if desired
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule } from '@angular/material/expansion'; // Cần cho menu con
 
 // AuthService
 import { AuthService } from '../../../core/services/auth.service';
 
-// Updated NavItem Interface (Recursive)
+// Interface (Bỏ `level`)
 interface NavItem {
   name: string;
   icon: string;
   route?: string;
-  children?: NavItem[]; // Allows nesting
-  level?: number; // Optional: To track nesting level for styling
+  children?: NavItem[];
 }
 
 @Component({
@@ -38,7 +36,7 @@ interface NavItem {
     MatListModule,
     MatIconModule,
     MatButtonModule,
-    MatExpansionModule // Keep if using expansion panels
+    MatExpansionModule // <-- Giữ lại
   ],
   templateUrl: './store-layout.component.html', // cite: 0
   styleUrl: './store-layout.component.scss' // cite: 1
@@ -48,55 +46,45 @@ export class StoreLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   menuItems: NavItem[] = [];
 
-  // === UPDATED MENU DATA WITH NESTING ===
-
-  // OWNER MENU (Role "2")
+  // OWNER MENU (Role "2") - Bỏ `level`
   private ownerMenu: NavItem[] = [
-    { name: 'Dashboard', icon: 'dashboard', route: '/store/dashboard', level: 1 },
+    { name: 'Dashboard', icon: 'dashboard', route: '/store/dashboard' },
     {
-      name: 'Quản lý Hợp đồng', icon: 'description', level: 1, children: [
-        { name: 'Tạo Hợp đồng mới', icon: 'add_circle_outline', route: '/store/contracts/new', level: 2 },
-        { name: 'Danh sách Hợp đồng', icon: 'list_alt', route: '/store/contracts', level: 2 },
-        { name: 'Tra cứu', icon: 'search', route: '/store/contracts/search', level: 2 }
+      name: 'Quản lý Hợp đồng', icon: 'description', children: [
+        { name: 'Tạo Hợp đồng mới', icon: 'add_circle_outline', route: '/store/contracts/new' },
+        { name: 'Danh sách Hợp đồng', icon: 'list_alt', route: '/store/contracts' },
+        { name: 'Tra cứu', icon: 'search', route: '/store/contracts/search' }
       ]
     },
-    { name: 'Khách hàng', icon: 'people', route: '/store/customers', level: 1 },
-    { name: 'Quản lý Nhân viên', icon: 'manage_accounts', route: '/store/staff', level: 1 },
+    { name: 'Khách hàng', icon: 'people', route: '/store/customers' },
+    { name: 'Quản lý Nhân viên', icon: 'manage_accounts', route: '/store/staff' },
     {
-      name: 'Báo cáo', icon: 'bar_chart', level: 1, children: [
-        { name: 'Doanh thu', icon: 'trending_up', route: '/store/reports/revenue', level: 2 },
-        { name: 'Công nợ', icon: 'receipt_long', route: '/store/reports/debt', level: 2 },
-        {
-          name: 'Hàng hóa', icon: 'inventory_2', level: 2, children: [ // Level 3 Example
-            { name: 'Tồn kho', icon: 'inventory', route: '/store/reports/stock', level: 3 },
-            { name: 'Thanh lý', icon: 'sell', route: '/store/reports/liquidation', level: 3 }
-          ]
-        }
+      name: 'Báo cáo', icon: 'bar_chart', children: [
+        { name: 'Doanh thu', icon: 'trending_up', route: '/store/reports/revenue' },
+        { name: 'Công nợ', icon: 'receipt_long', route: '/store/reports/debt' },
+        // (Menu con cấp 3 hiện tại không được hỗ trợ bởi HTML mới, cần làm phẳng)
+        { name: 'Tồn kho', icon: 'inventory', route: '/store/reports/stock' },
+        { name: 'Thanh lý', icon: 'sell', route: '/store/reports/liquidation' }
       ]
     },
-    { name: 'Cài đặt Tiệm', icon: 'settings', route: '/store/settings', level: 1 },
+    { name: 'Cài đặt Tiệm', icon: 'settings', route: '/store/settings' },
   ];
 
-  // EMPLOYEE MENU (Role "3")
+  // EMPLOYEE MENU (Role "3") - Bỏ `level`
   private employeeMenu: NavItem[] = [
-    { name: 'Dashboard', icon: 'dashboard', route: '/store/dashboard', level: 1 },
-    { name: 'Tạo Hợp đồng', icon: 'add_circle', route: '/store/contracts/new', level: 1 },
-    { name: 'Khách hàng', icon: 'people', route: '/store/customers', level: 1 },
-    { name: 'Tra cứu HĐ', icon: 'search', route: '/store/contracts/search', level: 1 },
+    { name: 'Dashboard', icon: 'dashboard', route: '/store/dashboard' },
+    { name: 'Tạo Hợp đồng', icon: 'add_circle', route: '/store/contracts/new' },
+    { name: 'Khách hàng', icon: 'people', route: '/store/customers' },
+    { name: 'Tra cứu HĐ', icon: 'search', route: '/store/contracts/search' },
   ];
 
   ngOnInit(): void {
-    // ... console logs ...
     const roles = this.authService.getUserRoles();
-    // Check for Owner roles ("1" or "2")
     if (roles.includes('1') || roles.includes('2')) {
-      console.log('Assigning owner menu (Role 1 or 2)');
       this.menuItems = this.ownerMenu;
-    } else if (roles.includes('3')) { // Employee
-      console.log('Assigning employee menu (Role 3)');
+    } else if (roles.includes('3')) {
       this.menuItems = this.employeeMenu;
     } else {
-      console.error('No valid role found! Logging out.');
       this.authService.logout();
     }
   }

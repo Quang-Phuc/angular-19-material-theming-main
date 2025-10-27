@@ -1,12 +1,40 @@
 <mat-sidenav-container class="store-container">
 
-  <mat-sidenav #sidenav mode="side" opened class="store-sidenav">
-    <div class="sidenav-header">
-      [LOGO TIỆM]
-    </div>
+  <mat-sidenav #sidenav mode="side" opened class="store-sidenav"> <div class="logo-container">
+    [LOGO TIỆM] </div>
 
     <mat-nav-list>
-      <ng-container *ngTemplateOutlet="menuTemplate; context: { items: menuItems }"></ng-container>
+      @for (item of menuItems; track item.name) {
+
+        @if (!item.children) {
+          <a mat-list-item
+             [routerLink]="item.route"
+             routerLinkActive="active nav-link"
+             [routerLinkActiveOptions]="{exact: true}"
+             class="nav-link"> <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.name }}</span>
+          </a>
+        }
+
+        @if (item.children) {
+          <mat-expansion-panel class="nav-expansion-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                <span matListItemTitle>{{ item.name }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            @for (child of item.children; track child.name) {
+              <a mat-list-item
+                 [routerLink]="child.route"
+                 routerLinkActive="active"
+                 class="nav-item-child"> {{ child.name }}
+              </a>
+            }
+          </mat-expansion-panel>
+        }
+      }
     </mat-nav-list>
 
   </mat-sidenav>
@@ -29,30 +57,3 @@
   </mat-sidenav-content>
 
 </mat-sidenav-container>
-
-
-<ng-template #menuTemplate let-items="items">
-  @for (item of items; track item.name) {
-    @if (!item.children) {
-      <a mat-list-item
-         [routerLink]="item.route"
-         routerLinkActive="active-link"
-         [ngClass]="'menu-item-level-' + (item.level || 1)">
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-        <span>{{ item.name }}</span>
-      </a>
-    }
-
-    @if (item.children) {
-      <div class="sub-menu-container" [ngClass]="'menu-item-level-' + (item.level || 1)">
-        <div class="sub-menu-header">
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span>{{ item.name }}</span>
-        </div>
-        <div class="sub-menu-items">
-          <ng-container *ngTemplateOutlet="menuTemplate; context: { items: item.children }"></ng-container>
-        </div>
-      </div>
-    }
-  }
-</ng-template>
