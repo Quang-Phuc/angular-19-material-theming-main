@@ -1,7 +1,7 @@
 /* purchase-license.component.scss */
-@use '@angular/material' as mat; // <-- Đảm bảo bạn đã @use mat
+@use '@angular/material' as mat;
 
-// Biến cục bộ (giữ nguyên)
+// Biến cục bộ
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 
@@ -9,7 +9,7 @@ $popular-accent-color: #ff4081;
   display: block;
   background-color: #f4f7fa;
   min-height: 100vh;
-  padding-bottom: 60px; // Thêm padding dưới
+  padding-bottom: 60px;
 }
 
 .page-container {
@@ -47,8 +47,6 @@ $popular-accent-color: #ff4081;
   align-items: stretch;
 }
 
-/* === PHẦN NÂNG CẤP HIỆU ỨNG === */
-
 .license-card {
   display: flex;
   flex-direction: column;
@@ -57,18 +55,14 @@ $popular-accent-color: #ff4081;
   position: relative;
   background-color: #ffffff;
 
-  // 1. Hiệu ứng ban đầu (Đổ bóng nhẹ)
   @include mat.elevation(4);
 
-  // 2. Transition (chuyển động) mượt mà
-  // Tách riêng transform và box-shadow để tối ưu hiệu năng
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
   box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-  // 3. Hiệu ứng HOVER (Nâng lên + Bóng to)
   &:hover {
-    transform: translateY(-10px); // Nâng thẻ lên cao hơn
-    @include mat.elevation(16); // Đổ bóng to, rõ nét
+    transform: translateY(-10px);
+    @include mat.elevation(16);
   }
 
   .mat-card-header {
@@ -140,50 +134,64 @@ $popular-accent-color: #ff4081;
     display: flex;
     justify-content: center;
 
-    // 4. NÂNG CẤP NÚT BẤM (BUTTON)
     .select-button {
       width: 100%;
       padding: 22px 0;
       font-size: 1rem;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: 50px;
       letter-spacing: 0.5px;
-      transition: all 0.3s ease; // Thêm transition cho nút
+      transition: all 0.3s ease;
+      border: none;
 
-      // Nút basic (không popular)
-      &.mat-mdc-button:not(.mat-primary) {
+      // Nút "Chọn gói này" (basic)
+      &:not(.mat-primary) {
         background-color: #f1f3f6;
         color: $popular-border-color;
         &:hover {
           background-color: #e8ebf0;
-          transform: translateY(-2px); // Hiệu ứng hover cho nút
+          transform: translateY(-2px);
         }
       }
 
-      // Nút primary (cho gói popular)
+      /* === SỬA NÚT "BẮT ĐẦU NGAY" === */
       &.mat-primary {
-        box-shadow: 0 4px 15px -2px rgba($popular-border-color, 0.4);
+        /* Thêm !important để ghi đè style gốc */
+        background: linear-gradient(135deg, #0072ff 0%, #00d4ff 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px 0 rgba(0, 162, 255, 0.35);
+
         &:hover {
-          box-shadow: 0 6px 20px -2px rgba($popular-border-color, 0.5);
-          transform: translateY(-2px); // Hiệu ứng hover cho nút
+          box-shadow: 0 6px 20px 0 rgba(0, 162, 255, 0.5);
+          transform: translateY(-3px);
         }
       }
     }
   }
 
-  // 5. NÂNG CẤP THẺ "POPULAR"
+  /* === SỬA LỖI ĐÈ CHỮ === */
   &.popular {
     border: 2px solid $popular-border-color;
     transform: scale(1.03);
     z-index: 10;
     background-color: #f9faff;
 
-    // Hiệu ứng hover cho thẻ popular (đã có)
-    &:hover {
-      transform: scale(1.05) translateY(-10px);
-      @include mat.elevation(20); // Bóng to hơn nữa
+    /* Bỏ padding-top không hiệu quả ở header */
+    .mat-card-header {
+      /* padding-top: 40px; <-- BỎ CÁI NÀY */
     }
 
+    /* Thêm margin-top cho chữ "Chuyên Nghiệp" để đẩy nó xuống */
+    .mat-mdc-card-title {
+      margin-top: 28px; /* <-- THÊM DÒNG NÀY */
+    }
+
+    &:hover {
+      transform: scale(1.05) translateY(-10px);
+      @include mat.elevation(20);
+    }
+
+    /* (Giữ nguyên style của badge) */
     .popular-badge {
       position: absolute;
       top: -16px;
