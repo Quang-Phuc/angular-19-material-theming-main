@@ -19,9 +19,6 @@
           @if (email.hasError('required') && email.touched) {
             <mat-error>Vui lòng nhập email</mat-error>
           }
-          @if (email.hasError('email')) {
-            <mat-error>Địa chỉ email không hợp lệ</mat-error>
-          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" data-aos="fade-left" data-aos-delay="200">
