@@ -1,0 +1,185 @@
+/* purchase-license.component.scss */
+@use '@angular/material' as mat;
+
+// Giả định bạn có định nghĩa $primary-palette và $accent-palette
+// Nếu không, hãy import file theme của bạn
+// @use '../../../styles/theme' as my-theme;
+// $primary-palette: my-theme.$primary-palette;
+// $accent-palette: my-theme.$accent-palette;
+
+// Biến cục bộ
+$popular-border-color: #3f51b5; // mat.get-color-from-palette($primary-palette, 'default');
+$popular-accent-color: #ff4081; // mat.get-color-from-palette($accent-palette, 'default');
+
+:host {
+  display: block;
+  background-color: #f4f7fa; // Một màu nền nhẹ nhàng
+  min-height: 100vh;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #666;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 0;
+}
+
+.pricing-grid {
+  display: grid;
+  // Tự động điều chỉnh cột:
+  // - Ít nhất 300px
+  // - Tối đa 1fr (chia đều không gian)
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  align-items: stretch; // Các card cao bằng nhau
+}
+
+.license-card {
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease-in-out;
+  border-radius: 12px !important; // Bo góc mềm mại
+  position: relative; // Để định vị "Popular" badge
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: mat.mdc-elevation-shadow(12) !important;
+  }
+
+  .mat-card-header {
+    text-align: center;
+    padding: 24px 16px 16px 16px;
+
+    // Ghi đè style của material để căn giữa
+    ::ng-deep .mat-mdc-card-header-text {
+      margin: 0;
+    }
+  }
+
+  .mat-mdc-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $popular-border-color;
+  }
+
+  .mat-mdc-card-subtitle {
+    font-size: 0.9rem;
+    color: #777;
+    min-height: 40px; // Giữ chiều cao đồng đều
+  }
+
+  .mat-card-content {
+    flex-grow: 1; // Đẩy actions xuống dưới
+    padding: 0 24px 16px 24px;
+  }
+
+  .price-display {
+    text-align: center;
+    padding: 24px 0;
+
+    .original-price {
+      font-size: 1rem;
+      text-decoration: line-through;
+      color: #999;
+      margin-right: 8px;
+    }
+
+    .discount-percent {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $popular-accent-color;
+      background-color: #ffe0e9;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .final-price {
+      display: block;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #333;
+      margin: 4px 0;
+    }
+
+    .duration {
+      font-size: 1rem;
+      color: #777;
+      font-style: italic;
+    }
+  }
+
+  .features-list {
+    padding-top: 16px;
+
+    .mat-mdc-list-item {
+      height: 40px !important;
+    }
+
+    .mat-mdc-list-item-icon {
+      color: $popular-border-color;
+      font-size: 20px;
+    }
+  }
+
+  .mat-card-actions {
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    justify-content: center;
+
+    .select-button {
+      width: 100%;
+      padding: 20px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+  }
+
+  // --- PHẦN LÀM NỔI BẬT ---
+  &.popular {
+    border: 2px solid $popular-border-color;
+    transform: scale(1.05); // To hơn một chút
+    z-index: 10;
+    background-color: #f9faff; // Nền hơi khác biệt
+
+    &:hover {
+      transform: scale(1.05) translateY(-8px);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 11;
+
+      .mat-mdc-chip {
+        background-color: $popular-accent-color !important;
+        color: white !important;
+      }
+    }
+  }
+}

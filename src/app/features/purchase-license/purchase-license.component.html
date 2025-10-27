@@ -1,0 +1,78 @@
+<div class="page-container">
+
+  <div class="page-header" data-aos="fade-down">
+    <h1>Chọn gói License phù hợp</h1>
+    <p>Bắt đầu hành trình của bạn với một gói dịch vụ tối ưu nhất.</p>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <div class="pricing-grid">
+
+      @for (plan of licensePlans; track plan.id) {
+
+        <mat-card class="license-card"
+                  [class.popular]="plan.isPopular"
+                  data-aos="fade-up"
+                  [attr.data-aos-delay]="100 * $index">
+
+          @if (plan.isPopular) {
+            <mat-chip-listbox class="popular-badge">
+              <mat-chip-option selected color="accent">Phổ biến nhất</mat-chip-option>
+            </mat-chip-listbox>
+          }
+
+          <mat-card-header>
+            <mat-card-title>{{ plan.name }}</mat-card-title>
+            <mat-card-subtitle>{{ plan.description }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="price-display">
+              @if (plan.discount > 0) {
+                <span class="original-price">
+                  {{ plan.price | currency:'VND' }}
+                </span>
+                <span class="discount-percent">-{{ plan.discount }}%</span>
+              }
+
+              <span class="final-price">
+                {{ calculateFinalPrice(plan) | currency:'VND' }}
+              </span>
+              <span class="duration">
+                / {{ plan.durationDays }} ngày
+              </span>
+            </div>
+
+            <mat-divider></mat-divider>
+            <mat-list role="list" class="features-list">
+              @for (feature of plan.features; track $index) {
+                <mat-list-item role="listitem">
+                  <mat-icon matListItemIcon color="primary">check_circle_outline</mat-icon>
+                  <span>{{ feature }}</span>
+                </mat-list-item>
+              }
+            </mat-list>
+
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-raised-button
+                    class="select-button"
+                    [color]="plan.isPopular ? 'primary' : 'basic'"
+                    (click)="onSelectPlan(plan)">
+              {{ plan.isPopular ? 'Bắt đầu ngay' : 'Chọn gói này' }}
+            </button>
+          </mat-card-actions>
+
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>
