@@ -5,26 +5,44 @@
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 
-// 1. ĐỊNH NGHĨA CÁC MÀU MỚI (TỪ HÌNH ẢNH)
+// ... (Các biến màu cho button) ...
 $color-green-bg: #e6f7ec;
 $color-green-text: #006a2e;
-
 $color-blue-bg: #eaf1fb;
 $color-blue-text: #3f51b5;
-
 $color-orange-bg: #fd7e14;
 $color-orange-text: #ffffff;
-
-$color-purple-bg: #f3e8ff; // Màu cho gói Pro (Popular)
+$color-purple-bg: #f3e8ff;
 $color-purple-text: #6a1b9a;
 
 
+/* === 1. CẬP NHẬT BACKGROUND :HOST === */
 :host {
   display: block;
-  background-color: #f4f7fa;
   min-height: 100vh;
   padding-bottom: 60px;
+
+  /* Cần để chứa các khối màu */
+  position: relative;
+  overflow-x: hidden; /* Ẩn các phần thừa của khối màu */
+
+  /* Màu nền cơ sở */
+  background-color: #f4f7fa;
+
+  /* Thêm các khối màu mờ (blobs) */
+  /* Đây là một kỹ thuật xếp chồng background-image */
+  background-image:
+    /* Khối 1 (Màu xanh dương) ở góc trên bên trái */
+    radial-gradient(circle at 0% 0%, rgba(63, 81, 181, 0.08) 0%, transparent 40%),
+
+      /* Khối 2 (Màu hồng accent) ở góc dưới bên phải */
+    radial-gradient(circle at 100% 100%, rgba(255, 64, 129, 0.06) 0%, transparent 45%);
+
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Giữ blobs cố định khi cuộn */
 }
+
+/* === 2. TẤT CẢ PHẦN CÒN LẠI GIỮ NGUYÊN === */
 
 .page-container {
   max-width: 1200px;
@@ -58,9 +76,7 @@ $color-purple-text: #6a1b9a;
   border: 1px solid #e0e0e0;
   position: relative;
   background-color: #ffffff;
-
   @include mat.elevation(4);
-
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
   box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
@@ -69,7 +85,6 @@ $color-purple-text: #6a1b9a;
     @include mat.elevation(16);
   }
 
-  // ... (mat-card-header, title, subtitle, content, price, features... giữ nguyên) ...
   .mat-card-header {
     text-align: center;
     padding: 32px 16px 16px 16px;
@@ -101,17 +116,15 @@ $color-purple-text: #6a1b9a;
     .mat-mdc-list-item-icon { color: $popular-border-color; font-size: 22px; }
   }
 
-  /* === 2. CẬP NHẬT KHU VỰC NÚT BẤM (THEO YÊU CẦU) === */
   .card-actions-stack {
     padding: 0 24px 32px 24px;
     margin-top: auto;
     display: flex;
-    flex-direction: column; // Xếp chồng
-    align-items: center; // Căn giữa
-    gap: 16px; // Khoảng cách 2 nút
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
   }
 
-  /* 3. STYLE CHO NÚT "XEM THÊM" (THEO YÊU CẦU) */
   .see-more-button {
     font-size: 0.9rem;
     font-weight: 500;
@@ -120,21 +133,12 @@ $color-purple-text: #6a1b9a;
     display: flex;
     align-items: center;
     transition: color 0.2s ease;
-
-    &:hover {
-      color: $popular-border-color;
-    }
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
+    &:hover { color: $popular-border-color; }
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
   }
 
-  /* 4. STYLE CHO NÚT "MUA NGAY" (BẰNG NHAU VÀ CÓ MÀU) */
   .select-button {
-    width: 100%; // <-- Quan trọng: Đảm bảo các nút bằng nhau
+    width: 100%;
     padding: 20px 0;
     font-size: 1.1rem;
     font-weight: 700;
@@ -143,32 +147,23 @@ $color-purple-text: #6a1b9a;
     transition: all 0.3s ease;
     border: none;
     box-shadow: none;
+    ::ng-deep .mat-mdc-button-ripple { display: none; }
 
-    ::ng-deep .mat-mdc-button-ripple {
-      display: none;
-    }
-
-    // Gán màu dựa trên data-theme (từ license.service.ts)
     &[data-theme="green"] {
       background-color: $color-green-bg;
       color: $color-green-text;
       &:hover { background-color: darken($color-green-bg, 5%); }
     }
-
     &[data-theme="blue"] {
       background-color: $color-blue-bg;
       color: $color-blue-text;
       &:hover { background-color: darken($color-blue-bg, 5%); }
     }
-
-    // Gói Pro (isPopular)
     &[data-theme="purple"] {
       background-color: $color-purple-bg;
       color: $color-purple-text;
       &:hover { background-color: darken($color-purple-bg, 5%); }
     }
-
-    // Gói Doanh nghiệp
     &[data-theme="orange"] {
       background-color: $color-orange-bg;
       color: $color-orange-text;
@@ -176,31 +171,22 @@ $color-purple-text: #6a1b9a;
     }
   }
 
-
-  /* === SỬA LỖI ĐÈ CHỮ (THEO YÊU CẦU) === */
   &.popular {
     border: 2px solid $popular-border-color;
     transform: scale(1.03);
     z-index: 10;
     background-color: #f9faff;
-
-    /* Thêm margin-top cho chữ "Chuyên Nghiệp" để đẩy nó xuống */
-    .mat-mdc-card-title {
-      margin-top: 28px; /* <-- FIX LỖI ĐÈ CHỮ */
-    }
-
+    .mat-mdc-card-title { margin-top: 28px; }
     &:hover {
       transform: scale(1.05) translateY(-10px);
       @include mat.elevation(20);
     }
-
     .popular-badge {
       position: absolute;
       top: -16px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 11;
-
       .mat-mdc-chip {
         background-color: $popular-accent-color !important;
         color: white !important;
