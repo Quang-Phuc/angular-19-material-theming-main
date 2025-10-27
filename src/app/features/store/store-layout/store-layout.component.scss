@@ -1,52 +1,174 @@
-/* store-layout.component.scss (File mới) */
+/* store-layout.component.scss (Giao diện SÁNG) */
+@use '@angular/material' as mat;
+
+// Biến màu SÁNG (Bạn có thể tùy chỉnh)
+$sidenav-bg: #ffffff; // Màu nền trắng
+$sidenav-text: #4b5563; // Màu chữ xám đậm
+$sidenav-text-hover: #1f2937; // Màu chữ khi hover/active (đậm hơn)
+$sidenav-icon: #6b7280; // Màu icon xám
+$sidenav-icon-hover: #1f2937; // Màu icon khi hover/active (đậm hơn)
+$sidenav-active-bg: #e0f2fe; // Nền xanh nhạt cho active
+$sidenav-active-border: #3b82f6; // Viền trái xanh dương cho active
+$sidenav-hover-bg: #f3f4f6; // Nền xám rất nhạt khi hover
+$sidenav-border: #e5e7eb; // Màu border phân cách
 
 .store-container {
   width: 100%;
   height: 100vh;
+  background-color: #f9fafb; // Màu nền chính
 }
 
+/* === NÂNG CẤP SIDENAV (SÁNG) === */
 .store-sidenav {
   width: 260px;
-  background: #2c3e50;
-  color: #ecf0f1;
+  background: $sidenav-bg;
+  color: $sidenav-text;
+  border-right: 1px solid $sidenav-border; // Thêm border phải nhẹ nhàng
+  box-shadow: none; // Bỏ bóng đổ
 }
 
+/* Header logo */
 .sidenav-header {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; // Hoặc 'flex-start'
+  padding: 0 20px;
   font-size: 1.5rem;
-  font-weight: 600;
-  border-bottom: 1px solid #34495e;
+  font-weight: 700;
+  color: #1f2937; // Màu chữ tối cho header
+  border-bottom: 1px solid $sidenav-border; // Border dưới header
+  background: $sidenav-bg; // Nền trắng đồng bộ
 }
 
-.mat-nav-list a.mat-list-item {
-  color: #bdc3c7;
-  .mat-icon {
-    color: #bdc3c7;
+/* List menu */
+.mat-nav-list {
+  padding-top: 16px;
+}
+
+/* Từng item menu */
+.mat-nav-list a.mat-list-item,
+.mat-expansion-panel-header {
+  color: $sidenav-text;
+  height: 52px;
+  margin: 0 12px 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out; // Hiệu ứng nhanh hơn
+  // Thêm border trái trong suốt để giữ layout khi active
+  border-left: 3px solid transparent;
+
+  .mat-icon,
+  mat-icon {
+    color: $sidenav-icon;
+    margin-right: 16px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    transition: color 0.2s ease-in-out; // Hiệu ứng màu icon
   }
+
+  span {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  // Hiệu ứng HOVER
   &:hover {
-    background: #34495e;
-    color: #ffffff;
-    .mat-icon {
-      color: #ffffff;
+    background: $sidenav-hover-bg;
+    color: $sidenav-text-hover;
+    .mat-icon,
+    mat-icon {
+      color: $sidenav-icon-hover;
     }
   }
 }
 
+/* Item menu đang ACTIVE */
 .mat-nav-list a.active-link {
-  background: #1abc9c;
-  color: #ffffff;
-  .mat-icon {
-    color: #ffffff;
+  background: $sidenav-active-bg;
+  color: $sidenav-text-hover;
+  font-weight: 600; // Chữ active đậm hơn
+  border-left: 3px solid $sidenav-active-border; // Hiển thị border trái
+
+  .mat-icon,
+  mat-icon {
+    color: $sidenav-active-border; // Icon active màu xanh
   }
 }
 
+/* === NÂNG CẤP MENU ĐA CẤP (Expansion Panel) === */
+.menu-expansion-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 12px 8px 12px;
+
+  .mat-expansion-panel-header {
+    padding: 0 16px;
+    margin: 0;
+    border-radius: 8px;
+    border-left: 3px solid transparent; // Giữ layout
+  }
+
+  // Khi panel mở, header cũng giống trạng thái hover
+  &.mat-expanded .mat-expansion-panel-header,
+  .mat-expansion-panel-header:hover {
+    background: $sidenav-hover-bg;
+    color: $sidenav-text-hover;
+    .mat-icon,
+    mat-icon {
+      color: $sidenav-icon-hover;
+    }
+  }
+
+  .mat-expansion-panel-content { padding: 0 !important; }
+  .mat-expansion-panel-body { padding: 8px 0 0 0 !important; }
+
+  // Item con trong submenu
+  a.submenu-item {
+    height: 44px;
+    margin: 0 0 4px 12px; // Giảm thụt lề trái
+    padding-left: 31px !important; // Căn chỉnh chữ con (16px padding gốc + 15px thụt lề)
+    color: $sidenav-text;
+    border-left: 3px solid transparent; // Giữ layout
+
+    .mat-icon,
+    mat-icon {
+      margin-right: 12px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: $sidenav-icon;
+    }
+
+    &:hover {
+      background: $sidenav-hover-bg;
+      color: $sidenav-text-hover;
+      .mat-icon,
+      mat-icon {
+        color: $sidenav-icon-hover;
+      }
+    }
+
+    // Item con active
+    &.active-link {
+      background: transparent; // Active con không cần nền
+      color: $sidenav-active-border; // Màu chữ xanh
+      font-weight: 600;
+      .mat-icon,
+      mat-icon {
+        color: $sidenav-active-border;
+      }
+      border-left: 3px solid $sidenav-active-border; // Hiển thị border trái
+    }
+  }
+}
+
+/* === TOOLBAR VÀ NỘI DUNG CHÍNH (Giữ nguyên) === */
 .store-toolbar {
   background: #ffffff;
   color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); // Bóng đổ nhẹ hơn nữa
+  border-bottom: 1px solid $sidenav-border;
 }
 
 .spacer {
@@ -54,8 +176,8 @@
 }
 
 .main-content {
-  padding: 24px;
-  background: #f4f7fa;
-  height: calc(100% - 64px); // Trừ đi chiều cao toolbar
+  padding: 32px;
+  background: #f9fafb;
+  height: calc(100vh - 64px);
   overflow-y: auto;
 }
