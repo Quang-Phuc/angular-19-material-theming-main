@@ -1,84 +1,202 @@
-<div class="page-container">
+<div class="stepper-container">
 
   <div class="page-header" data-aos="fade-down">
-    <h1>Chọn gói License phù hợp</h1>
-    <p>Bắt đầu hành trình của bạn với một gói dịch vụ tối ưu nhất.</p>
+    <h1>Mua & Gia hạn Gói License</h1>
+    <p>Chọn gói phù hợp với nhu cầu của bạn để sử dụng đầy đủ các tính năng.</p>
   </div>
 
-  @if (isLoading) {
-    <div class="loading-container">
-      <mat-spinner diameter="60"></mat-spinner>
-    </div>
-  }
+  <mat-stepper [linear]="true" [(selectedIndex)]="activeStep" labelPosition="bottom" class="mat-elevation-z4">
 
-  @if (!isLoading) {
-    <div class="pricing-grid">
+    <mat-step label="Chọn gói License">
+      <div class="step-content-container">
+        @if (isLoading) {
+          <div class="loading-container">
+            <mat-spinner diameter="60"></mat-spinner>
+          </div>
+        }
 
-      @for (plan of licensePlans; track plan.id) {
+        @if (!isLoading) {
+          <div class="pricing-grid">
+            @for (plan of licensePlans; track plan.id) {
+              <mat-card class="license-card"
+                        [class.popular]="plan.isPopular"
+                        data-aos="fade-up"
+                        [attr.data-aos-delay]="100 * $index">
 
-        <mat-card class="license-card"
-                  [class.popular]="plan.isPopular"
-                  data-aos="fade-up"
-                  [attr.data-aos-delay]="100 * $index">
+                @if (plan.isPopular) {
+                  <mat-chip-listbox class="popular-badge">
+                    <mat-chip-option selected color="accent">Phổ biến nhất</mat-chip-option>
+                  </mat-chip-listbox>
+                }
 
-          @if (plan.isPopular) {
-            <mat-chip-listbox class="popular-badge">
-              <mat-chip-option selected color="accent">Phổ biến nhất</mat-chip-option>
-            </mat-chip-listbox>
-          }
+                <mat-card-header>
+                  <mat-card-title>{{ plan.name }}</mat-card-title>
+                  <mat-card-subtitle>{{ plan.description }}</mat-card-subtitle>
+                </mat-card-header>
 
-          <mat-card-header>
-            <mat-card-title>{{ plan.name }}</mat-card-title>
-            <mat-card-subtitle>{{ plan.description }}</mat-card-subtitle>
-          </mat-card-header>
+                <mat-card-content>
+                  <div class="price-display">
+                    @if (plan.discount > 0) {
+                      <span class="original-price">
+                        {{ plan.price | currency:'VND':'symbol':'1.0-0' }}
+                      </span>
+                      <span class="discount-percent">-{{ plan.discount }}%</span>
+                    }
+                    <span class="final-price">
+                      {{ calculateFinalPrice(plan) | currency:'VND':'symbol':'1.0-0' }}
+                    </span>
+                    <span class="duration">
+                      / {{ plan.durationDays }} ngày
+                    </span>
+                  </div>
 
-          <mat-card-content>
-            <div class="price-display">
-              @if (plan.discount > 0) {
-                <span class="original-price">
-                  {{ plan.price | currency:'VND':'symbol':'1.0-0' }}
-                </span>
-                <span class="discount-percent">-{{ plan.discount }}%</span>
-              }
-              <span class="final-price">
-                {{ calculateFinalPrice(plan) | currency:'VND':'symbol':'1.0-0' }}
-              </span>
-              <span class="duration">
-                / {{ plan.durationDays }} ngày
-              </span>
+                  <mat-divider></mat-divider>
+
+                  <mat-list role="list" class="features-list">
+                    @for (feature of plan.features; track $index) {
+                      <mat-list-item role="listitem">
+                        <mat-icon matListItemIcon color="primary">check_circle_outline</mat-icon>
+                        <span>{{ feature }}</span>
+                      </mat-list-item>
+                    }
+                  </mat-list>
+
+                </mat-card-content>
+
+                <mat-card-actions class="card-actions-stack">
+                  <a href="javascript:void(0)" class="see-more-button">
+                    Xem thêm
+                    <mat-icon>expand_more</mat-icon>
+                  </a>
+
+                  <button mat-raised-button
+                          class="select-button"
+                          [attr.data-theme]="plan.themeColor"
+                          (click)="handleSelectPackage(plan)">
+                    {{ plan.price > 0 ? 'Mua ngay' : 'Bắt đầu ngay' }}
+                  </button>
+                </mat-card-actions>
+
+              </mat-card>
+            }
+          </div>
+        }
+      </div>
+    </mat-step>
+
+    <mat-step label="Thanh toán">
+      <div class="step-content-container">
+        @if (selectedPackage) {
+          <div class="payment-grid">
+
+            <div class="bank-details">
+              <mat-card class="mat-elevation-z0" style="border: 1px dashed #ccc;">
+                <mat-card-header>
+                  <mat-card-title>Thông tin chuyển khoản</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="detail-item">
+                    <span>Ngân hàng</span>
+                    <strong>{{ bankInfo.bankName }}</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Chủ tài khoản</span>
+                    <strong>{{ bankInfo.accountName }}</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Số tài khoản</span>
+                    <strong class="highlight">{{ bankInfo.accountNumber }}</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Số tiền</span>
+                    <strong class="highlight">{{ calculateFinalPrice(selectedPackage) | currency:'VND' }}</strong>
+                  </div>
+
+                  <mat-form-field appearance="outline" style="width: 100%; margin-top: 20px;">
+                    <mat-label>Nội dung chuyển khoản (Bắt buộc)</mat-label>
+                    <input matInput
+                           [(ngModel)]="transferContent"
+                           name="transferContent"
+                           readonly>
+                  </mat-form-field>
+
+                  <div class="alert alert-info">
+                    Vui lòng chuyển khoản chính xác <strong>Số tiền</strong> và <strong>Nội dung</strong> để hệ thống tự động xác nhận.
+                  </div>
+                </mat-card-content>
+              </mat-card>
             </div>
 
-            <mat-divider></mat-divider>
+            <div class="qr-container">
+              <mat-card class="mat-elevation-z0" style="text-align: center;">
+                <mat-card-title>Quét mã VietQR</mat-card-title>
+                @if (qrImageUrl) {
+                  <img [src]="qrImageUrl" alt="Mã QR thanh toán">
+                } @else {
+                  <p>Không thể tạo mã QR.</p>
+                }
+                <p>Quét mã QR để thanh toán nhanh chóng</p>
+              </mat-card>
+            </div>
+          </div>
+        }
 
-            <mat-list role="list" class="features-list">
-              @for (feature of plan.features; track $index) {
-                <mat-list-item role="listitem">
-                  <mat-icon matListItemIcon color="primary">check_circle_outline</mat-icon>
-                  <span>{{ feature }}</span>
-                </mat-list-item>
-              }
-            </mat-list>
+        <div class="stepper-actions">
+          <button mat-button (click)="prevStep()">Quay lại</button>
+          <button mat-raised-button
+                  color="primary"
+                  (click)="handleTransferConfirmed()"
+                  [disabled]="isSendingRequest">
+            @if (isSendingRequest) {
+              <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
+              <span>Đang gửi yêu cầu...</span>
+            } @else {
+              <span>Tôi đã chuyển khoản & Gửi yêu cầu</span>
+            }
+          </button>
+        </div>
+      </div>
+    </mat-step>
 
-          </mat-card-content>
+    <mat-step label="Hoàn tất">
+      <div class="step-content-container">
+        @if (paymentDetails) {
+          <div class="success-container">
+            <mat-icon class="success-icon" color="primary">check_circle</mat-icon>
 
-          <mat-card-actions class="card-actions-stack">
+            @if (paymentDetails.amount === 0) {
+              <h2>Đăng ký Trial thành công!</h2>
+              <p>Gói Trial của bạn đã được kích hoạt. Hãy bắt đầu trải nghiệm ngay!</p>
+            } @else {
+              <h2>Yêu cầu thanh toán đã được ghi nhận!</h2>
+              <p>Hệ thống đã ghi nhận yêu cầu. Vui lòng chờ xác nhận tự động trong vài phút.</p>
 
-            <a href="javascript:void(0)" class="see-more-button">
-              Xem thêm
-              <mat-icon>expand_more</mat-icon>
-            </a>
+              <mat-card class="mat-elevation-z0 detail-summary">
+                <div class="detail-item">
+                  <span>Mã yêu cầu (ID)</span>
+                  <strong class="highlight">{{ paymentDetails.requestId }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Số tiền</span>
+                  <strong>{{ paymentDetails.amount | currency:'VND' }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Nội dung CK</span>
+                  <strong class="highlight">{{ paymentDetails.transferContent }}</strong>
+                </div>
+              </mat-card>
+            }
 
             <button mat-raised-button
-                    class="select-button"
-                    [attr.data-theme]="plan.themeColor"
-                    (click)="onSelectPlan(plan)">
-              {{ plan.price > 0 ? 'Mua ngay' : 'Bắt đầu ngay' }}
+                    color="primary"
+                    (click)="resetFlow()"
+                    style="margin-top: 24px;">
+              Hoàn tất & Về trang chủ
             </button>
-          </mat-card-actions>
+          </div>
+        }
+      </div>
+    </mat-step>
 
-        </mat-card>
-      }
-    </div>
-  }
-
+  </mat-stepper>
 </div>
