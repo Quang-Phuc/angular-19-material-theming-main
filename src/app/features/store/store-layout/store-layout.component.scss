@@ -1,0 +1,61 @@
+/* store-layout.component.scss (File mới) */
+
+.store-container {
+  width: 100%;
+  height: 100vh;
+}
+
+.store-sidenav {
+  width: 260px;
+  background: #2c3e50;
+  color: #ecf0f1;
+}
+
+.sidenav-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid #34495e;
+}
+
+.mat-nav-list a.mat-list-item {
+  color: #bdc3c7;
+  .mat-icon {
+    color: #bdc3c7;
+  }
+  &:hover {
+    background: #34495e;
+    color: #ffffff;
+    .mat-icon {
+      color: #ffffff;
+    }
+  }
+}
+
+.mat-nav-list a.active-link {
+  background: #1abc9c;
+  color: #ffffff;
+  .mat-icon {
+    color: #ffffff;
+  }
+}
+
+.store-toolbar {
+  background: #ffffff;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.main-content {
+  padding: 24px;
+  background: #f4f7fa;
+  height: calc(100% - 64px); // Trừ đi chiều cao toolbar
+  overflow-y: auto;
+}

@@ -1,4 +1,4 @@
-// login.component.ts
+// login.component.ts (File của bạn, đã cập nhật)
 
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -7,16 +7,12 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import * as AOS from 'aos';
 
-// Core services and utils
-import { AuthService, LoginPayload } from '../../../core/services/auth.service';
+// 1. IMPORT THÊM "AuthResponse"
+import { AuthService, LoginPayload, AuthResponse } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { MyErrorStateMatcher } from '../../../core/utils/error-state-matcher';
 
-// === THÊM MODULES MỚI ===
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-
-// === IMPORT DIALOG MỚI ===
-// (Điều chỉnh đường dẫn này cho đúng với cấu trúc dự án của bạn)
 import { LicenseExpiredDialogComponent } from '../../../core/dialogs/license-expired-dialog/license-expired-dialog.component';
 
 // Import Material Modules
@@ -31,26 +27,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    MatCardModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatProgressSpinnerModule,
-    MatDialogModule // <-- THÊM MatDialogModule VÀO IMPORTS
+    CommonModule, ReactiveFormsModule, RouterLink, MatCardModule,
+    MatInputModule, MatButtonModule, MatIconModule, MatFormFieldModule,
+    MatProgressSpinnerModule, MatDialogModule
   ],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  templateUrl: './login.component.html', //
+  styleUrl: './login.component.scss' //
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private router = inject(Router);
-  private dialog = inject(MatDialog); // <-- INJECT MatDialog
+  private dialog = inject(MatDialog);
 
   isLoading = false;
   matcher = new MyErrorStateMatcher();
@@ -79,76 +68,60 @@ export class LoginComponent implements OnInit {
     const payload: LoginPayload = {
       phone: this.phone.value,
       password: this.password.value,
-      type: 'USER'
+      type: 'USER' // Giả định USER là cho tiệm (1 và 2)
     };
 
+    // 2. CẬP NHẬT LOGIC KHI LOGIN THÀNH CÔNG
     this.authService.login(payload).pipe(
       finalize(() => {
         this.isLoading = false;
         this.loginForm.enable();
       })
     ).subscribe({
-      next: (user) => {
+      next: (response: AuthResponse) => { // Ép kiểu response
+
+        // 2a. Lưu thông tin vào "Store" (localStorage)
+        this.authService.saveAuthData(response);
+
         this.notification.showSuccess('Đăng nhập thành công!');
-        this.router.navigate(['/dashboard']);
+
+        // 2b. Điều hướng đến trang quản lý tiệm
+        this.router.navigate(['/store']);
       },
       error: (err) => {
-        // === LOGIC XỬ LÝ LỖI ĐÃ CẬP NHẬT ===
-
+        // (Logic xử lý lỗi SS004 của bạn giữ nguyên)
         let errorMessage = 'Lỗi không xác định';
-        let errorCode = null; // Biến để lưu mã lỗi
+        let errorCode = null;
         let raw = err?.error ?? err?.message ?? 'Đã có lỗi';
 
         if (typeof raw === 'string') {
           try {
             const parsed = JSON.parse(raw);
             errorMessage = parsed.messages?.vn || parsed.message || JSON.stringify(parsed);
-            errorCode = parsed.code || null; // Lấy mã lỗi
+            errorCode = parsed.code || null;
           } catch {
             errorMessage = raw;
           }
         } else if (typeof raw === 'object') {
           errorMessage = raw.messages?.vn || raw.message || JSON.stringify(raw);
-          errorCode = raw.code || null; // Lấy mã lỗi
+          errorCode = raw.code || null;
         }
 
-        // Kiểm tra mã lỗi
         if (errorCode === 'SS004') {
-          // Nếu là lỗi hết hạn, mở dialog
           this.openLicenseDialog();
         } else {
-          // Nếu là lỗi khác, hiển thị toast như cũ
           this.notification.showError(errorMessage);
         }
       }
     });
   }
 
-  /**
-   * Hàm mới để mở dialog hết hạn license
-   */
-  // login.component.ts
-
-  /**
-   * Hàm mới để mở dialog hết hạn license
-   */
   private openLicenseDialog(): void {
-    const dialogRef = this.dialog.open(LicenseExpiredDialogComponent, {
-      // ... (cấu hình dialog)
-    });
-
-    // Lắng nghe kết quả khi dialog đóng
+    // (Logic dialog của bạn giữ nguyên)
+    const dialogRef = this.dialog.open(LicenseExpiredDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
-
-      // === CHÍNH LÀ CHỖ NÀY ===
-      // Nếu kết quả trả về là 'true' (tức là người dùng nhấn "Gia hạn ngay")
       if (result === true) {
-
-        // Thì thực hiện điều hướng đến trang purchase-license
         this.router.navigate(['/purchase-license']);
-
-      } else {
-        // Người dùng đã click "Để sau" (Hủy)
       }
     });
   }
