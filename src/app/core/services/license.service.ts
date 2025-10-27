@@ -1,20 +1,19 @@
 // src/app/core/services/license.service.ts
 
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 
-// Interface ApiResponse
-export interface ApiResponse<T> {
+// === ADD EXPORT TO ALL INTERFACES ===
+export interface ApiResponse<T> { // <-- Added export
   result: string;
   message: string;
   errorCode: string;
   data: T;
 }
 
-// Interface LicensePlan
-export interface LicensePlan {
+export interface LicensePlan { // <-- Added export
   id: number;
   name: string;
   description: string | null;
@@ -28,22 +27,43 @@ export interface LicensePlan {
   themeColor?: 'green' | 'blue' | 'purple' | 'orange';
 }
 
-// Interface cho API QR (Bước 2)
-export interface QrResponse {
-  base64Data: string;
-  // (Cập nhật tên thuộc tính nếu API thật trả về khác)
-}
-
-// === 1. THÊM INTERFACE CHO API MỚI (BƯỚC 3) ===
-export interface HistoryRequest {
-  license_package_id: number;
-  // (Thêm các trường khác nếu API của bạn yêu cầu, ví dụ: amount, content)
-}
-
-// Giả sử API trả về là { id: 123, status: "PENDING", ... }
-export interface HistoryResponse {
+export interface UserInfo { // <-- Added export
   id: number;
-  // (Thêm các trường khác)
+  name: string;
+  storeId?: number;
+}
+
+export interface StoreInfo { // <-- Added export
+  id: number;
+  name: string;
+}
+
+export interface LicenseStatus { // <-- Added export
+  status: 'valid' | 'expired' | 'not_found';
+  expiryDate?: string;
+  currentStoreCount?: number;
+  currentUserCount?: number;
+  stores?: StoreInfo[];
+  users?: UserInfo[];
+}
+
+export interface CurrentUsage { // <-- Added export
+  storeCount: number;
+  userCount: number;
+  stores: StoreInfo[];
+  users: UserInfo[];
+}
+
+export interface QrResponse { // <-- Added export
+  base64Data: string;
+}
+
+export interface HistoryRequest { // <-- Added export
+  license_package_id: number;
+}
+
+export interface HistoryResponse { // <-- Added export
+  id: number;
 }
 
 
@@ -53,45 +73,33 @@ export interface HistoryResponse {
 export class LicenseService {
 
   private apiService = inject(ApiService);
-  private apiUrl = '/license-packages';
+  private apiUrl = '/api/license-packages';
+  private historyApiUrl = '/api/license-history';
+  private licenseCheckUrl = '/api/license/check';
+  private currentUsageUrl = '/api/usage';
 
-  // === 2. ĐỊNH NGHĨA URL API MỚI ===
-  private historyApiUrl = '/license-history';
+  private currentUsageSubject = new BehaviorSubject<CurrentUsage | null>(null);
+  currentUsage$ = this.currentUsageSubject.asObservable();
+
 
   constructor() { }
 
-  /**
-   * API 1: Lấy danh sách gói (Đã có)
-   */
+  // --- Methods ---
   getLicensePlans(): Observable<LicensePlan[]> {
     return this.apiService.get<ApiResponse<LicensePlan[]>>(this.apiUrl).pipe(
       map(response => {
-        // (Logic "làm giàu" dữ liệu không thay đổi)
         const apiPlans = response.data;
-        return apiPlans.map(plan => {
+        // Add type to 'plan' parameter
+        return apiPlans.map((plan: LicensePlan) => { // <-- Added Type here
           let uiFeatures: string[] = [];
           let uiIsPopular = false;
           let uiThemeColor: LicensePlan['themeColor'] = 'blue';
 
-          if (plan.name === 'TRIAL') {
-            uiFeatures = [ `Quản lý ${plan.maxStore} cửa hàng`, `${plan.maxUserPerStore} tài khoản/cửa hàng`, `Dùng thử ${plan.durationDays} ngày`, 'Hỗ trợ cơ bản' ];
-            uiThemeColor = 'green';
-          }
-          else if (plan.name === 'Cá Nhân') {
-            uiFeatures = [ `Quản lý ${plan.maxStore} cửa hàng`, `${plan.maxUserPerStore} tài khoản/cửa hàng`, 'Báo cáo doanh thu cơ bản', 'Hỗ trợ qua Email' ];
-            uiThemeColor = 'blue';
-          }
-          else if (plan.name === 'Chuyên Nghiệp') {
-            uiFeatures = [ `Quản lý ${plan.maxStore} cửa hàng`, `${plan.maxUserPerStore} tài khoản/cửa hàng`, 'Báo cáo doanh thu nâng cao', 'Tích hợp API (Shopee, Lazada)', 'Hỗ trợ ưu tiên 24/7' ];
-            if (plan.discount > 0) {
-              uiIsPopular = true;
-              uiThemeColor = 'purple';
-            }
-          }
-          else if (plan.name === 'Doanh Nghiệp') {
-            uiFeatures = [ `Quản lý ${plan.maxStore} cửa hàng`, `${plan.maxUserPerStore} tài khoản/cửa hàng`, 'Tùy chỉnh tính năng', 'Server riêng & Bảo mật cao', 'Hỗ trợ chuyên dụng' ];
-            uiThemeColor = 'orange';
-          }
+          // (Logic remains the same)
+          if (plan.name === 'TRIAL') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,`Dùng thử ${plan.durationDays} ngày`,'Hỗ trợ cơ bản']; uiThemeColor = 'green'; }
+          else if (plan.name === 'Cá Nhân') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,'Báo cáo doanh thu cơ bản','Hỗ trợ qua Email']; uiThemeColor = 'blue'; }
+          else if (plan.name === 'Chuyên Nghiệp') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,'Báo cáo doanh thu nâng cao','Tích hợp API (Shopee, Lazada)','Hỗ trợ ưu tiên 24/7']; if (plan.discount > 0) { uiIsPopular = true; uiThemeColor = 'purple'; } }
+          else if (plan.name === 'Doanh Nghiệp') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,'Tùy chỉnh tính năng','Server riêng & Bảo mật cao','Hỗ trợ chuyên dụng']; uiThemeColor = 'orange'; }
 
           return { ...plan, features: uiFeatures, isPopular: uiIsPopular, themeColor: uiThemeColor };
         });
@@ -99,31 +107,29 @@ export class LicenseService {
     );
   }
 
-  /**
-   * API 2: Lấy mã QR (Đã có)
-   */
   createQrCode(price: number, content: string): Observable<QrResponse> {
     const payload = { price, content };
     return this.apiService.post<QrResponse>(`${this.apiUrl}/qr`, payload);
   }
 
-  /**
-   * API 3: Lưu lịch sử (MỚI)
-   * (Gọi khi người dùng xác nhận ở Bước 2)
-   */
   saveLicenseHistory(packageId: number): Observable<HistoryResponse> {
-    // API của bạn chỉ yêu cầu license_package_id
-    const payload: HistoryRequest = {
-      license_package_id: packageId
-    };
-
-    // Nếu API của bạn cần thêm (amount, content), bạn phải thêm chúng vào đây
-    // const payload = {
-    //   license_package_id: packageId,
-    //   amount: amount,
-    //   transferContent: content
-    // };
-
+    const payload: HistoryRequest = { license_package_id: packageId };
     return this.apiService.post<HistoryResponse>(this.historyApiUrl, payload);
+  }
+
+  checkLicenseStatus(): Observable<LicenseStatus> {
+    return this.apiService.get<LicenseStatus>(this.licenseCheckUrl).pipe(
+      tap(response => {
+        if (response.status === 'expired') {
+          this.currentUsageSubject.next({ storeCount: response.currentStoreCount ?? 0, userCount: response.currentUserCount ?? 0, stores: response.stores ?? [], users: response.users ?? [] });
+        } else {
+          this.currentUsageSubject.next(null);
+        }
+      })
+    );
+  }
+
+  getStoredUsage(): CurrentUsage | null {
+    return this.currentUsageSubject.getValue();
   }
 }

@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Xác nhận hạ cấp License</h2>
+
+<mat-dialog-content>
+  <p>
+    Gói bạn chọn có giới hạn thấp hơn số lượng cửa hàng hoặc người dùng hiện tại của bạn.
+    Vui lòng chọn những mục bạn muốn giữ lại.
+  </p>
+
+  <div class="selection-grid">
+    <div class="selection-section">
+      <h3>
+        Chọn Cửa hàng (Tối đa: {{ data.newPackageLimits.maxStore }})
+        <span [class.limit-reached]="isStoreLimitReached()">
+          [{{ numSelectedStores }}/{{ data.newPackageLimits.maxStore }}]
+        </span>
+      </h3>
+      <mat-divider></mat-divider>
+      <mat-list class="selection-list">
+        @for (store of data.currentUsage.stores; track store.id) {
+          <mat-list-item>
+            <mat-checkbox [(ngModel)]="selectedStoreIds[store.id]"
+                          [disabled]="!selectedStoreIds[store.id] && isStoreLimitReached()"
+                          (ngModelChange)="onStoreSelectionChange()">
+              {{ store.name }}
+            </mat-checkbox>
+          </mat-list-item>
+        }
+      </mat-list>
+    </div>
+
+    <div class="selection-section">
+      <h3>
+        Chọn Người dùng (Tối đa: {{ data.newPackageLimits.maxUserPerStore }})
+        <span [class.limit-reached]="isUserLimitReached()">
+           [{{ numSelectedUsers }}/{{ data.newPackageLimits.maxUserPerStore }}]
+        </span>
+      </h3>
+      <mat-divider></mat-divider>
+      <mat-list class="selection-list">
+        @for (user of data.currentUsage.users; track user.id) {
+          <mat-list-item>
+            <mat-checkbox [(ngModel)]="selectedUserIds[user.id]"
+                          [disabled]="!selectedUserIds[user.id] && isUserLimitReached()"
+                          (ngModelChange)="onUserSelectionChange()">
+              {{ user.name }} </mat-checkbox>
+          </mat-list-item>
+        }
+      </mat-list>
+    </div>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Hủy</button>
+  <button mat-raised-button color="primary" [disabled]="!canConfirm()" (click)="onConfirm()">
+    Xác nhận lựa chọn
+  </button>
+</mat-dialog-actions>
