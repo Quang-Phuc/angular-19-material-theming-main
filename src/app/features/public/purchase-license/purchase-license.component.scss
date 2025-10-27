@@ -88,8 +88,15 @@ $color-purple-text: #ffffff;
   }
 }
 
+/* ... các style khác ... */
+
 .qr-container {
   img {
+    /* THÊM 2 DÒNG NÀY ĐỂ CĂN GIỮA */
+    display: block;
+    margin: 0 auto 16px auto; /* Căn giữa và thêm khoảng cách bên dưới */
+
+    /* Các thuộc tính cũ giữ nguyên */
     width: 100%;
     max-width: 250px;
     height: auto;
@@ -101,6 +108,8 @@ $color-purple-text: #ffffff;
     color: #777;
   }
 }
+
+/* ... các style khác ... */
 
 .qr-loading {
   display: flex;
