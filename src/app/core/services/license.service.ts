@@ -1,23 +1,33 @@
+// src/app/core/services/license.service.ts
+
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; // <-- 1. Import HttpClient
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators'; // <-- 2. Import 'map' operator
+import { map } from 'rxjs/operators';
+import { ApiService } from './api.service';
+
+// === THAY ĐỔI 1: Định nghĩa cấu trúc phản hồi API ===
+// (Để khớp với JSON bạn cung cấp)
+export interface ApiResponse<T> {
+  result: string;
+  message: string;
+  errorCode: string;
+  data: T; // Dữ liệu chúng ta cần nằm trong này
+}
 
 /**
  * Định nghĩa cấu trúc cho một gói License.
- * Dựa trên các trường bạn cung cấp + các trường cho UI.
  */
 export interface LicensePlan {
   id: number;
   name: string;
-  description: string;
+  description: string | null; // API có thể trả về null
   maxStore: number;
   maxUserPerStore: number;
   price: number;
   discount: number;
   durationDays: number;
-  isPopular?: boolean; // <-- Vẫn giữ làm trường tùy chọn
-  features?: string[]; // <-- Vẫn giữ làm trường tùy chọn
+  isPopular?: boolean; // Trường này ta tự thêm vào
+  features?: string[]; // Trường này ta tự thêm vào
 }
 
 @Injectable({
@@ -25,10 +35,8 @@ export interface LicensePlan {
 })
 export class LicenseService {
 
-  private http = inject(HttpClient); // <-- 3. Inject HttpClient
-
-  // 4. Định nghĩa URL API (sử dụng URL tương đối)
-  private apiUrl = '/api/auth/license-package';
+  private apiService = inject(ApiService);
+  private apiUrl = '/license-packages'; // Endpoint đã đúng
 
   constructor() { }
 
@@ -37,56 +45,43 @@ export class LicenseService {
    */
   getLicensePlans(): Observable<LicensePlan[]> {
 
-    // 5. Gọi API thật bằng http.get
-    // API trả về mảng LicensePlan (chưa có 'features' và 'isPopular')
-    return this.http.get<LicensePlan[]>(this.apiUrl).pipe(
+    // === THAY ĐỔI 2: Đổi kiểu mong đợi ===
+    // Thay vì mong đợi LicensePlan[], giờ ta mong đợi ApiResponse<LicensePlan[]>
+    return this.apiService.get<ApiResponse<LicensePlan[]>>(this.apiUrl).pipe(
 
-      // 6. Dùng 'map' để biến đổi dữ liệu trả về
-      map(apiPlans => {
+      // === THAY ĐỔI 3: Cập nhật hàm map() ===
+      map(response => {
+        // 'response' là object { result: "...", data: [...] }
 
-        // Lặp qua từng plan nhận được từ API
+        // 1. Lấy mảng 'data' từ bên trong response
+        const apiPlans = response.data;
+
+        // 2. Lặp qua mảng apiPlans (logic "làm giàu" dữ liệu)
         return apiPlans.map(plan => {
 
           let uiFeatures: string[] = [];
           let uiIsPopular = false;
 
-          // === LOGIC LÀM GIÀU DỮ LIỆU ===
-          // Thêm 'features' và 'isPopular' dựa trên 'name' (hoặc 'id')
-          // Bạn có thể tùy chỉnh logic này
-
-          if (plan.name === 'Cá Nhân') {
-            uiFeatures = [
-              `Quản lý ${plan.maxStore} cửa hàng`,
-              `${plan.maxUserPerStore} tài khoản nhân viên`,
-              'Báo cáo cơ bản',
-              'Hỗ trợ qua Email'
-            ];
-          }
-          else if (plan.name === 'Chuyên Nghiệp') {
+          // Logic để thêm trường UI (features, isPopular)
+          // Cập nhật logic này dựa trên tên gói "TRIAL"
+          if (plan.name === 'TRIAL') {
             uiFeatures = [
               `Quản lý ${plan.maxStore} cửa hàng`,
               `${plan.maxUserPerStore} tài khoản/cửa hàng`,
-              'Báo cáo nâng cao',
-              'Tích hợp API',
-              'Hỗ trợ ưu tiên 24/7'
+              `Dùng thử ${plan.durationDays} ngày`,
+              'Hỗ trợ cơ bản'
             ];
-            uiIsPopular = true; // <-- Đánh dấu gói này là "Phổ biến"
+            // Vì chỉ có 1 gói, ta làm nó nổi bật luôn
+            uiIsPopular = true;
           }
-          else if (plan.name === 'Doanh Nghiệp') {
-            uiFeatures = [
-              'Không giới hạn cửa hàng',
-              'Không giới hạn nhân viên',
-              'Tùy chỉnh tính năng',
-              'Server riêng',
-              'Hỗ trợ chuyên dụng'
-            ];
-          }
+          // ... (Thêm else if cho các gói khác nếu có)
+          // else if (plan.name === 'CHUYEN_NGHIEP') { ... }
 
-          // 7. Trả về object mới đã bao gồm dữ liệu từ API và dữ liệu UI
+          // 3. Trả về object đã được "làm giàu"
           return {
-            ...plan, // Dữ liệu gốc từ API
-            features: uiFeatures, // Dữ liệu UI đã thêm
-            isPopular: uiIsPopular // Dữ liệu UI đã thêm
+            ...plan,
+            features: uiFeatures,
+            isPopular: uiIsPopular
           };
         });
       })

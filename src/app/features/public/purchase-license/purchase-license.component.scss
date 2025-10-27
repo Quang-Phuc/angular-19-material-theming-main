@@ -1,5 +1,5 @@
 /* purchase-license.component.scss */
-@use '@angular/material' as mat;
+@use '../../../../../node_modules/@angular/material/index' as mat;
 
 // Giả định bạn có định nghĩa $primary-palette và $accent-palette
 // Nếu không, hãy import file theme của bạn
@@ -66,7 +66,16 @@ $popular-accent-color: #ff4081; // mat.get-color-from-palette($accent-palette, '
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: mat.mdc-elevation-shadow(12) !important;
+
+    /* SỬA LẠI: Dùng @include để gọi mixin elevation */
+    /* Mixin này sẽ tự động áp dụng thuộc tính 'box-shadow' */
+    @include mat.elevation(12);
+
+    /* * LƯU Ý: Bạn không thể dùng !important với mixin.
+     * Mixin "elevation" sẽ tạo ra thuộc tính "box-shadow" cho bạn.
+     * Nếu bạn cần ghi đè, bạn phải tăng độ ưu tiên (specificity)
+     * cho selector, nhưng 99% trường hợp bạn chỉ cần gọi mixin là đủ.
+     */
   }
 
   .mat-card-header {

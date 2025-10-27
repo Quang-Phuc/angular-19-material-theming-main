@@ -1,13 +1,13 @@
 // purchase-license.component.ts
 
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common'; // Import CurrencyPipe
+import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 // Services
-import { LicenseService, LicensePlan } from '../../core/services/license.service'; // Chỉnh đường dẫn
-import { NotificationService } from '../../core/services/notification.service';
+import { LicenseService, LicensePlan } from '../../../core/services/license.service'; // Chỉnh đường dẫn
+import { NotificationService } from '../../../core/services/notification.service';
 
 // Material Modules
 import { MatCardModule } from '@angular/material/card';
@@ -46,19 +46,29 @@ export class PurchaseLicenseComponent implements OnInit {
     this.loadPlans();
   }
 
+  // ... (các hàm khác)
+
   loadPlans(): void {
     this.isLoading = true;
     this.licenseService.getLicensePlans().pipe(
       finalize(() => this.isLoading = false)
     ).subscribe({
       next: (plans) => {
+        // === THÊM DÒNG NÀY ĐỂ DEBUG ===
+        console.log('Tải gói thành công:', plans);
+
         this.licensePlans = plans;
       },
       error: (err) => {
+        // === THÊM DÒNG NÀY ĐỂ DEBUG ===
+        console.error('Lỗi khi tải gói:', err);
+
         this.notification.showError('Không thể tải danh sách gói. Vui lòng thử lại.');
       }
     });
   }
+
+// ... (các hàm khác)
 
   /**
    * Tính giá cuối cùng sau khi đã giảm

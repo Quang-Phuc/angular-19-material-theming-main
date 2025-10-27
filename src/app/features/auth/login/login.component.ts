@@ -127,21 +127,28 @@ export class LoginComponent implements OnInit {
   /**
    * Hàm mới để mở dialog hết hạn license
    */
+  // login.component.ts
+
+  /**
+   * Hàm mới để mở dialog hết hạn license
+   */
   private openLicenseDialog(): void {
     const dialogRef = this.dialog.open(LicenseExpiredDialogComponent, {
-      width: '450px',
-      disableClose: true, // Không cho đóng khi click bên ngoài
+      // ... (cấu hình dialog)
     });
 
     // Lắng nghe kết quả khi dialog đóng
     dialogRef.afterClosed().subscribe(result => {
+
+      // === CHÍNH LÀ CHỖ NÀY ===
+      // Nếu kết quả trả về là 'true' (tức là người dùng nhấn "Gia hạn ngay")
       if (result === true) {
-        // Người dùng đã click "Mua License"
-        // Bạn cần tạo trang và route cho '/purchase-license'
+
+        // Thì thực hiện điều hướng đến trang purchase-license
         this.router.navigate(['/purchase-license']);
+
       } else {
-        // Người dùng đã click "Hủy"
-        // Không làm gì cả, họ sẽ ở lại trang login
+        // Người dùng đã click "Để sau" (Hủy)
       }
     });
   }

@@ -1,4 +1,7 @@
+// app.routes.ts
+
 import { Routes } from '@angular/router';
+
 // ... (các import cũ của bạn)
 import { HomepageComponent } from './features/homepage/homepage.component';
 import { LoginComponent } from './features/auth/login/login.component';
@@ -11,6 +14,10 @@ import { StoreListComponent } from './features/admin/pages/store-list/store-list
 import { PlanListComponent } from './features/admin/components/plan-list/plan-list.component';
 // Import component login admin
 import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-login.component';
+
+// === IMPORT MỚI CHO TRANG MUA LICENSE ===
+// (Đảm bảo đường dẫn này đúng với cấu trúc dự án của bạn)
+import { PurchaseLicenseComponent } from './features/public/purchase-license/purchase-license.component';
 
 
 export const routes: Routes = [
@@ -26,6 +33,12 @@ export const routes: Routes = [
   {
     path: 'register',
     component: RegisterComponent
+  },
+
+  // === ROUTE MỚI ĐÃ THÊM VÀO ===
+  {
+    path: 'purchase-license', // Đường dẫn bị lỗi "Cannot match any routes"
+    component: PurchaseLicenseComponent // Component sẽ hiển thị
   },
   // ... (các route cũ khác)
 
