@@ -129,12 +129,24 @@
 
             <div class="qr-container">
               <mat-card class="mat-elevation-z0" style="text-align: center;">
-                <mat-card-title>Quét mã VietQR</mat-card-title>
-                @if (qrImageUrl) {
-                  <img [src]="qrImageUrl" alt="Mã QR thanh toán">
-                } @else {
-                  <p>Không thể tạo mã QR.</p>
+                <mat-card-title>Quét mã QR</mat-card-title>
+
+                @if (isFetchingQr) {
+                  <div class="qr-loading">
+                    <mat-spinner diameter="50"></mat-spinner>
+                    <p>Đang tạo mã...</p>
+                  </div>
                 }
+                @else if (qrCodeBase64) {
+                  <img [src]="'data:image/png;base64,' + qrCodeBase64" alt="Mã QR thanh toán">
+                }
+                @else {
+                  <div class="qr-loading">
+                    <mat-icon color="warn">error_outline</mat-icon>
+                    <p>Không thể tạo mã QR.</p>
+                  </div>
+                }
+
                 <p>Quét mã QR để thanh toán nhanh chóng</p>
               </mat-card>
             </div>
@@ -146,13 +158,12 @@
           <button mat-raised-button
                   color="primary"
                   (click)="handleTransferConfirmed()"
-                  [disabled]="isSendingRequest">
-            @if (isSendingRequest) {
-              <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
-              <span>Đang gửi yêu cầu...</span>
-            } @else {
-              <span>Tôi đã chuyển khoản & Gửi yêu cầu</span>
-            }
+                  [disabled]="isSendingRequest || isFetchingQr"> @if (isSendingRequest) {
+            <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
+            <span>Đang gửi yêu cầu...</span>
+          } @else {
+            <span>Tôi đã chuyển khoản & Gửi yêu cầu</span>
+          }
           </button>
         </div>
       </div>

@@ -6,15 +6,14 @@ $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 
 // ... (Các biến màu cho button) ...
-$color-green-bg: #e6f7ec;
-$color-green-text: #006a2e;
-$color-blue-bg: #eaf1fb;
-$color-blue-text: #3f51b5;
+$color-green-bg: #10b981;
+$color-green-text: #ffffff;
+$color-blue-bg: #3b82f6;
+$color-blue-text: #ffffff;
 $color-orange-bg: #fd7e14;
 $color-orange-text: #ffffff;
-$color-purple-bg: #f3e8ff;
-$color-purple-text: #6a1b9a;
-
+$color-purple-bg: #8b5cf6;
+$color-purple-text: #ffffff;
 
 :host {
   display: block;
@@ -22,8 +21,6 @@ $color-purple-text: #6a1b9a;
   padding-bottom: 60px;
   position: relative;
   overflow-x: hidden;
-
-  /* Nền (Giữ nguyên) */
   background-color: #f4f7fa;
   background-image:
     radial-gradient(circle at 0% 0%, rgba(63, 81, 181, 0.08) 0%, transparent 40%),
@@ -50,17 +47,17 @@ $color-purple-text: #6a1b9a;
 
 .step-content-container {
   padding: 24px;
-  min-height: 400px; // Đảm bảo các bước có chiều cao
+  min-height: 400px;
 }
 
 /* Style cho Bước 2: Thanh toán */
 .payment-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr; // 2/3 cho info, 1/3 cho QR
+  grid-template-columns: 2fr 1fr;
   gap: 32px;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr; // Stack trên mobile
+    grid-template-columns: 1fr;
   }
 }
 
@@ -72,9 +69,7 @@ $color-purple-text: #6a1b9a;
   border-bottom: 1px dashed #e0e0e0;
   font-size: 0.95rem;
 
-  span {
-    color: #666;
-  }
+  span { color: #666; }
   strong.highlight {
     color: $popular-border-color;
     font-size: 1.1rem;
@@ -107,6 +102,23 @@ $color-purple-text: #6a1b9a;
   }
 }
 
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 250px;
+  width: 250px;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+
+  p {
+    margin-top: 16px;
+    font-weight: 500;
+  }
+}
+
 .stepper-actions {
   display: flex;
   justify-content: space-between;
@@ -128,7 +140,7 @@ $color-purple-text: #6a1b9a;
   font-size: 80px;
   width: 80px;
   height: 80px;
-  color: #4caf50; // Màu xanh lá thành công
+  color: #4caf50;
   margin-bottom: 16px;
 }
 .success-container h2 {
@@ -153,13 +165,13 @@ $color-purple-text: #6a1b9a;
 
 
 /* ===============================================
-  STYLE CŨ (BƯỚC 1 - GIỮ NGUYÊN)
+  STYLE CŨ (BƯỚC 1)
 ===============================================
 */
 
 .page-header {
   text-align: center;
-  margin-bottom: 24px; // Giảm margin vì đã có container
+  margin-bottom: 24px;
   h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; color: #2c3e50; }
   p { font-size: 1.15rem; color: #555; }
 }
@@ -169,11 +181,18 @@ $color-purple-text: #6a1b9a;
   align-items: center;
   padding: 100px 0;
 }
+
+/* === SỬA LỖI 1 CỘT (ĐÃ CẬP NHẬT) === */
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 32px;
   align-items: stretch;
+
+  /* Sử dụng 'auto-fit' để trình duyệt TỰ ĐỘNG quyết định số cột.
+    - Nó sẽ cố gắng tạo các cột rộng tối thiểu (min) 300px.
+    - Nó sẽ chia đều không gian còn lại (max: 1fr).
+  */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 
@@ -254,28 +273,40 @@ $color-purple-text: #6a1b9a;
     letter-spacing: 0.5px;
     transition: all 0.3s ease;
     border: none;
-    box-shadow: none;
+    box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.1);
     ::ng-deep .mat-mdc-button-ripple { display: none; }
 
     &[data-theme="green"] {
       background-color: $color-green-bg;
       color: $color-green-text;
-      &:hover { background-color: darken($color-green-bg, 5%); }
+      &:hover {
+        background-color: darken($color-green-bg, 8%);
+        transform: translateY(-2px);
+      }
     }
     &[data-theme="blue"] {
       background-color: $color-blue-bg;
       color: $color-blue-text;
-      &:hover { background-color: darken($color-blue-bg, 5%); }
+      &:hover {
+        background-color: darken($color-blue-bg, 8%);
+        transform: translateY(-2px);
+      }
     }
     &[data-theme="purple"] {
       background-color: $color-purple-bg;
       color: $color-purple-text;
-      &:hover { background-color: darken($color-purple-bg, 5%); }
+      &:hover {
+        background-color: darken($color-purple-bg, 8%);
+        transform: translateY(-2px);
+      }
     }
     &[data-theme="orange"] {
       background-color: $color-orange-bg;
       color: $color-orange-text;
-      &:hover { background-color: darken($color-orange-bg, 8%); }
+      &:hover {
+        background-color: darken($color-orange-bg, 8%);
+        transform: translateY(-2px);
+      }
     }
   }
 
