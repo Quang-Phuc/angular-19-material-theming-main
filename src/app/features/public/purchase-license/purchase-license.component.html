@@ -1,6 +1,6 @@
 <div class="page-container">
 
-  <div class="page-header" data-aos="fade-down">
+  <div class="page-header">
     <h1>Chọn gói License phù hợp</h1>
     <p>Bắt đầu hành trình của bạn với một gói dịch vụ tối ưu nhất.</p>
   </div>
@@ -17,9 +17,7 @@
       @for (plan of licensePlans; track plan.id) {
 
         <mat-card class="license-card"
-                  [class.popular]="plan.isPopular"
-                  data-aos="fade-up"
-                  [attr.data-aos-delay]="100 * $index">
+                  [class.popular]="plan.isPopular">
 
           @if (plan.isPopular) {
             <mat-chip-listbox class="popular-badge">
@@ -50,6 +48,7 @@
             </div>
 
             <mat-divider></mat-divider>
+
             <mat-list role="list" class="features-list">
               @for (feature of plan.features; track $index) {
                 <mat-list-item role="listitem">

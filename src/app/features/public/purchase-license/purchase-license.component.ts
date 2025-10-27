@@ -1,12 +1,13 @@
 // purchase-license.component.ts
 
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+// 1. IMPORT THÊM ChangeDetectorRef
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 // Services
-import { LicenseService, LicensePlan } from '../../../core/services/license.service'; // Chỉnh đường dẫn
+import { LicenseService, LicensePlan } from '../../../core/services/license.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 // Material Modules
@@ -15,14 +16,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips'; // Dùng cho tag "Phổ biến"
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-purchase-license',
   standalone: true,
   imports: [
     CommonModule,
-    CurrencyPipe, // Thêm CurrencyPipe vào imports
+    CurrencyPipe,
     MatCardModule,
     MatButtonModule,
     MatListModule,
@@ -39,6 +40,9 @@ export class PurchaseLicenseComponent implements OnInit {
   private notification = inject(NotificationService);
   private router = inject(Router);
 
+  // 2. INJECT ChangeDetectorRef
+  private cdr = inject(ChangeDetectorRef);
+
   licensePlans: LicensePlan[] = [];
   isLoading = false;
 
@@ -46,29 +50,32 @@ export class PurchaseLicenseComponent implements OnInit {
     this.loadPlans();
   }
 
-  // ... (các hàm khác)
-
   loadPlans(): void {
     this.isLoading = true;
     this.licenseService.getLicensePlans().pipe(
-      finalize(() => this.isLoading = false)
+      finalize(() => {
+        this.isLoading = false;
+        // 4. Đánh dấu để kiểm tra lại khi finalize (quan trọng)
+        this.cdr.markForCheck();
+      })
     ).subscribe({
       next: (plans) => {
-        // === THÊM DÒNG NÀY ĐỂ DEBUG ===
-        console.log('Tải gói thành công:', plans);
+        console.log('Tải gói thành công:', plans); // Log này đã chạy
 
-        this.licensePlans = plans;
+        this.licensePlans = plans; // Dữ liệu đã được gán
+
+        // 3. THÊM DÒNG NÀY: Ra lệnh cho Angular "Vẽ lại giao diện!"
+        this.cdr.markForCheck();
       },
       error: (err) => {
-        // === THÊM DÒNG NÀY ĐỂ DEBUG ===
         console.error('Lỗi khi tải gói:', err);
-
         this.notification.showError('Không thể tải danh sách gói. Vui lòng thử lại.');
+
+        // Đánh dấu kiểm tra ngay cả khi có lỗi
+        this.cdr.markForCheck();
       }
     });
   }
-
-// ... (các hàm khác)
 
   /**
    * Tính giá cuối cùng sau khi đã giảm
@@ -84,13 +91,7 @@ export class PurchaseLicenseComponent implements OnInit {
    * Xử lý khi người dùng chọn mua 1 gói
    */
   onSelectPlan(plan: LicensePlan): void {
-    // 1. Sử dụng showSuccess thay vì showInfo
     this.notification.showSuccess(`Bạn đã chọn: ${plan.name}. Đang chuyển đến trang thanh toán...`);
-
-    // 2. Kích hoạt điều hướng đến trang thanh toán và truyền ID của gói
     this.router.navigate(['/payment'], { queryParams: { planId: plan.id } });
-
-    // 3. Xóa console.log
-    // console.log('Selected plan:', plan);
   }
 }
