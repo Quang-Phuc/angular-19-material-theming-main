@@ -8,5 +8,5 @@ export const environment = {
    * Link API máy chủ local của bạn.
    * (Ví dụ: khi bạn chạy API ở máy của mình)
    */
-  apiUrl: 'http://localhost:3000/v1'
+  apiUrl: 'http://localhost:8080/api'
 };

@@ -65,6 +65,9 @@ export class RegisterComponent implements OnInit {
   /**
    * Xử lý Submit Form, Gọi API Đăng ký
    */
+  /**
+   * Xử lý Submit Form, Gọi API Đăng ký
+   */
   onSubmit(): void {
     // Nếu form không hợp lệ, hoặc đang loading thì không làm gì cả
     if (this.registerForm.invalid || this.isLoading) {
@@ -77,21 +80,47 @@ export class RegisterComponent implements OnInit {
     const payload: RegisterPayload = this.registerForm.getRawValue();
 
     this.authService.register(payload).pipe(
-      // Dùng finalize để đảm bảo isLoading và form luôn được set lại
-      finalize(() => {
-        this.isLoading = false;
-        this.registerForm.enable();
-      })
+      finalize(() => { this.isLoading = false; this.registerForm.enable(); })
     ).subscribe({
-      next: (response) => {
-        // Thành công
-        this.notification.showSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
-        this.router.navigate(['/login']); // Chuyển đến trang đăng nhập
+      next: (resp) => {
+        // nếu success mà trả text JSON, cố parse
+        let body = resp.body;
+        try {
+          const parsed = JSON.parse(body);
+          // parsed.messages.vn ...
+          this.notification.showSuccess('Đăng ký thành công!');
+          this.router.navigate(['/login']);
+        } catch {
+          this.notification.showSuccess('Đăng ký thành công!');
+        }
       },
-      error: (error: Error) => {
-        // Thất bại
-        this.notification.showError(error.message);
+      error: (err) => {
+
+        let errorMessage = 'Lỗi không xác định';
+        let raw = err?.error ?? err?.message ?? 'Đã có lỗi';
+
+        if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw);
+            errorMessage = parsed.messages?.vn || parsed.message || JSON.stringify(parsed);
+          } catch {
+            errorMessage = raw;
+          }
+        } else if (typeof raw === 'object') {
+          errorMessage = raw.messages?.vn || raw.message || JSON.stringify(raw);
+        }
+
+        this.notification.showError(errorMessage);
       }
+
     });
+
+
+
+
+
+
+
+
   }
 }

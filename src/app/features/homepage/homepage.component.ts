@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs'; // Dùng cho phần nghiệp vụ
+import { RouterLink } from '@angular/router'; // <-- THÊM DÒNG NÀY
 
 @Component({
   selector: 'app-homepage',
@@ -24,7 +25,8 @@ import { MatTabsModule } from '@angular/material/tabs'; // Dùng cho phần nghi
     MatCardModule,
     MatInputModule,
     MatIconModule,
-    MatTabsModule
+    MatTabsModule,
+    RouterLink // <-- THÊM DÒNG NÀY
   ]
 })
 export class HomepageComponent implements OnInit {

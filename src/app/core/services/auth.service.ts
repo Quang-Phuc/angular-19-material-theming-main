@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+// THÊM throwError TỪ 'rxjs'
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+// THÊM catchError TỪ 'rxjs/operators'
+import { map, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service'; // Dịch vụ API common
 import { User } from '../models/user.model';
 import { Router } from '@angular/router';
@@ -65,10 +67,18 @@ export class AuthService {
 
   /**
    * Hàm Đăng ký (Register)
+   * === ĐÃ CẬP NHẬT HÀM NÀY ===
    */
   register(payload: RegisterPayload): Observable<any> {
     // Interceptor sẽ thấy URL này và KHÔNG gắn token
-    return this.api.post<any>('/auth/register', payload);
+    return this.api.post<any>('/auth/register', payload).pipe(
+      // Bắt lỗi gốc (HttpErrorResponse)
+      catchError(err => {
+        // Ném lỗi gốc này về cho component
+        // Component (register.component.ts) sẽ nhận được đầy đủ body lỗi
+        return throwError(() => err);
+      })
+    );
   }
 
   /**
@@ -85,7 +95,12 @@ export class AuthService {
         // Thông báo cho toàn ứng dụng biết đã đăng nhập
         this.currentUserSubject.next(response.user);
       }),
-      map(response => response.user) // Chỉ trả về user cho component
+      map(response => response.user), // Chỉ trả về user cho component
+
+      // Bạn cũng nên thêm catchError ở đây cho hàm login
+      catchError(err => {
+        return throwError(() => err);
+      })
     );
   }
 

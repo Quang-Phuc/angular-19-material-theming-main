@@ -66,21 +66,13 @@ export class ApiService {
    * Hàm xử lý lỗi "common" (chung)
    * Đây là nơi duy nhất xử lý lỗi HTTP
    */
+  /**
+   * Hàm xử lý lỗi "common" (chung)
+   * Đây là nơi duy nhất xử lý lỗi HTTP
+   */
   private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'Đã có lỗi không xác định xảy ra!';
-
-    if (error.status === 0) {
-      // Lỗi client-side hoặc lỗi mạng (mất kết nối)
-      errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra internet.';
-    } else if (error.error && error.error.message) {
-      // Lỗi do server trả về (ví dụ: "Số điện thoại đã tồn tại", "Sai mật khẩu")
-      errorMessage = error.error.message;
-    } else {
-      // Các lỗi 404, 500... mà server không trả về message cụ thể
-      errorMessage = `Lỗi ${error.status}: ${error.statusText}`;
-    }
-
-    // Ném (throw) lỗi ra ngoài để .subscribe() trong component có thể bắt được
-    return throwError(() => new Error(errorMessage));
+    // 🔥 Giữ nguyên lỗi gốc để component có thể đọc được JSON từ BE
+    return throwError(() => error);
   }
+
 }
