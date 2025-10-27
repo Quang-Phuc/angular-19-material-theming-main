@@ -30,29 +30,28 @@ import { MatIconModule } from '@angular/material/icon';
     <mat-dialog-actions align="center" class="dialog-actions">
       <button mat-button (click)="onClose(false)">Để sau</button>
 
-      <button mat-raised-button color="primary" (click)="onClose(true)">
+      <button mat-raised-button (click)="onClose(true)">
         Gia hạn ngay
       </button>
     </mat-dialog-actions>
   `,
   styles: [`
-    /* Style cho Icon mới thêm vào */
+    /* ----- PHẦN STYLE CŨ (GIỮ NGUYÊN) ----- */
     .header-icon-container {
       display: flex;
       justify-content: center;
-      padding-top: 8px; /* Thêm padding, thay vì margin âm */
+      padding-top: 8px;
       margin-bottom: 8px;
     }
 
     .header-icon-container mat-icon {
-      font-size: 64px; /* Icon to, rõ ràng */
+      font-size: 64px;
       width: 64px;
       height: 64px;
       line-height: 64px;
-      color: #f44336; /* Đảm bảo màu đỏ (warn) */
+      color: #f44336; /* Màu đỏ cảnh báo */
     }
 
-    /* Style cho các phần text (Giống ảnh) */
     h2[mat-dialog-title] {
       font-weight: 600;
       font-size: 1.4rem;
@@ -66,7 +65,6 @@ import { MatIconModule } from '@angular/material/icon';
       padding: 0 24px;
     }
 
-    /* Style cho dòng chữ đậm (Giống ảnh) */
     .main-message {
       font-weight: 600;
       color: #222;
@@ -74,27 +72,67 @@ import { MatIconModule } from '@angular/material/icon';
       margin-bottom: 8px;
     }
 
-    /* Style cho khu vực nút */
+    /* ----- PHẦN STYLE MỚI CHO BUTTON (CẬP NHẬT) ----- */
+
     .dialog-actions {
       padding: 16px 24px 24px 24px;
-      gap: 12px; /* Khoảng cách giữa 2 nút */
+      gap: 12px;
+      display: flex;
+      justify-content: center;
     }
 
-    /* Style cho nút chính (to, rõ) */
-    button[mat-raised-button] {
-      padding: 0 24px;
-      height: 44px;
+    /* 1. Style cho nút phụ "Để sau" (Làm mờ đi) */
+    .dialog-actions button[mat-button] {
       font-weight: 600;
+      color: #888; /* Màu xám, ít chú ý */
+      background-color: transparent;
+      box-shadow: none;
+      transition: background-color 0.2s ease;
+      border-radius: 50px; /* Bo tròn đồng bộ */
+      height: 44px;
+      padding: 0 24px;
+    }
+
+    .dialog-actions button[mat-button]:hover {
+      background-color: #f1f1f1; /* Hiệu ứng hover nhẹ */
+    }
+
+    /* 2. Style cho nút chính "Gia hạn ngay" (NỔI BẬT) */
+    .dialog-actions button[mat-raised-button] {
+      /* Gradient (Xanh Dương/Ngọc) */
+      background: linear-gradient(135deg, #0072ff 0%, #00d4ff 100%);
+      color: white;
+      border: none;
+
+      /* Kích thước & Hình dáng */
+      height: 44px;
+      padding: 0 24px;
+      font-weight: 600;
+      border-radius: 50px; /* Bo tròn mịn */
+
+      /* Bóng (Shadow) */
+      box-shadow: 0 4px 15px 0 rgba(0, 162, 255, 0.35);
+
+      /* Hiệu ứng chuyển động */
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* 3. Hiệu ứng HOVER cho nút chính */
+    .dialog-actions button[mat-raised-button]:hover {
+      transform: translateY(-3px); /* Nâng button lên */
+      box-shadow: 0 6px 20px 0 rgba(0, 162, 255, 0.5); /* Bóng to hơn */
+    }
+
+    /* 4. Hiệu ứng NHẤN (Active) cho nút chính */
+    .dialog-actions button[mat-raised-button]:active {
+      transform: translateY(1px); /* Nhấn button xuống */
+      box-shadow: 0 2px 10px 0 rgba(0, 162, 255, 0.3);
     }
   `]
 })
 export class LicenseExpiredDialogComponent {
   private dialogRef = inject(MatDialogRef<LicenseExpiredDialogComponent>);
 
-  /**
-   * Đóng dialog và trả về kết quả
-   * @param shouldPurchase true nếu click "Mua", false nếu click "Hủy"
-   */
   onClose(shouldPurchase: boolean): void {
     this.dialogRef.close(shouldPurchase);
   }
