@@ -86,11 +86,17 @@ export class StoreLayoutComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    if (this.authService.hasRole('2')) {
+    // ... console logs ...
+    const roles = this.authService.getUserRoles();
+    // Check for Owner roles ("1" or "2")
+    if (roles.includes('1') || roles.includes('2')) {
+      console.log('Assigning owner menu (Role 1 or 2)');
       this.menuItems = this.ownerMenu;
-    } else if (this.authService.hasRole('3')) {
+    } else if (roles.includes('3')) { // Employee
+      console.log('Assigning employee menu (Role 3)');
       this.menuItems = this.employeeMenu;
     } else {
+      console.error('No valid role found! Logging out.');
       this.authService.logout();
     }
   }

@@ -1,4 +1,4 @@
-// login.component.ts (File của bạn, đã cập nhật)
+// login.component.ts (With Debug Logs)
 
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -7,11 +7,12 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import * as AOS from 'aos';
 
-// 1. IMPORT THÊM "AuthResponse"
+// Import services and interfaces
 import { AuthService, LoginPayload, AuthResponse } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { MyErrorStateMatcher } from '../../../core/utils/error-state-matcher';
 
+// Import dialog components and modules
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LicenseExpiredDialogComponent } from '../../../core/dialogs/license-expired-dialog/license-expired-dialog.component';
 
@@ -31,8 +32,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule, MatButtonModule, MatIconModule, MatFormFieldModule,
     MatProgressSpinnerModule, MatDialogModule
   ],
-  templateUrl: './login.component.html', //
-  styleUrl: './login.component.scss' //
+  templateUrl: './login.component.html', // cite: 1
+  styleUrl: './login.component.scss' // cite: 2
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -68,28 +69,32 @@ export class LoginComponent implements OnInit {
     const payload: LoginPayload = {
       phone: this.phone.value,
       password: this.password.value,
-      type: 'USER' // Giả định USER là cho tiệm (1 và 2)
+      type: 'USER' // Assume USER for store owner/employee
     };
 
-    // 2. CẬP NHẬT LOGIC KHI LOGIN THÀNH CÔNG
     this.authService.login(payload).pipe(
       finalize(() => {
         this.isLoading = false;
         this.loginForm.enable();
       })
     ).subscribe({
-      next: (response: AuthResponse) => { // Ép kiểu response
-
-        // 2a. Lưu thông tin vào "Store" (localStorage)
+      next: (response: AuthResponse) => {
+        // Save auth data to localStorage
         this.authService.saveAuthData(response);
 
         this.notification.showSuccess('Đăng nhập thành công!');
 
-        // 2b. Điều hướng đến trang quản lý tiệm
-        this.router.navigate(['/store']);
+        // --- DEBUG LOGS ADDED HERE ---
+        console.log('Attempting navigation to /store...');
+        // Verify roles are saved BEFORE navigating
+        console.log('Current roles in localStorage:', localStorage.getItem('userRoles'));
+        // --- END DEBUG LOGS ---
+
+        // Navigate to the store management page
+        this.router.navigate(['/store']); // cite: 0
       },
       error: (err) => {
-        // (Logic xử lý lỗi SS004 của bạn giữ nguyên)
+        // Handle login errors (including SS004)
         let errorMessage = 'Lỗi không xác định';
         let errorCode = null;
         let raw = err?.error ?? err?.message ?? 'Đã có lỗi';
@@ -117,7 +122,7 @@ export class LoginComponent implements OnInit {
   }
 
   private openLicenseDialog(): void {
-    // (Logic dialog của bạn giữ nguyên)
+    // Open license expired dialog
     const dialogRef = this.dialog.open(LicenseExpiredDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
