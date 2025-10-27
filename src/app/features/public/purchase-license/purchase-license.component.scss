@@ -5,6 +5,20 @@
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 
+// 1. ĐỊNH NGHĨA CÁC MÀU MỚI (TỪ HÌNH ẢNH)
+$color-green-bg: #e6f7ec;
+$color-green-text: #006a2e;
+
+$color-blue-bg: #eaf1fb;
+$color-blue-text: #3f51b5;
+
+$color-orange-bg: #fd7e14;
+$color-orange-text: #ffffff;
+
+$color-purple-bg: #f3e8ff; // Màu cho gói Pro (Popular)
+$color-purple-text: #6a1b9a;
+
+
 :host {
   display: block;
   background-color: #f4f7fa;
@@ -17,35 +31,25 @@ $popular-accent-color: #ff4081;
   margin: 0 auto;
   padding: 40px 24px;
 }
-
 .page-header {
   text-align: center;
   margin-bottom: 48px;
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: #2c3e50;
-  }
-  p {
-    font-size: 1.15rem;
-    color: #555;
-  }
+  h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; color: #2c3e50; }
+  p { font-size: 1.15rem; color: #555; }
 }
-
 .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 100px 0;
 }
-
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 32px;
   align-items: stretch;
 }
+
 
 .license-card {
   display: flex;
@@ -65,18 +69,13 @@ $popular-accent-color: #ff4081;
     @include mat.elevation(16);
   }
 
+  // ... (mat-card-header, title, subtitle, content, price, features... giữ nguyên) ...
   .mat-card-header {
     text-align: center;
     padding: 32px 16px 16px 16px;
     ::ng-deep .mat-mdc-card-header-text { margin: 0; }
   }
-
-  .mat-mdc-card-title {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: $popular-border-color;
-  }
-
+  .mat-mdc-card-title { font-size: 1.6rem; font-weight: 600; color: $popular-border-color; }
   .mat-mdc-card-subtitle {
     font-size: 0.95rem;
     color: #666;
@@ -84,106 +83,110 @@ $popular-accent-color: #ff4081;
     line-height: 1.4;
     padding: 0 8px;
   }
-
   .mat-card-content {
     flex-grow: 1;
     padding: 0 24px 24px 24px;
   }
-
   .price-display {
     text-align: center;
     padding: 24px 0;
-    .original-price {
-      font-size: 1.1rem;
-      text-decoration: line-through;
-      color: #999;
-      margin-right: 8px;
-    }
-    .discount-percent {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: $popular-accent-color;
-      background-color: #ffe0e9;
-      padding: 3px 8px;
-      border-radius: 12px;
-    }
-    .final-price {
-      display: block;
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: #333;
-      margin: 8px 0 4px 0;
-      line-height: 1.2;
-    }
-    .duration {
-      font-size: 1rem;
-      color: #777;
-      font-style: italic;
-    }
+    .original-price { font-size: 1.1rem; text-decoration: line-through; color: #999; margin-right: 8px; }
+    .discount-percent { font-size: 0.9rem; font-weight: 600; color: $popular-accent-color; background-color: #ffe0e9; padding: 3px 8px; border-radius: 12px; }
+    .final-price { display: block; font-size: 2.8rem; font-weight: 700; color: #333; margin: 8px 0 4px 0; line-height: 1.2; }
+    .duration { font-size: 1rem; color: #777; font-style: italic; }
   }
-
   .features-list {
     padding-top: 16px;
     .mat-mdc-list-item { height: 44px !important; font-size: 0.95rem; }
     .mat-mdc-list-item-icon { color: $popular-border-color; font-size: 22px; }
   }
 
-  .mat-card-actions {
+  /* === 2. CẬP NHẬT KHU VỰC NÚT BẤM (THEO YÊU CẦU) === */
+  .card-actions-stack {
     padding: 0 24px 32px 24px;
     margin-top: auto;
     display: flex;
-    justify-content: center;
+    flex-direction: column; // Xếp chồng
+    align-items: center; // Căn giữa
+    gap: 16px; // Khoảng cách 2 nút
+  }
 
-    .select-button {
-      width: 100%;
-      padding: 22px 0;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 50px;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
-      border: none;
+  /* 3. STYLE CHO NÚT "XEM THÊM" (THEO YÊU CẦU) */
+  .see-more-button {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
 
-      // Nút "Chọn gói này" (basic)
-      &:not(.mat-primary) {
-        background-color: #f1f3f6;
-        color: $popular-border-color;
-        &:hover {
-          background-color: #e8ebf0;
-          transform: translateY(-2px);
-        }
-      }
+    &:hover {
+      color: $popular-border-color;
+    }
 
-      /* === SỬA NÚT "BẮT ĐẦU NGAY" === */
-      &.mat-primary {
-        /* Thêm !important để ghi đè style gốc */
-        background: linear-gradient(135deg, #0072ff 0%, #00d4ff 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px 0 rgba(0, 162, 255, 0.35);
-
-        &:hover {
-          box-shadow: 0 6px 20px 0 rgba(0, 162, 255, 0.5);
-          transform: translateY(-3px);
-        }
-      }
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
   }
 
-  /* === SỬA LỖI ĐÈ CHỮ === */
+  /* 4. STYLE CHO NÚT "MUA NGAY" (BẰNG NHAU VÀ CÓ MÀU) */
+  .select-button {
+    width: 100%; // <-- Quan trọng: Đảm bảo các nút bằng nhau
+    padding: 20px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: none;
+
+    ::ng-deep .mat-mdc-button-ripple {
+      display: none;
+    }
+
+    // Gán màu dựa trên data-theme (từ license.service.ts)
+    &[data-theme="green"] {
+      background-color: $color-green-bg;
+      color: $color-green-text;
+      &:hover { background-color: darken($color-green-bg, 5%); }
+    }
+
+    &[data-theme="blue"] {
+      background-color: $color-blue-bg;
+      color: $color-blue-text;
+      &:hover { background-color: darken($color-blue-bg, 5%); }
+    }
+
+    // Gói Pro (isPopular)
+    &[data-theme="purple"] {
+      background-color: $color-purple-bg;
+      color: $color-purple-text;
+      &:hover { background-color: darken($color-purple-bg, 5%); }
+    }
+
+    // Gói Doanh nghiệp
+    &[data-theme="orange"] {
+      background-color: $color-orange-bg;
+      color: $color-orange-text;
+      &:hover { background-color: darken($color-orange-bg, 8%); }
+    }
+  }
+
+
+  /* === SỬA LỖI ĐÈ CHỮ (THEO YÊU CẦU) === */
   &.popular {
     border: 2px solid $popular-border-color;
     transform: scale(1.03);
     z-index: 10;
     background-color: #f9faff;
 
-    /* Bỏ padding-top không hiệu quả ở header */
-    .mat-card-header {
-      /* padding-top: 40px; <-- BỎ CÁI NÀY */
-    }
-
     /* Thêm margin-top cho chữ "Chuyên Nghiệp" để đẩy nó xuống */
     .mat-mdc-card-title {
-      margin-top: 28px; /* <-- THÊM DÒNG NÀY */
+      margin-top: 28px; /* <-- FIX LỖI ĐÈ CHỮ */
     }
 
     &:hover {
@@ -191,7 +194,6 @@ $popular-accent-color: #ff4081;
       @include mat.elevation(20);
     }
 
-    /* (Giữ nguyên style của badge) */
     .popular-badge {
       position: absolute;
       top: -16px;

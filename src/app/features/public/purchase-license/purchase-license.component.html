@@ -40,7 +40,6 @@
                 </span>
                 <span class="discount-percent">-{{ plan.discount }}%</span>
               }
-
               <span class="final-price">
                 {{ calculateFinalPrice(plan) | currency:'VND':'symbol':'1.0-0' }}
               </span>
@@ -62,11 +61,18 @@
 
           </mat-card-content>
 
-          <mat-card-actions>
+          <mat-card-actions class="card-actions-stack">
+
+            <a href="javascript:void(0)" class="see-more-button">
+              Xem thêm
+              <mat-icon>expand_more</mat-icon>
+            </a>
+
             <button mat-raised-button
                     class="select-button"
-                    [color]="plan.isPopular ? 'primary' : 'basic'">
-              {{ plan.isPopular ? 'Bắt đầu ngay' : 'Chọn gói này' }}
+                    [attr.data-theme]="plan.themeColor"
+                    (click)="onSelectPlan(plan)">
+              {{ plan.price > 0 ? 'Mua ngay' : 'Bắt đầu ngay' }}
             </button>
           </mat-card-actions>
 
