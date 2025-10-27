@@ -5,29 +5,26 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 
-// === THAY ĐỔI 1: Định nghĩa cấu trúc phản hồi API ===
-// (Để khớp với JSON bạn cung cấp)
+// Interface ApiResponse (Giữ nguyên)
 export interface ApiResponse<T> {
   result: string;
   message: string;
   errorCode: string;
-  data: T; // Dữ liệu chúng ta cần nằm trong này
+  data: T;
 }
 
-/**
- * Định nghĩa cấu trúc cho một gói License.
- */
+// Interface LicensePlan (Giữ nguyên)
 export interface LicensePlan {
   id: number;
   name: string;
-  description: string | null; // API có thể trả về null
+  description: string | null;
   maxStore: number;
   maxUserPerStore: number;
   price: number;
   discount: number;
   durationDays: number;
-  isPopular?: boolean; // Trường này ta tự thêm vào
-  features?: string[]; // Trường này ta tự thêm vào
+  isPopular?: boolean;
+  features?: string[];
 }
 
 @Injectable({
@@ -36,48 +33,72 @@ export interface LicensePlan {
 export class LicenseService {
 
   private apiService = inject(ApiService);
-  private apiUrl = '/license-packages'; // Endpoint đã đúng
+  private apiUrl = '/license-packages'; // Endpoint (Giữ nguyên)
 
   constructor() { }
 
-  /**
-   * Lấy danh sách các gói License từ API và làm giàu dữ liệu cho UI
-   */
   getLicensePlans(): Observable<LicensePlan[]> {
 
-    // === THAY ĐỔI 2: Đổi kiểu mong đợi ===
-    // Thay vì mong đợi LicensePlan[], giờ ta mong đợi ApiResponse<LicensePlan[]>
     return this.apiService.get<ApiResponse<LicensePlan[]>>(this.apiUrl).pipe(
 
-      // === THAY ĐỔI 3: Cập nhật hàm map() ===
       map(response => {
-        // 'response' là object { result: "...", data: [...] }
 
-        // 1. Lấy mảng 'data' từ bên trong response
         const apiPlans = response.data;
 
-        // 2. Lặp qua mảng apiPlans (logic "làm giàu" dữ liệu)
+        // === CẬP NHẬT LOGIC: Xử lý cho cả 4 gói ===
         return apiPlans.map(plan => {
 
           let uiFeatures: string[] = [];
           let uiIsPopular = false;
 
-          // Logic để thêm trường UI (features, isPopular)
-          // Cập nhật logic này dựa trên tên gói "TRIAL"
+          // 1. Gói TRIAL
           if (plan.name === 'TRIAL') {
             uiFeatures = [
-              `Quản lý ${plan.maxStore} cửa hàng`,
-              `${plan.maxUserPerStore} tài khoản/cửa hàng`,
+              `Quản lý ${plan.maxStore} cửa hàng`, // 3
+              `${plan.maxUserPerStore} tài khoản/cửa hàng`, // 10
               `Dùng thử ${plan.durationDays} ngày`,
               'Hỗ trợ cơ bản'
             ];
-            // Vì chỉ có 1 gói, ta làm nó nổi bật luôn
-            uiIsPopular = true;
+            // Không nên 'isPopular' nếu có gói Pro
           }
-          // ... (Thêm else if cho các gói khác nếu có)
-          // else if (plan.name === 'CHUYEN_NGHIEP') { ... }
 
-          // 3. Trả về object đã được "làm giàu"
+          // 2. Gói CÁ NHÂN
+          else if (plan.name === 'Cá Nhân') {
+            uiFeatures = [
+              `Quản lý ${plan.maxStore} cửa hàng`, // 1
+              `${plan.maxUserPerStore} tài khoản/cửa hàng`, // 5
+              'Báo cáo doanh thu cơ bản',
+              'Hỗ trợ qua Email'
+            ];
+          }
+
+          // 3. Gói CHUYÊN NGHIỆP
+          else if (plan.name === 'Chuyên Nghiệp') {
+            uiFeatures = [
+              `Quản lý ${plan.maxStore} cửa hàng`, // 5
+              `${plan.maxUserPerStore} tài khoản/cửa hàng`, // 25
+              'Báo cáo doanh thu nâng cao',
+              'Tích hợp API (Shopee, Lazada)',
+              'Hỗ trợ ưu tiên 24/7'
+            ];
+            // Tự động làm nổi bật gói có giảm giá
+            if (plan.discount > 0) {
+              uiIsPopular = true;
+            }
+          }
+
+          // 4. Gói DOANH NGHIỆP
+          else if (plan.name === 'Doanh Nghiệp') {
+            uiFeatures = [
+              `Quản lý ${plan.maxStore} cửa hàng`, // 999
+              `${plan.maxUserPerStore} tài khoản/cửa hàng`, // 999 (Sửa lỗi trong ảnh)
+              'Tùy chỉnh tính năng',
+              'Server riêng & Bảo mật cao',
+              'Hỗ trợ chuyên dụng'
+            ];
+          }
+
+          // Trả về object đã được "làm giàu"
           return {
             ...plan,
             features: uiFeatures,
