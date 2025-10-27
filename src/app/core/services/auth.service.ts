@@ -16,6 +16,7 @@ export interface RegisterPayload {
 export interface LoginPayload {
   phone: string | null | undefined;
   password: string | null | undefined;
+  type: string | null | undefined;
 }
 // (Đây là cấu trúc API trả về, bạn hãy sửa lại cho đúng)
 interface AuthResponse {
@@ -86,7 +87,7 @@ export class AuthService {
    */
   login(payload: LoginPayload): Observable<User> {
     // Interceptor sẽ thấy URL này và KHÔNG gắn token
-    return this.api.post<AuthResponse>('/auth/login', payload).pipe(
+    return this.api.post<AuthResponse>('/login', payload).pipe(
       tap(response => {
         // === LƯU TOKEN VÀ USER ===
         localStorage.setItem('access_token', response.token);

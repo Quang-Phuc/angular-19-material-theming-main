@@ -7,10 +7,10 @@ import { RegisterComponent } from './features/auth/register/register.component';
 // === CÁC IMPORT MỚI CHO BỐ CỤC ADMIN ===
 import { AdminLayoutComponent } from './features/admin/layout/admin-layout/admin-layout.component';
 import { AdminDashboardComponent } from './features/admin/pages/dashboard/admin-dashboard.component';
-
-// *** 1. IMPORT COMPONENT "DANH SÁCH TIỆM" CỦA BẠN VÀO ĐÂY ***
 import { StoreListComponent } from './features/admin/pages/store-list/store-list.component';
-import {PlanListComponent} from './features/admin/components/plan-list/plan-list.component';
+import { PlanListComponent } from './features/admin/components/plan-list/plan-list.component';
+// Import component login admin
+import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-login.component';
 
 
 export const routes: Routes = [
@@ -29,33 +29,34 @@ export const routes: Routes = [
   },
   // ... (các route cũ khác)
 
-  // --- CẤU TRÚC ROUTE CHO ADMIN ---
+  // --- TRANG LOGIN ADMIN (ĐẶT Ở NGOÀI ĐỂ KHÔNG CÓ LAYOUT) ---
+  {
+    path: 'admin/login', // <-- 1. Đưa route login admin ra cấp cao nhất
+    component: AdminLoginComponent
+  },
+
+  // --- CẤU TRÚC ROUTE CHO ADMIN (CÁC TRANG CÓ LAYOUT) ---
   {
     path: 'admin',
-    component: AdminLayoutComponent, // 1. Tải "Vỏ" (Layout)
-    // canActivate: [authGuard],
+    component: AdminLayoutComponent, // 2. Tải "Vỏ" (Layout)
+    // canActivate: [authGuard], // <== Sau này bạn sẽ đặt Guard ở đây
 
-    children: [ // 2. Các trang con
+    children: [ // 3. Các trang con sẽ nằm BÊN TRONG layout
       {
-        path: 'dashboard',
+        path: 'dashboard', // <-- Bỏ 'login' ra khỏi đây
         component: AdminDashboardComponent // Trang Tổng quan
       },
-
-      // *** 3. THÊM ROUTE CHO "DANH SÁCH TIỆM" TẠI ĐÂY ***
       {
-        path: 'stores/list', // <-- Đường dẫn này khớp với routerLink
-        component: StoreListComponent // <-- Component sẽ hiển thị
+        path: 'stores/list',
+        component: StoreListComponent
       },
       {
-        path: 'plans', // <-- Đường dẫn này khớp với routerLink
-        component: PlanListComponent // <-- Component sẽ hiển thị
+        path: 'plans',
+        component: PlanListComponent
       },
-      // *******************************************
-
       // (Thêm các trang admin khác ở đây)
-      // { path: 'stores/pending', component: StorePendingComponent },
-      // { path: 'plans', component: PlanListComponent },
 
+      // 4. Redirect từ /admin (rỗng) sang /admin/dashboard
       {
         path: '',
         redirectTo: 'dashboard',

@@ -1,0 +1,17 @@
+/* Import file style chung */
+@use 'auth-form' as *;
+
+// Add any specific styles for admin login if needed
+:host {
+  // Example: Override primary color if admin uses a different theme variant
+  // --primary-blue: #your-admin-primary-color;
+}
+
+// Ensure spinner is centered in the button
+.submit-button {
+  .mat-mdc-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 8px; // Adjust margin as needed
+  }
+}
