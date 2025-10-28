@@ -6,6 +6,7 @@
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 $color-green-success: #28a745;
+$color-warn-red: #f44336;
 $table-row-hover-bg: #e9ecef;
 $table-row-stripe-bg: #f8f9fa;
 $table-border-color: #dee2e6;
@@ -100,7 +101,7 @@ $color-purple-text: #ffffff;
   position: relative;
 }
 
-table.mat-mdc-table {
+table.mat-table {
   width: 100%;
 }
 
@@ -138,7 +139,8 @@ tr.mat-mdc-row:last-child td.mat-mdc-cell {
 }
 
 th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
-  width: 120px;
+  /* Điều chỉnh lại cho vừa nút 3 chấm */
+  width: 80px;
   text-align: center;
   padding-right: 16px;
 }
@@ -221,4 +223,23 @@ mat-paginator {
   &.mat-mdc-chip-selected {
     background-color: #6c757d !important; // Màu xám
   }
+}
+
+/* * *** THÊM STYLE MỚI CHO ICON TRONG MENU ***
+ */
+.menu-item-icon {
+  margin-right: 12px; // Tạo khoảng cách
+  vertical-align: middle;
+}
+
+.menu-item-icon.view {
+  color: $popular-border-color; // Màu Primary (Blue)
+}
+
+.menu-item-icon.edit {
+  color: $popular-accent-color; // Màu Accent (Pink)
+}
+
+.menu-item-icon.delete {
+  color: $color-warn-red; // Màu Warn (Red)
 }

@@ -15,6 +15,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu'; // <-- *** THÊM IMPORT NÀY ***
 
 // THÊM CÁC IMPORT CẦN THIẾT
 import { Subject, Subscription, merge, of, throwError } from 'rxjs';
@@ -30,7 +31,7 @@ import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/con
 import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
 import { LicenseAdminDialogComponent } from '../../../core/dialogs/license-admin-dialog/license-admin-dialog.component';
 
-// *** CẬP NHẬT IMPORT ROUTER ***
+// CẬP NHẬT IMPORT ROUTER
 import { RouterLink, ActivatedRoute } from '@angular/router'; // Thêm ActivatedRoute
 
 @Component({
@@ -42,6 +43,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router'; // Thêm Activated
     MatInputModule, MatIconModule, MatButtonModule, MatDialogModule,
     MatProgressSpinnerModule, MatProgressBarModule,
     MatToolbarModule, MatTooltipModule, MatChipsModule,
+    MatMenuModule, // <-- *** THÊM VÀO IMPORTS ***
 
     // THÊM DIALOGS VÀ ROUTERLINK VÀO IMPORTS
     ConfirmDialogComponent,
@@ -56,9 +58,9 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
-  private route = inject(ActivatedRoute); // <-- *** INJECT ROUTE ***
+  private route = inject(ActivatedRoute); // <-- INJECT ROUTE
 
-  // *** BIẾN MỚI ĐỂ PHÂN QUYỀN ***
+  // BIẾN MỚI ĐỂ PHÂN QUYỀN
   public isAdmin: boolean = false;
 
   displayedColumns: string[] = ['stt', 'packageCode', 'packageName', 'purchaseDate', 'amountPaid', 'status', 'actions'];
@@ -84,8 +86,7 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
     AOS.init({ duration: 600, once: true });
     this.setupSearch();
 
-    // *** THÊM LOGIC KIỂM TRA ADMIN ***
-    // Lấy segment đầu tiên của route cha (ví dụ: 'store' hoặc 'admin')
+    // THÊM LOGIC KIỂM TRA ADMIN
     const parentPath = this.route.parent?.snapshot.url[0]?.path;
     this.isAdmin = (parentPath === 'admin');
 
@@ -100,8 +101,6 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
       });
     }
-    // Chuyển loadData() vào ngOnInit() để 'isAdmin' được set trước khi load
-    // this.loadData();
   }
 
   ngOnDestroy(): void {
@@ -131,12 +130,11 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
       return;
     }
 
-    // CẬP NHẬT MERGE ĐỂ LẮNG NGHE refreshDataSubject
     this.dataSubscription = merge(
       this.sort.sortChange,
       this.paginator.page,
       this.searchSubject.pipe(debounceTime(0)),
-      this.refreshDataSubject.pipe(startWith(null)) // Thêm refresh trigger
+      this.refreshDataSubject.pipe(startWith(null))
     )
       .pipe(
         startWith({}),
@@ -197,22 +195,15 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-  /**
-   * HÀM XEM CHI TIẾT
-   */
   viewDetails(row: LicenseHistoryEntry): void {
     this.dialog.open(LicenseHistoryDetailDialogComponent, {
       data: row,
-      width: '500px', // Đặt chiều rộng dialog
+      width: '500px',
       autoFocus: false
     });
   }
 
-  /**
-   * HÀM XÓA (ĐÃ SỬA LẠI LOGIC LOADING)
-   */
   deleteHistory(row: LicenseHistoryEntry): void {
-    // 1. Mở dialog xác nhận
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -221,65 +212,48 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
       }
     });
 
-    // 2. Xử lý sau khi dialog đóng
     dialogRef.afterClosed().pipe(
-      filter(result => result === true), // Chỉ tiếp tục nếu người dùng bấm "Xác nhận"
+      filter(result => result === true),
       switchMap(() => {
-        // Không set isLoading = true ở đây
         return this.licenseService.deleteLicenseHistory(row.id).pipe(
-          map(() => true) // Chuyển đổi kết quả (nếu API trả về void hoặc object) thành 'true'
+          map(() => true)
         );
       }),
       catchError((err) => {
-        // Xử lý nếu API trả về lỗi
         console.error('Delete error:', err);
-        // Không set isLoading = false ở đây
         this.notification.showError('Xóa thất bại. Vui lòng thử lại.');
-        return of(null); // Ngăn pipe tiếp tục
+        return of(null);
       })
     ).subscribe(result => {
-      // Chỉ chạy nếu API thành công (result là 'true')
       if (result) {
-        // Không set isLoading = false ở đây
         this.notification.showSuccess('Xóa lịch sử thành công!');
-
-        // 3. Kích hoạt tải lại dữ liệu bảng
-        // Hàm loadData() sẽ tự xử lý việc bật/tắt loading
         this.refreshDataSubject.next();
       }
     });
   }
 
-  /**
-   * *** THÊM HÀM MỚI: CẬP NHẬT (ADMIN) ***
-   */
   editHistory(row: LicenseHistoryEntry): void {
-    // 1. Mở dialog Admin, truyền dữ liệu 'row' vào
     const dialogRef = this.dialog.open(LicenseAdminDialogComponent, {
       width: '550px',
-      data: row, // Truyền toàn bộ 'row' (bao gồm cả 'note' nếu có)
+      data: row,
       autoFocus: false
     });
 
-    // 2. Xử lý sau khi dialog đóng
     dialogRef.afterClosed().pipe(
-      filter(result => !!result), // Chỉ tiếp tục nếu admin bấm "Lưu" (result là object data)
+      filter(result => !!result),
       switchMap((updatedData: { status: string, note: string }) => {
-        // GỌI API CẬP NHẬT
-        // TODO: Đảm bảo bạn có hàm 'updateLicenseHistory' trong LicenseService
         return this.licenseService.updateLicenseHistory(row.id, updatedData).pipe(
-          map(() => true) // Chuyển thành true để xử lý ở subscribe
+          map(() => true)
         );
       }),
       catchError((err) => {
         console.error('Update error:', err);
         this.notification.showError('Cập nhật thất bại. Vui lòng thử lại.');
-        return of(null); // Ngăn pipe tiếp tục
+        return of(null);
       })
     ).subscribe(result => {
       if (result) {
         this.notification.showSuccess('Cập nhật lịch sử thành công!');
-        // Tải lại bảng để hiển thị dữ liệu mới
         this.refreshDataSubject.next();
       }
     });
