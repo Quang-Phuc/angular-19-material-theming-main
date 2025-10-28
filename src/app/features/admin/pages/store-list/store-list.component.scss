@@ -1,6 +1,4 @@
 /* store-list.component.scss */
-/* NỘI DUNG ĐƯỢC SAO CHÉP TỪ license-history.component.scss */
-
 @use '@angular/material' as mat;
 @use 'sass:color'; // Import sass color module
 
@@ -13,15 +11,7 @@ $table-row-hover-bg: #e9ecef;
 $table-row-stripe-bg: #f8f9fa;
 $table-border-color: #dee2e6;
 $table-header-bg: #f8f9fa;
-$color-green-bg: #10b981;
-$color-green-text: #ffffff;
-$color-blue-bg: #3b82f6;
-$color-blue-text: #ffffff;
-$color-orange-bg: #fd7e14;
-$color-orange-text: #ffffff;
-$color-purple-bg: #8b5cf6;
-$color-purple-text: #ffffff;
-
+// ... (các biến màu khác có thể giữ lại)
 
 .page-container {
   padding: 24px;
@@ -42,7 +32,7 @@ $color-purple-text: #ffffff;
   display: flex;
   align-items: center;
   margin-bottom: 24px;
-  gap: 8px; // Thêm gap để tạo khoảng cách
+  gap: 8px;
 
   .page-title {
     font-size: 1.6rem;
@@ -59,26 +49,22 @@ $color-purple-text: #ffffff;
 .search-field {
   width: 300px;
   ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-
-  /* Đặt chiều cao cố định cho ô input */
   ::ng-deep .mat-mdc-form-field-flex {
-    height: 50px !important; // Đặt chiều cao
+    height: 50px !important;
   }
 }
 
-/* Đặt chiều cao và bỏ margin */
 .search-button, .buy-license-button {
-  margin-left: 0; // Bỏ margin, dùng gap của toolbar
+  margin-left: 0;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 16px;
-  height: 50px; // Đặt chiều cao bằng với ô input
-  box-sizing: border-box; // Đảm bảo padding không làm tăng chiều cao
+  height: 50px;
+  box-sizing: border-box;
   border: none;
 }
 
-/* MÀU MỚI CHO NÚT TÌM */
 .search-button {
   background-color: $popular-border-color;
   color: white;
@@ -87,7 +73,6 @@ $color-purple-text: #ffffff;
   }
 }
 
-/* MÀU MỚI CHO NÚT MUA LICENSE (Sẽ được dùng cho nút Thêm Tiệm) */
 .buy-license-button {
   background-color: $color-green-success;
   color: white;
@@ -141,7 +126,6 @@ tr.mat-mdc-row:last-child td.mat-mdc-cell {
 }
 
 th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
-  /* Điều chỉnh lại cho vừa nút 3 chấm */
   width: 80px;
   text-align: center;
   padding-right: 16px;
@@ -168,79 +152,35 @@ mat-paginator {
   border-radius: 0 0 12px 12px;
 }
 
-/* STYLE CHO PROGRESS BAR MỚI */
 .table-progress-bar {
   position: absolute;
-  top: 0; // Nằm trên cùng của table-container
+  top: 0;
   left: 0;
   right: 0;
   z-index: 5;
-  height: 4px; // Chiều cao của progress-bar
+  height: 4px;
 }
 
 .table-progress-bar-placeholder {
-  height: 4px; // Giữ đúng chiều cao khi không loading
+  height: 4px;
 }
 
+/* === XÓA CÁC STYLE CHO .status-chip === */
 
-/* STYLE CHO TRẠNG THÁI (SAO CHÉP TỪ LICENSE) */
-::ng-deep mat-chip-option {
-  // Ẩn cái dấu tick '✓' đi
-  .mat-mdc-chip-checkmark {
-    display: none !important;
-  }
-}
-
-.status-chip {
-  &.mat-mdc-chip-selected { // Chỉ áp dụng khi chip đang 'selected'
-    color: #fff !important; // Chữ trắng cho tất cả
-    padding: 4px 10px; // Chỉnh lại padding
-    font-size: 0.8rem;
-  }
-}
-
-// Hoàn thành (Green) - Dùng cho 'active'
-.status-completed {
-  &.mat-mdc-chip-selected {
-    background-color: #468053 !important; // Màu xanh lá
-  }
-}
-
-// Chờ xử lý (Orange) - Dùng cho 'trial'
-.status-pending {
-  &.mat-mdc-chip-selected {
-    background-color: #fd7e14 !important; // Màu cam
-  }
-}
-
-// Thất bại (Red) - Dùng cho 'locked'
-.status-failed {
-  &.mat-mdc-chip-selected {
-    background-color: #dc3545 !important; // Màu đỏ
-  }
-}
-
-// Mặc định (Gray) - Dùng cho 'expired'
-.status-default {
-  &.mat-mdc-chip-selected {
-    background-color: #6c757d !important; // Màu xám
-  }
-}
-
-/* STYLE CHO ICON TRONG MENU (SAO CHÉP TỪ LICENSE) */
+/* STYLE CHO ICON TRONG MENU (VẪN GIỮ LẠI) */
 .menu-item-icon {
-  margin-right: 12px; // Tạo khoảng cách
+  margin-right: 12px;
   vertical-align: middle;
 }
 
 .menu-item-icon.view {
-  color: $popular-border-color; // Màu Primary (Blue)
+  color: $popular-border-color;
 }
 
 .menu-item-icon.edit {
-  color: $popular-accent-color; // Màu Accent (Pink)
+  color: $popular-accent-color;
 }
 
 .menu-item-icon.delete {
-  color: $color-warn-red; // Màu Warn (Red)
+  color: $color-warn-red;
 }

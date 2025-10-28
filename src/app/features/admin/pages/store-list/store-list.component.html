@@ -1,16 +1,19 @@
 <div class="page-container" data-aos="fade-in">
 
   <mat-toolbar class="filter-toolbar" [formGroup]="searchForm">
-    <h1 class="page-title">Quản lý Tiệm</h1> <span class="spacer"></span>
+    <h1 class="page-title">Quản lý Tiệm</h1>
+    <span class="spacer"></span>
 
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Tìm tên, SĐT, chủ tiệm...</mat-label>
       <input matInput #searchInput
              formControlName="basicSearch"
              placeholder="Nhập từ khóa..."
-             (keyup.enter)="applyBasicSearchTrigger(searchInput.value)"> </mat-form-field>
+             (keyup.enter)="applyFilterFromInput(searchInput.value)">
+    </mat-form-field>
 
-    <button mat-flat-button class="search-button" (click)="applyBasicSearchTrigger(searchInput.value)"> <mat-icon>search</mat-icon>
+    <button mat-flat-button class="search-button" (click)="applyFilterFromInput(searchInput.value)">
+      <mat-icon>search</mat-icon>
       <span>Tìm</span>
     </button>
 
@@ -40,33 +43,16 @@
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="name">
+      <ng-container matColumnDef="storeName">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tên Tiệm </th>
-        <td mat-cell *matCellDef="let row"> {{ row.name }} </td> </ng-container>
+        <td mat-cell *matCellDef="let row"> {{ row.storeName }} </td>
+      </ng-container>
 
-      <ng-container matColumnDef="ownerName">
+      <ng-container matColumnDef="userFullName">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Chủ Tiệm </th>
-        <td mat-cell *matCellDef="let row"> {{ row.ownerName }} </td>
+        <td mat-cell *matCellDef="let row"> {{ row.userFullName }} </td>
       </ng-container>
 
-      <ng-container matColumnDef="licensePlan">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Gói </th>
-        <td mat-cell *matCellDef="let row"> {{ row.licensePlan }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="expiryDate">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Ngày Hết Hạn </th>
-        <td mat-cell *matCellDef="let row"> {{ row.expiryDate | date:'dd/MM/yyyy' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Trạng thái </th>
-        <td mat-cell *matCellDef="let row">
-          <mat-chip-option [ngClass]="getStatusClass(row.status)" selected disableRipple>
-            {{ getStatusText(row.status) }}
-          </mat-chip-option>
-        </td>
-      </ng-container>
 
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Hành động </th>
@@ -77,16 +63,24 @@
           </button>
 
           <mat-menu #actionsMenu="matMenu">
-            <button mat-menu-item (click)="openStoreDialog(row)">
-              <mat-icon class="menu-item-icon edit">edit</mat-icon>
-              <span>Sửa</span>
-            </button>
-            <button mat-menu-item (click)="onDeleteStore(row.id, row.name)">
-              <mat-icon class="menu-item-icon delete">delete_outline</mat-icon>
-              <span>Xóa</span>
-            </button>
-          </mat-menu>
 
+            @if (isAdmin) {
+              <button mat-menu-item (click)="openStoreDialog(row)">
+                <mat-icon class="menu-item-icon edit">edit</mat-icon>
+                <span>Sửa</span>
+              </button>
+              <button mat-menu-item (click)="onDeleteStore(row)">
+                <mat-icon class="menu-item-icon delete">delete_outline</mat-icon>
+                <span>Xóa</span>
+              </button>
+            } @else {
+              <button mat-menu-item (click)="openStoreDialog(row)">
+                <mat-icon class="menu-item-icon view">visibility</mat-icon>
+                <span>Xem chi tiết</span>
+              </button>
+            }
+
+          </mat-menu>
         </td>
       </ng-container>
 
