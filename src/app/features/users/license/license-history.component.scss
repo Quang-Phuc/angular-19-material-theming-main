@@ -2,22 +2,14 @@
 @use '@angular/material' as mat;
 @use 'sass:color'; // Import sass color module
 
-// Biến màu
-$popular-border-color: #3f51b5; // Blue used in header
+// Biến màu (Giữ nguyên)
+$popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 $table-row-hover-bg: #e9ecef;
 $table-row-stripe-bg: #f8f9fa;
 $table-border-color: #dee2e6;
-$table-header-bg: #f8f9fa; // <-- FIX: Added variable back for paginator
-// (Variables for select buttons - green, blue, orange, purple - kept)
-$color-green-bg: #10b981;
-$color-green-text: #ffffff;
-$color-blue-bg: #3b82f6;
-$color-blue-text: #ffffff;
-$color-orange-bg: #fd7e14;
-$color-orange-text: #ffffff;
-$color-purple-bg: #8b5cf6;
-$color-purple-text: #ffffff;
+$table-header-bg: #f8f9fa;
+// ... (các biến màu khác)
 
 
 .page-container {
@@ -25,23 +17,28 @@ $color-purple-text: #ffffff;
   position: relative;
 }
 
+// ... (Giữ nguyên .page-title, .filter-toolbar)
 .page-title {
   font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .filter-toolbar {
-  background-color: transparent;
-  padding: 0 0 16px 0;
-  box-shadow: none;
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
-}
+  margin-bottom: 24px;
 
-.search-container {
-  display: flex;
-  align-items: center;
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
 }
 
 .search-field {
@@ -49,23 +46,27 @@ $color-purple-text: #ffffff;
   ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
 }
 
+/* SỬA LẠI SEARCH BUTTON */
 .search-button {
   margin-left: 8px;
-  min-width: auto;
-  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px; // Khoảng cách giữa icon và text
+  padding: 0 16px; // Đảm bảo đủ rộng
 }
-
 
 .spacer {
   flex: 1 1 auto;
 }
 
 .table-container {
-  overflow: hidden;
+  overflow: hidden; // Giữ overflow
   border-radius: 12px;
   border: 1px solid $table-border-color;
+  position: relative;
 }
 
+// ... (Giữ nguyên table, th, td, tr styles ...)
 table.mat-mdc-table {
   width: 100%;
 }
@@ -98,6 +99,7 @@ td.mat-mdc-cell {
   border-bottom: 1px solid $table-border-color;
   color: #333;
   font-size: 0.9rem;
+  vertical-align: middle;
 }
 tr.mat-mdc-row:last-child td.mat-mdc-cell {
   border-bottom: none;
@@ -105,21 +107,16 @@ tr.mat-mdc-row:last-child td.mat-mdc-cell {
 
 th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
   width: 120px;
-  text-align: right;
-  padding-right: 24px;
+  text-align: center;
+  padding-right: 16px;
 }
 th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
   width: 60px;
+  text-align: center;
 }
 
-::ng-deep .mat-mdc-chip-action-label {
-  font-weight: 500;
-}
-mat-chip-option {
-  height: 28px !important;
-  font-size: 0.8rem;
-}
 
+// ... (Giữ nguyên .mat-no-data-row, mat-paginator)
 tr.mat-mdc-row.mat-no-data-row {
   background-color: #fff;
   td.mat-mdc-cell {
@@ -132,20 +129,71 @@ tr.mat-mdc-row.mat-no-data-row {
 }
 
 mat-paginator {
-  background-color: $table-header-bg; // Uses the added back variable
+  background-color: $table-header-bg;
   border-top: 1px solid $table-border-color;
   border-radius: 0 0 12px 12px;
 }
 
+/* BỎ LOADING-SHADE CŨ */
 .loading-shade {
+  // Bỏ hết style cũ
+}
+
+/* THÊM STYLE CHO PROGRESS BAR MỚI */
+.table-progress-bar {
   position: absolute;
-  top: 0;
+  top: 0; // Nằm trên cùng của table-container
   left: 0;
-  bottom: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.7);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 5;
+  height: 4px; // Chiều cao của progress-bar
+}
+
+.table-progress-bar-placeholder {
+  height: 4px; // Giữ đúng chiều cao khi không loading
+}
+
+
+/* THÊM STYLE CHO TRẠNG THÁI */
+::ng-deep mat-chip-option {
+  // Ẩn cái dấu tick '✓' đi
+  .mat-mdc-chip-checkmark {
+    display: none !important;
+  }
+}
+
+.status-chip {
+  &.mat-mdc-chip-selected { // Chỉ áp dụng khi chip đang 'selected'
+    color: #fff !important; // Chữ trắng cho tất cả
+    padding: 4px 10px; // Chỉnh lại padding
+    font-size: 0.8rem;
+  }
+}
+
+// Hoàn thành (Green)
+.status-completed {
+  &.mat-mdc-chip-selected {
+    background-color: #28a745 !important; // Màu xanh lá
+  }
+}
+
+// Chờ xử lý (Orange)
+.status-pending {
+  &.mat-mdc-chip-selected {
+    background-color: #fd7e14 !important; // Màu cam
+  }
+}
+
+// Thất bại (Red)
+.status-failed {
+  &.mat-mdc-chip-selected {
+    background-color: #dc3545 !important; // Màu đỏ
+  }
+}
+
+// Mặc định (Gray)
+.status-default {
+  &.mat-mdc-chip-selected {
+    background-color: #6c757d !important; // Màu xám
+  }
 }

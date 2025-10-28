@@ -11,20 +11,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar'; // <-- THÊM MODULE NÀY
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 
-import { Subject, Subscription, merge, of } from 'rxjs'; // Import 'of'
+import { Subject, Subscription, merge, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, catchError, map } from 'rxjs/operators';
 import * as AOS from 'aos';
 
 // Services and Interfaces
 import { LicenseService, LicenseHistoryEntry, PagedResponse } from '../../../core/services/license.service'; // cite: 1
 import { NotificationService } from '../../../core/services/notification.service';
-// TODO: Create these dialog components
-// import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
-// import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+// ...
 
 @Component({
   selector: 'app-license-history',
@@ -33,13 +32,15 @@ import { NotificationService } from '../../../core/services/notification.service
     CommonModule, CurrencyPipe, DatePipe,
     MatTableModule, MatPaginatorModule, MatSortModule, MatFormFieldModule,
     MatInputModule, MatIconModule, MatButtonModule, MatDialogModule,
-    MatProgressSpinnerModule, MatToolbarModule, MatTooltipModule, MatChipsModule
+    MatProgressSpinnerModule,
+    MatProgressBarModule, // <-- THÊM VÀO IMPORTS
+    MatToolbarModule, MatTooltipModule, MatChipsModule
   ],
   templateUrl: './license-history.component.html', // cite: 1
   styleUrl: './license-history.component.scss' // cite: 2
 })
 export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy {
-
+  // ... (Các thuộc tính cũ giữ nguyên)
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
@@ -60,12 +61,14 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   isLoading = true;
   private dataSubscription!: Subscription;
 
+
   ngOnInit(): void {
     AOS.init({ duration: 600, once: true });
     this.setupSearch();
   }
 
   ngAfterViewInit(): void {
+    // ... (Giữ nguyên logic)
     if (this.sort) {
       this.sort.sortChange.subscribe(() => {
         if (this.paginator) {
@@ -73,9 +76,8 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
       });
     }
-    this.loadData(); // Initial data load
+    this.loadData();
   }
-
 
   ngOnDestroy(): void {
     this.searchSubscription?.unsubscribe();
@@ -83,6 +85,7 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   setupSearch(): void {
+    // ... (Giữ nguyên)
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged()
@@ -91,30 +94,27 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
       if (this.paginator) {
         this.paginator.pageIndex = 0;
       }
-      // Note: loadData is triggered by merge() in ngAfterViewInit,
-      // no need to call it explicitly here unless merge strategy changes.
     });
   }
 
   loadData(): void {
-    this.isLoading = true; // Set loading true at the start
+    // ... (Giữ nguyên logic)
+    this.isLoading = true;
 
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
     }
 
-    // Ensure paginator and sort are ready before subscribing
     if (!this.paginator || !this.sort) {
-      // If not ready, retry after a short delay
       setTimeout(() => this.loadData(), 50);
       return;
     }
 
     this.dataSubscription = merge(this.sort.sortChange, this.paginator.page, this.searchSubject.pipe(debounceTime(0)))
       .pipe(
-        startWith({}), // Trigger initial load
+        startWith({}),
         switchMap(() => {
-          this.isLoading = true; // Set loading true before API call
+          this.isLoading = true;
           return this.licenseService.getLicenseHistory( // cite: 1
             this.paginator.pageIndex,
             this.paginator.pageSize,
@@ -122,53 +122,51 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
           ).pipe(
             catchError(() => {
               console.error('Failed to load license history');
-              this.notification.showError('Không thể tải lịch sử mua.'); // Show error to user
-              // FIX: Add missing properties for PagedResponse on error
+              this.notification.showError('Không thể tải lịch sử mua.');
               return of({
                 content: [],
                 totalElements: 0,
-                totalPages: 0, // Add missing property
-                number: 0,     // Add missing property (current page)
-                size: this.pageSize // Add missing property (page size)
+                totalPages: 0,
+                number: 0,
+                size: this.pageSize
               } as PagedResponse<LicenseHistoryEntry>);
             })
           );
         }),
         map(data => {
-          this.isLoading = false; // Set loading false after data processing
+          this.isLoading = false;
           this.totalElements = data.totalElements;
-          return data.content; // Pass content to the subscription
+          return data.content;
         })
       )
       .subscribe(data => {
-        this.dataSource.data = data; // Update table data
+        this.dataSource.data = data;
       });
   }
 
-  /**
-   * Apply filter value from input or button click
-   */
   applyFilterFromInput(filterValue: string): void {
-    // Trim and pass the value to the search subject
     this.searchSubject.next(filterValue.trim());
   }
 
-
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
-    // Data reload is handled by the merge() observable in loadData()
   }
 
   announceSortChange(sortState: Sort): void {
-    // Optional: Implement accessibility message
   }
 
-  getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
+  // Bỏ hàm getStatusColor(status) cũ
+
+  /**
+   * THÊM HÀM NÀY: Trả về lớp CSS cho chip trạng thái
+   */
+  getStatusClass(status: string): string {
+    const baseClass = 'status-chip';
     switch (status?.toUpperCase()) {
-      case 'COMPLETED': return 'primary';
-      case 'PENDING': return 'accent';
-      case 'FAILED': return 'warn';
-      default: return undefined;
+      case 'COMPLETED': return `${baseClass} status-completed`;
+      case 'PENDING': return `${baseClass} status-pending`;
+      case 'FAILED': return `${baseClass} status-failed`;
+      default: return `${baseClass} status-default`;
     }
   }
 
@@ -183,13 +181,11 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
 
   viewDetails(row: LicenseHistoryEntry): void {
     console.log('Xem chi tiết:', row);
-    // TODO: Open LicenseHistoryDetailDialogComponent
     this.notification.showInfo('Chức năng Xem chi tiết chưa được cài đặt.');
   }
 
   deleteHistory(row: LicenseHistoryEntry): void {
     console.log('Xóa:', row);
-    // TODO: Open ConfirmDialogComponent and handle deletion
     this.notification.showInfo('Chức năng Xóa chưa được cài đặt.');
   }
 }
