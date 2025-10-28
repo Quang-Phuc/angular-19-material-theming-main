@@ -74,6 +74,20 @@ export interface LicenseHistoryEntry {
   paymentMethod?: string;
 }
 
+export interface ApiPagedData<T> {
+  content: T[];
+  pageable: any; // Or define pageable interface
+  totalElements: number;
+  last: boolean;
+  totalPages: number;
+  size: number;
+  number: number; // Current page (zero-based)
+  sort: any; // Or define sort interface
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
+}
+
 export interface PagedResponse<T> {
   content: T[];
   totalElements: number;
@@ -102,7 +116,6 @@ export class LicenseService {
 
   // --- Methods ---
 
-  // (getLicensePlans, createQrCode, saveLicenseHistory giữ nguyên)
   getLicensePlans(): Observable<LicensePlan[]> {
     return this.apiService.get<ApiResponse<LicensePlan[]>>(this.apiUrl).pipe(
       map(response => {
@@ -120,6 +133,68 @@ export class LicenseService {
         });
       })
     );
+  }
+  // (getLicensePlans, createQrCode, saveLicenseHistory giữ nguyên)
+  /**
+   * === CẬP NHẬT PHƯƠNG THỨC LẤY LỊCH SỬ ===
+   */
+  getLicenseHistory(page: number, size: number, searchTerm?: string): Observable<PagedResponse<LicenseHistoryEntry>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      params = params.set('search', searchTerm.trim());
+    }
+
+    // 1. Mong đợi cấu trúc ApiResponse lồng nhau
+    return this.apiService.get<ApiResponse<ApiPagedData<any>>>(this.historyApiUrl, params).pipe(
+      map(response => {
+        // 2. Lấy phần 'data' bên trong ApiResponse
+        const apiPagedData = response.data;
+
+        // 3. Map dữ liệu thô từ 'content' sang 'LicenseHistoryEntry'
+        const mappedContent: LicenseHistoryEntry[] = apiPagedData.content.map(item => ({
+          id: item.id,
+          packageCode: `ID_${item.licensePackageId}`, // Tạm dùng ID
+          packageName: item.packageName ?? 'N/A', // Lấy tên nếu có, nếu không thì 'N/A'
+          purchaseDate: item.createdDate, // Map từ createdDate
+          amountPaid: item.packagePrice ?? 0, // Lấy giá nếu có, nếu không thì 0
+          userId: item.userId,
+          status: this.mapStatusToString(item.status), // Map số sang chữ
+          originalStatus: item.status, // Giữ lại status gốc nếu cần
+          licensePackageId: item.licensePackageId,
+          createdDate: item.createdDate,
+          // (Map các trường khác nếu cần)
+        }));
+
+        // 4. Trả về cấu trúc PagedResponse phẳng cho component
+        return {
+          content: mappedContent,
+          totalElements: apiPagedData.totalElements,
+          totalPages: apiPagedData.totalPages,
+          number: apiPagedData.number,
+          size: apiPagedData.size,
+        };
+      })
+    );
+  }
+
+  /**
+   * Hàm helper để map status number sang string
+   */
+  private mapStatusToString(statusNumber: number | null | undefined): string {
+    switch (statusNumber) {
+      case 5: return 'COMPLETED'; // Giả sử 5 là Hoàn thành
+      // TODO: Thêm các case khác nếu có (PENDING, FAILED)
+      // case 1: return 'PENDING';
+      // case 9: return 'FAILED';
+      default: return 'UNKNOWN';
+    }
+  }
+
+  deleteLicenseHistory(historyId: number): Observable<void> {
+    return this.apiService.delete<void>(`${this.historyApiUrl}/${historyId}`);
   }
   createQrCode(price: number, content: string): Observable<QrResponse> {
     const payload = { price, content };
@@ -151,26 +226,6 @@ export class LicenseService {
     return this.currentUsageSubject.getValue();
   }
 
-  getLicenseHistory(page: number, size: number, searchTerm?: string): Observable<PagedResponse<LicenseHistoryEntry>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
 
-    if (searchTerm && searchTerm.trim() !== '') {
-      params = params.set('search', searchTerm.trim());
-    }
-
-    // SỬA LẠI: Bỏ dấu {} bao quanh params
-    return this.apiService.get<PagedResponse<LicenseHistoryEntry>>(this.historyApiUrl, params); // Truyền trực tiếp params
-  }
-
-  /**
-   * === 4. PHƯƠNG THỨC MỚI: XÓA LỊCH SỬ MUA ===
-   * (Nếu API hỗ trợ)
-   * @param historyId ID của mục lịch sử cần xóa
-   */
-  deleteLicenseHistory(historyId: number): Observable<void> { // Hoặc kiểu trả về khác tùy API
-    return this.apiService.delete<void>(`${this.historyApiUrl}/${historyId}`);
-  }
 
 }

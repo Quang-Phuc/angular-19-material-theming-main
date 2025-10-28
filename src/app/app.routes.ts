@@ -18,6 +18,7 @@ import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-lo
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
+import {LicenseHistoryComponent} from './features/users/license/license-history.component';
 
 
 export const routes: Routes = [
@@ -48,6 +49,11 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: StoreDashboardComponent // Dashboard for store owner/employee
+      },
+      // *** 2. ADD THE NEW ROUTE HERE ***
+      {
+        path: 'license-history', // The missing segment
+        component: LicenseHistoryComponent // Link to the component
       },
       // (Add other store management pages here, e.g., contracts, customers)
 
