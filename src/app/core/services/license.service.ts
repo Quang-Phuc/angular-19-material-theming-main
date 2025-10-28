@@ -68,9 +68,9 @@ export class LicenseService {
 
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
-  private apiUrl = '/api/license-packages';
-  private historyApiUrl = '/api/license-history';
-  private licenseCheckUrl = '/api/license/check';
+  private apiUrl = '/license-packages';
+  private historyApiUrl = '/license-history';
+  private licenseCheckUrl = '/license/check';
   private currentUsageUrl = '/api/usage'; // Example URL
 
   private currentUsageSubject = new BehaviorSubject<CurrentUsage | null>(null);
