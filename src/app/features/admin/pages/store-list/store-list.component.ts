@@ -112,14 +112,19 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   loadStores() {
     this.isLoading = true;
-    const params = this.buildApiParams(); // Hàm này đã được cập nhật
+    const params = this.buildApiParams();
 
     return this.storeService.getStores(params).pipe(
-      map(response => {
+      map((response: any) => { // Thêm kiểu 'any' để dễ truy cập
         this.isLoading = false;
-        this.resultsLength = response.total; // Tổng số bản ghi
-        this.dataSource.data = response.data; // Gán dữ liệu cho dataSource
-        return response.data; // Dữ liệu cho bảng
+
+        // SỬA Ở ĐÂY: Đọc từ response.data.totalElements
+        this.resultsLength = response.data.totalElements;
+
+        // SỬA Ở ĐÂY: Đọc mảng từ response.data.content
+        this.dataSource.data = response.data.content;
+
+        return response.data.content;
       }),
       catchError((error: Error) => {
         this.isLoading = false;
