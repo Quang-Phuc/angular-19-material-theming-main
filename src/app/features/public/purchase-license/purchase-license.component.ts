@@ -199,6 +199,6 @@ export class PurchaseLicenseComponent implements OnInit {
   }
 
   resetFlow(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/store/license-history']);
   }
 }
