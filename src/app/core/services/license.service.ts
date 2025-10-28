@@ -1,9 +1,9 @@
 // src/app/core/services/license.service.ts
 
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, throwError, of } from 'rxjs'; // Import throwError and 'of' if using Option 2 below
+import { Observable, BehaviorSubject } from 'rxjs'; // Đã xóa throwError, of
 import { map, tap } from 'rxjs/operators';
-import { HttpHeaders } from '@angular/common/http';
+// import { HttpHeaders } from '@angular/common/http'; // Đã xóa
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 
@@ -70,8 +70,8 @@ export class LicenseService {
   private authService = inject(AuthService);
   private apiUrl = '/license-packages';
   private historyApiUrl = '/license-history';
-  private licenseCheckUrl = '/license/check';
-  private currentUsageUrl = '/api/usage'; // Example URL
+  // private licenseCheckUrl = '/license/check'; // <-- 1. ĐÃ XÓA API CŨ
+  private currentUsageUrl = '/license/check'; // <-- 2. SẼ SỬ DỤNG API NÀY
 
   private currentUsageSubject = new BehaviorSubject<CurrentUsage | null>(null);
   currentUsage$ = this.currentUsageSubject.asObservable();
@@ -80,17 +80,17 @@ export class LicenseService {
   constructor() { }
 
   // --- Methods ---
+
+  // (getLicensePlans, createQrCode, saveLicenseHistory giữ nguyên)
   getLicensePlans(): Observable<LicensePlan[]> {
-    // Note: Assuming ApiService now handles token automatically via interceptor
-    // If not, you'd need to add headers here like in checkLicenseStatus
     return this.apiService.get<ApiResponse<LicensePlan[]>>(this.apiUrl).pipe(
       map(response => {
+        // (Logic "làm giàu" dữ liệu không thay đổi)
         const apiPlans = response.data;
         return apiPlans.map((plan: LicensePlan) => {
           let uiFeatures: string[] = [];
           let uiIsPopular = false;
           let uiThemeColor: LicensePlan['themeColor'] = 'blue';
-          // (Mapping logic...)
           if (plan.name === 'TRIAL') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,`Dùng thử ${plan.durationDays} ngày`,'Hỗ trợ cơ bản']; uiThemeColor = 'green'; }
           else if (plan.name === 'Cá Nhân') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,'Báo cáo doanh thu cơ bản','Hỗ trợ qua Email']; uiThemeColor = 'blue'; }
           else if (plan.name === 'Chuyên Nghiệp') { uiFeatures = [`Quản lý ${plan.maxStore} cửa hàng`,`${plan.maxUserPerStore} tài khoản/cửa hàng`,'Báo cáo doanh thu nâng cao','Tích hợp API (Shopee, Lazada)','Hỗ trợ ưu tiên 24/7']; if (plan.discount > 0) { uiIsPopular = true; uiThemeColor = 'purple'; } }
@@ -100,35 +100,29 @@ export class LicenseService {
       })
     );
   }
-
   createQrCode(price: number, content: string): Observable<QrResponse> {
-    // Note: Assuming ApiService now handles token automatically via interceptor
     const payload = { price, content };
     return this.apiService.post<QrResponse>(`${this.apiUrl}/qr`, payload);
   }
-
   saveLicenseHistory(packageId: number): Observable<HistoryResponse> {
-    // Note: Assuming ApiService now handles token automatically via interceptor
     const payload: HistoryRequest = { license_package_id: packageId };
     return this.apiService.post<HistoryResponse>(this.historyApiUrl, payload);
   }
 
+  // --- 3. ĐÃ XÓA checkLicenseStatus() ---
+
   /**
-   * Calls API to check the current user's license status.
-   * Assumes ApiService automatically adds the token header via an interceptor.
-   * Stores usage details if expired.
+   * 4. API MỚI ĐỂ LẤY USAGE (THAY THẾ CHO CHECK)
+   * Gọi API để lấy thông tin sử dụng (store/user) hiện tại.
+   * Lưu lại để trang Purchase License có thể so sánh.
    */
-  checkLicenseStatus(): Observable<LicenseStatus> {
-    // No need to manually get token or set headers if ApiService handles it
-    return this.apiService.get<LicenseStatus>(this.licenseCheckUrl).pipe(
+  fetchCurrentUsage(): Observable<CurrentUsage> {
+    return this.apiService.get<CurrentUsage>(this.currentUsageUrl).pipe(
       tap(response => {
-        // (Logic to store usage details remains the same)
-        if (response.status === 'expired') {
-          this.currentUsageSubject.next({ storeCount: response.currentStoreCount ?? 0, userCount: response.currentUserCount ?? 0, stores: response.stores ?? [], users: response.users ?? [] });
-        } else {
-          this.currentUsageSubject.next(null);
-        }
+        // Lưu lại thông tin usage
+        this.currentUsageSubject.next(response);
       })
+      // Lỗi (bao gồm SS004) sẽ được tự động throw về component
     );
   }
 
