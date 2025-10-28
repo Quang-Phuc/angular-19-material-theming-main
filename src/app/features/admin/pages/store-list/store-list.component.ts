@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core'; // Thêm 'inject'
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
@@ -16,14 +16,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { merge, Subject } from 'rxjs';
 import { startWith, switchMap, map, catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router'; // <-- *** 1. THÊM IMPORT ROUTE ***
 
 import { Store } from '../../../../core/models/store.model';
 import { StoreService } from '../../../../core/services/store.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
-// *** 1. IMPORT MatCardModule VÀO ĐÂY ***
 import { MatCardModule } from '@angular/material/card';
-
 
 @Component({
   selector: 'app-store-list',
@@ -33,14 +32,12 @@ import { MatCardModule } from '@angular/material/card';
     MatSortModule, MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatProgressSpinnerModule, MatDialogModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule,
-    MatCardModule // <-- *** 2. THÊM NÓ VÀO MẢNG IMPORTS ***
+    MatCardModule
   ],
   templateUrl: './store-list.component.html',
   styleUrl: './store-list.component.scss'
 })
 export class StoreListComponent implements AfterViewInit, OnInit {
-
-  // ... (Phần còn lại của file giữ nguyên) ...
 
   // Các cột hiển thị trong bảng
   displayedColumns: string[] = ['name', 'ownerName', 'phone', 'status', 'licensePlan', 'expiryDate', 'actions'];
@@ -54,6 +51,10 @@ export class StoreListComponent implements AfterViewInit, OnInit {
   searchForm: FormGroup;
   // Subject để trigger tìm kiếm cơ bản
   private searchSubject = new Subject<string>();
+
+  // *** 2. THÊM BIẾN PHÂN QUYỀN ***
+  public isAdmin: boolean = false;
+  private route = inject(ActivatedRoute); // Inject route
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -73,13 +74,22 @@ export class StoreListComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
+    // *** 3. KIỂM TRA QUYỀN ADMIN ***
+    const parentPath = this.route.parent?.snapshot.url[0]?.path;
+    this.isAdmin = (parentPath === 'admin');
+
+    // Nếu không phải admin, ẩn cột "Hành động"
+    if (!this.isAdmin) {
+      this.displayedColumns = ['name', 'ownerName', 'phone', 'status', 'licensePlan', 'expiryDate']; // Bỏ 'actions'
+    }
+
     // Lắng nghe sự kiện gõ phím cho tìm kiếm cơ bản
     this.searchSubject.pipe(
       debounceTime(400), // Chờ 400ms sau khi gõ
       distinctUntilChanged() // Chỉ call API nếu text thay đổi
     ).subscribe(() => {
       this.paginator.pageIndex = 0; // Reset về trang đầu
-      this.loadStores(); // Gọi API
+      // Đã chuyển loadStores() sang AfterViewInit
     });
   }
 
@@ -88,12 +98,13 @@ export class StoreListComponent implements AfterViewInit, OnInit {
     this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
 
     // Lắng nghe 2 sự kiện: Sắp xếp (Sort) và Phân trang (Paginator)
-    merge(this.sort.sortChange, this.paginator.page).pipe(
-      startWith({}), // Bắt đầu với 1 sự kiện rỗng
-      switchMap(() => {
-        return this.loadStores(); // Gọi API
-      })
-    ).subscribe();
+    merge(this.sort.sortChange, this.paginator.page, this.searchSubject.pipe(debounceTime(0))) // Thêm searchSubject
+      .pipe(
+        startWith({}), // Bắt đầu với 1 sự kiện rỗng
+        switchMap(() => {
+          return this.loadStores(); // Gọi API
+        })
+      ).subscribe();
   }
 
   /**
@@ -101,7 +112,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   loadStores() {
     this.isLoading = true;
-    const params = this.buildApiParams();
+    const params = this.buildApiParams(); // Hàm này đã được cập nhật
 
     return this.storeService.getStores(params).pipe(
       map(response => {
@@ -125,14 +136,18 @@ export class StoreListComponent implements AfterViewInit, OnInit {
     const formValue = this.searchForm.value;
 
     let params = new HttpParams()
-      .set('page', this.paginator.pageIndex + 1) // API thường bắt đầu từ 1
-      .set('limit', this.paginator.pageSize)
-      .set('sort', this.sort.active || 'createdAt')
-      .set('order', this.sort.direction || 'desc');
+      .set('page', this.paginator.pageIndex) // Paginator (0-based)
+      .set('size', this.paginator.pageSize)
 
-    // Tìm kiếm cơ bản (cho tên, sđt, email...)
-    if (formValue.basicSearch) {
-      params = params.set('q', formValue.basicSearch);
+    // *** 4. THÊM THAM SỐ 'TYPE' VÀO API ***
+    // Gửi vai trò (admin/user) để backend lọc
+    params = params.set('type', this.isAdmin ? 'admin' : 'user');
+
+
+    // Tìm kiếm cơ bản (q)
+    const basicSearchTerm = this.searchForm.get('basicSearch')?.value;
+    if (basicSearchTerm) {
+      params = params.set('q', basicSearchTerm);
     }
 
     // Tìm kiếm nâng cao
@@ -153,7 +168,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   applyBasicSearch(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.searchSubject.next(filterValue.trim().toLowerCase());
+    this.searchSubject.next(filterValue.trim()); // Bỏ toLowerCase() nếu API là case-sensitive
   }
 
   /**
@@ -161,7 +176,10 @@ export class StoreListComponent implements AfterViewInit, OnInit {
    */
   onAdvancedSearch(): void {
     this.paginator.pageIndex = 0;
-    this.loadStores(); // Chỉ cần gọi loadStores
+    // Chỉ cần trigger 1 trong các stream merge() là được
+    // (Trong trường hợp này, 'merge' đã lắng nghe sortChange, page, và searchSubject)
+    // Cách đơn giản nhất là trigger searchSubject
+    this.searchSubject.next(this.searchForm.get('basicSearch')?.value || '');
   }
 
   /**
@@ -185,7 +203,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         // Nếu dialog trả về true (lưu thành công) -> tải lại danh sách
-        this.loadStores();
+        this.searchSubject.next(this.searchForm.get('basicSearch')?.value || '');
       }
     });
     */
@@ -201,7 +219,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
         next: () => {
           this.notification.showSuccess(`Đã xóa tiệm "${name}" thành công.`);
           // Tải lại danh sách
-          this.loadStores();
+          this.searchSubject.next(this.searchForm.get('basicSearch')?.value || '');
         },
         error: (error: Error) => {
           this.notification.showError(error.message);
