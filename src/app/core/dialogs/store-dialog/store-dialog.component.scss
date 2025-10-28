@@ -1,0 +1,16 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Khoảng cách giữa các trường */
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.dialog-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}

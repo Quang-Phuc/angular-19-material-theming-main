@@ -1,12 +1,14 @@
+// login.component.ts (With Debug Logs)
+
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router } from '@angular/router'; // Import Router
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import * as AOS from 'aos';
 
 // Core services and utils
-import { AuthService, LoginPayload } from '../../../../core/services/auth.service'; // Assuming login uses same payload for now
+import {AuthResponse, AuthService, LoginPayload} from '../../../../core/services/auth.service'; // Assuming login uses same payload for now
 import { NotificationService } from '../../../../core/services/notification.service';
 import { MyErrorStateMatcher } from '../../../../core/utils/error-state-matcher';
 
@@ -17,84 +19,102 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-admin-login', // Changed selector
+  selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    // RouterLink is not needed if no links in template
-    MatCardModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule, // Make sure this is imported
-    MatProgressSpinnerModule
+    CommonModule, ReactiveFormsModule, RouterLink, MatCardModule,
+    MatInputModule, MatButtonModule, MatIconModule, MatFormFieldModule,
+    MatProgressSpinnerModule, MatDialogModule
   ],
-  templateUrl: './admin-login.component.html', // Changed template URL
-  styleUrl: './admin-login.component.scss' // Changed style URL
+  templateUrl: './admin-login.component.html', // cite: 1
+  styleUrl: './admin-login.component.scss' // cite: 2
 })
 export class AdminLoginComponent implements OnInit { // Added OnInit
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   isLoading = false;
   matcher = new MyErrorStateMatcher();
 
-  // Using email for admin login might be more appropriate
   loginForm = this.fb.group({
-    // Changed 'phone' to 'email' and added email validator
-    email: ['', [Validators.required, Validators.email]],
+    phone: ['', [Validators.required]],
     password: ['', [Validators.required]]
   });
 
   ngOnInit(): void {
-    // Initialize AOS for potential entry animations
     AOS.init({ duration: 800, once: true, offset: 0 });
   }
 
-  // Getters for easier template access
-  get email() { return this.loginForm.get('email') as FormControl; }
+  get phone() { return this.loginForm.get('phone') as FormControl; }
   get password() { return this.loginForm.get('password') as FormControl; }
 
   onSubmit(): void {
-    this.loginForm.markAllAsTouched(); // Trigger validation on submit attempt
-
+    this.loginForm.markAllAsTouched();
     if (this.loginForm.invalid || this.isLoading) {
       return;
     }
 
     this.isLoading = true;
-    this.loginForm.disable(); // Disable form during API call
+    this.loginForm.disable();
 
-    // Adapt payload if necessary (e.g., use email)
     const payload: LoginPayload = {
-      phone: this.email.value, // Map email to phone field if API expects phone
-      // OR if API expects email:
-      // email: this.email.value,
+      phone: this.phone.value,
       password: this.password.value,
-      type: 'ADMIN'
+      type: 'ADMIN' // Assume USER for store owner/employee
     };
 
-    // Assuming AuthService has a login method that handles API call and token storage
-    // You might need a specific adminLogin method if the endpoint or logic differs
     this.authService.login(payload).pipe(
       finalize(() => {
         this.isLoading = false;
-        this.loginForm.enable(); // Re-enable form
+        this.loginForm.enable();
       })
     ).subscribe({
-      next: (user) => {
-        this.notification.showSuccess('Đăng nhập Admin thành công!');
-        // Redirect to the main admin dashboard after successful login
-        this.router.navigate(['/admin/dashboard']);
+      next: (response: AuthResponse) => {
+        // Save auth data to localStorage
+        this.authService.saveAuthData(response);
+
+        this.notification.showSuccess('Đăng nhập thành công!');
+
+        // --- DEBUG LOGS ADDED HERE ---
+        console.log('Attempting navigation to /store...');
+        // Verify roles are saved BEFORE navigating
+        console.log('Current roles in localStorage:', localStorage.getItem('userRoles'));
+        // --- END DEBUG LOGS ---
+
+        // Navigate to the store management page
+        this.router.navigate(['/admin']); // cite: 0
       },
-      error: (error: Error) => {
-        this.notification.showError(error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      error: (err) => {
+        // Handle login errors (including SS004)
+        let errorMessage = 'Lỗi không xác định';
+        let errorCode = null;
+        let raw = err?.error ?? err?.message ?? 'Đã có lỗi';
+
+        if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw);
+            errorMessage = parsed.messages?.vn || parsed.message || JSON.stringify(parsed);
+            errorCode = parsed.code || null;
+          } catch {
+            errorMessage = raw;
+          }
+        } else if (typeof raw === 'object') {
+          errorMessage = raw.messages?.vn || raw.message || JSON.stringify(raw);
+          errorCode = raw.code || null;
+        }
+
+
+          this.notification.showError(errorMessage);
+
       }
     });
   }
+
+
 }

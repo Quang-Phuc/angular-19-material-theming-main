@@ -1,59 +1,48 @@
 <div class="auth-container">
-  <!-- Reusing auth-card style -->
   <mat-card class="auth-card" data-aos="zoom-in">
 
     <div class="auth-header">
-      <!-- Maybe a different logo or title for Admin -->
-      <span class="logo-text">[ADMIN]</span>
-      <h2>Đăng Nhập Admin</h2>
+      <a href="/public" class="logo-text">[LOGO]</a>
+      <h2>Đăng Nhập</h2>
     </div>
 
     <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <mat-card-content>
 
-        <!-- Changed phone to email -->
-        <mat-form-field appearance="outline" data-aos="fade-right" data-aos-delay="100">
-          <mat-label>Email</mat-label>
-          <mat-icon matPrefix>email</mat-icon>
-          <input matInput formControlName="email" placeholder="admin@example.com" [errorStateMatcher]="matcher">
-          @if (email.hasError('required') && email.touched) {
-            <mat-error>Vui lòng nhập email</mat-error>
+        <mat-form-field appearance="outline">
+          <mat-label>Số điện thoại</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="phone" placeholder="09xxxxxxx">
+          @if (loginForm.controls['phone'].hasError('required')) {
+            <mat-error>Vui lòng nhập số điện thoại</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" data-aos="fade-left" data-aos-delay="200">
+        <mat-form-field appearance="outline">
           <mat-label>Mật khẩu</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
-          <input matInput formControlName="password" type="password" [errorStateMatcher]="matcher">
-          @if (password.hasError('required') && password.touched) {
+          <input matInput formControlName="password" type="password">
+          @if (loginForm.controls['password'].hasError('required')) {
             <mat-error>Vui lòng nhập mật khẩu</mat-error>
           }
         </mat-form-field>
 
-        <!-- Removed "Forgot Password?" for simplicity, add back if needed -->
-        <!-- <a routerLink="/admin/forgot-password" class="forgot-password">Quên mật khẩu?</a> -->
+        <a routerLink="/forgot-password" class="forgot-password">Quên mật khẩu?</a>
 
       </mat-card-content>
-      <mat-card-actions class="auth-actions" data-aos="fade-up" data-aos-delay="300">
+      <mat-card-actions class="auth-actions">
         <button mat-raised-button
                 class="submit-button cta-gradient-button"
                 type="submit"
-                [disabled]="loginForm.invalid || isLoading">
-          @if (isLoading) {
-            <mat-spinner diameter="24"></mat-spinner>
-          } @else {
-            ĐĂNG NHẬP
-          }
+                [disabled]="loginForm.invalid">
+          ĐĂNG NHẬP
         </button>
       </mat-card-actions>
     </form>
 
-    <!-- Removed footer link to user registration -->
-    <!--
-    <div class="auth-footer" data-aos="fade-up" data-aos-delay="400">
+    <div class="auth-footer">
       <span>Chưa có tài khoản? <a routerLink="/register">Đăng ký miễn phí</a></span>
     </div>
-    -->
 
   </mat-card>
 </div>

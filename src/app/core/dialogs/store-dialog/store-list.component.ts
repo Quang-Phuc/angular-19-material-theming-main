@@ -1,4 +1,4 @@
-// store-list.component.ts (ĐÃ CẬP NHẬT HOÀN CHỈNH)
+// store-list.component.ts (ĐÃ CẬP NHẬT)
 
 import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,9 +17,9 @@ import { merge, Subject, of } from 'rxjs';
 import { startWith, switchMap, map, catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 
-// import { Store } from '../../../../core/models/store.model'; // Tạm thời không cần ép kiểu
-import { StoreService } from '../../../../core/services/store.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+// import { Store } from '../../../../core/models/store.model';
+import { StoreService } from '../../services/store.service';
+import { NotificationService } from '../../services/notification.service';
 
 import { MatCardModule } from '@angular/material/card';
 
@@ -30,9 +30,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // === IMPORT CÁC DIALOG MỚI ===
-// (Hãy đảm bảo đường dẫn này đúng với cấu trúc dự án của bạn)
-import { StoreDialogComponent } from '../../../../core/dialogs/store-dialog/store-dialog.component';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+import { StoreDialogComponent } from '../../dialogs/store-dialog/store-dialog.component'; // Cập nhật đường dẫn
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../dialogs/confirm-dialog/confirm-dialog.component'; // Cập nhật đường dẫn
 
 @Component({
   selector: 'app-store-list',
@@ -45,8 +44,10 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../core/dial
     MatToolbarModule,
     MatProgressBarModule,
     MatMenuModule,
-    MatTooltipModule
-    // Không cần import dialogs ở đây nếu chúng là standalone và được mở bằng service
+    MatTooltipModule,
+    // Import các dialog (nếu chúng là standalone)
+    // StoreDialogComponent, // Không cần nếu mở bằng service
+    // ConfirmDialogComponent
   ],
   templateUrl: './store-list.component.html',
   styleUrl: './store-list.component.scss'
@@ -73,7 +74,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
   constructor(
     private storeService: StoreService,
     private notification: NotificationService,
-    private dialog: MatDialog,
+    private dialog: MatDialog, // Đã có
     private fb: FormBuilder
   ) {
     this.searchForm = this.fb.group({
@@ -105,9 +106,6 @@ export class StoreListComponent implements AfterViewInit, OnInit {
       ).subscribe();
   }
 
-  /**
-   * Hàm chính: Call API
-   */
   loadStores() {
     this.isLoading = true;
     const params = this.buildApiParams();
@@ -134,9 +132,6 @@ export class StoreListComponent implements AfterViewInit, OnInit {
     );
   }
 
-  /**
-   * Xây dựng HttpParams cho API
-   */
   buildApiParams(): HttpParams {
     let params = new HttpParams()
       .set('page', this.paginator.pageIndex)
@@ -162,7 +157,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
   }
 
   /**
-   * === ĐÃ SỬA: Mở Dialog Thêm/Sửa ===
+   * === SỬA Ở ĐÂY: Mở Dialog Thêm/Sửa ===
    */
   openStoreDialog(row?: any): void {
     const dialogRef = this.dialog.open(StoreDialogComponent, {
@@ -180,7 +175,7 @@ export class StoreListComponent implements AfterViewInit, OnInit {
   }
 
   /**
-   * === ĐÃ SỬA: Xử lý Xóa dùng Confirm Dialog ===
+   * === SỬA Ở ĐÂY: Xử lý Xóa dùng Confirm Dialog ===
    */
   onDeleteStore(row: any): void {
     const id = row.storeId;
