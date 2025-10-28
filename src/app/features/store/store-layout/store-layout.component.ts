@@ -4,7 +4,12 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
-// (Các import Material modules giữ nguyên)
+// *** 1. THÊM IMPORT CHO DIALOG ***
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+// *** (Đảm bảo đường dẫn này đúng) ***
+import { LicenseExpiredDialogComponent } from '../../../core/dialogs/license-expired-dialog/license-expired-dialog.component';
+
+// Material modules
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -32,7 +37,8 @@ interface NavItem {
     CommonModule,
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatToolbarModule, MatListModule, MatIconModule,
-    MatButtonModule, MatExpansionModule
+    MatButtonModule, MatExpansionModule,
+    MatDialogModule // <-- 2. THÊM MODULE DIALOG VÀO IMPORTS
   ],
   templateUrl: './store-layout.component.html',
   styleUrl: './store-layout.component.scss'
@@ -43,6 +49,8 @@ export class StoreLayoutComponent implements OnInit {
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private router = inject(Router);
+  // *** 3. INJECT MATDIALOG ***
+  private dialog = inject(MatDialog);
 
   menuItems: NavItem[] = [];
   // private isLoadingLicense = true; // <-- 1. ĐÃ XÓA
@@ -78,18 +86,41 @@ export class StoreLayoutComponent implements OnInit {
         this.loadMenuBasedOnRole();
       },
       error: (err) => {
-        // 3. XỬ LÝ LỖI THEO YÊU CẦU MỚI (SS004)
+        const errorBody = err?.error; // Lấy phần body của lỗi
+        let errorCode = null;
+        let errorMessage = 'Lỗi không xác định';
 
-        // (Giả định ApiService/Interceptor đã parse lỗi)
-        const errorCode = err?.error?.errorCode || err?.errorCode || null;
-        const errorMessage = err?.error?.message || err?.message || 'Lỗi không xác định';
-
-        if (errorCode === 'SS004') { //
-          this.notification.showError('License của bạn đã hết hạn. Vui lòng gia hạn.');
-          // Giống logic cũ: chuyển hướng
-          this.router.navigate(['/purchase-license']);
+        // Kiểm tra xem errorBody có phải object và có code/messages không
+        if (typeof errorBody === 'object' && errorBody !== null) {
+          errorCode = errorBody.code || null;
+          // Ưu tiên thông báo tiếng Việt
+          errorMessage = errorBody.messages?.vn || errorBody.messages?.en || errorBody.message || JSON.stringify(errorBody);
+        } else if (typeof errorBody === 'string') {
+          // Nếu body chỉ là string, thử parse JSON
+          try {
+            const parsed = JSON.parse(errorBody);
+            errorCode = parsed.code || null;
+            errorMessage = parsed.messages?.vn || parsed.messages?.en || parsed.message || JSON.stringify(parsed);
+          } catch {
+            // Nếu không parse được, dùng string gốc
+            errorMessage = errorBody;
+            // Cố gắng tìm mã lỗi trong string (ít chính xác)
+            if (errorBody.includes('"code": "SS004"')) {
+              errorCode = 'SS004';
+            }
+          }
         } else {
-          // Lỗi nghiêm trọng khác (500, 401, v.v...)
+          // Nếu không có body hoặc không xác định được, dùng message gốc
+          errorMessage = err?.message || 'Lỗi không xác định';
+        }
+
+
+        // *** 4. SỬA LOGIC XỬ LÝ LỖI ***
+        if (errorCode === 'SS004') {
+          // Thay vì showError + navigate -> Gọi hàm mở dialog
+          this.openLicenseDialog();
+        } else {
+          // Lỗi khác thì logout
           this.notification.showError(errorMessage);
           this.authService.logout();
         }
@@ -97,21 +128,27 @@ export class StoreLayoutComponent implements OnInit {
     });
   }
 
-  loadMenuBasedOnRole(): void {
-    // (Giữ nguyên)
-    const roles = this.authService.getUserRoles();
-    if (roles.includes('1') || roles.includes('2')) {
-      this.menuItems = this.ownerMenu;
-    } else if (roles.includes('3')) {
-      this.menuItems = this.employeeMenu;
-    } else {
-      console.error('Role không hợp lệ sau khi kiểm tra license!');
-      this.authService.logout();
-    }
-  }
+  loadMenuBasedOnRole(): void { /* ... (giữ nguyên) ... */ }
+  logout(): void { /* ... (giữ nguyên) ... */ }
 
-  logout(): void {
-    // (Giữ nguyên)
-    this.authService.logout();
+  /**
+   * 5. THÊM HÀM MỞ DIALOG (Giống login.component.ts)
+   */
+  private openLicenseDialog(): void {
+    const dialogRef = this.dialog.open(LicenseExpiredDialogComponent, {
+      width: '450px',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        // Nếu nhấn "Gia hạn ngay", chuyển đến trang mua
+        this.router.navigate(['/purchase-license']);
+      } else {
+        // Nếu nhấn "Để sau", có thể logout hoặc ở lại trang lỗi
+        this.notification.showError('Bạn cần gia hạn license để tiếp tục.');
+        this.authService.logout(); // Logout người dùng
+      }
+    });
   }
 }
