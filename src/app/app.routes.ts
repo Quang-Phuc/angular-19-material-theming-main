@@ -18,6 +18,8 @@ import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-lo
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
+
+// *** COMPONENT CHUNG CHO CẢ USER VÀ ADMIN ***
 import {LicenseHistoryComponent} from './features/users/license/license-history.component';
 
 
@@ -40,7 +42,7 @@ export const routes: Routes = [
     component: PurchaseLicenseComponent
   },
 
-  // --- Store Management Routes ---
+  // --- Store Management Routes (User) ---
   {
     path: 'store',
     component: StoreLayoutComponent, // Layout includes menu
@@ -50,10 +52,9 @@ export const routes: Routes = [
         path: 'dashboard',
         component: StoreDashboardComponent // Dashboard for store owner/employee
       },
-      // *** 2. ADD THE NEW ROUTE HERE ***
       {
-        path: 'license-history', // The missing segment
-        component: LicenseHistoryComponent // Link to the component
+        path: 'license-history', // <-- Route cho User
+        component: LicenseHistoryComponent
       },
       // (Add other store management pages here, e.g., contracts, customers)
 
@@ -87,6 +88,12 @@ export const routes: Routes = [
       {
         path: 'plans',
         component: PlanListComponent
+      },
+
+      // *** ĐÃ THÊM ROUTE ADMIN TẠI ĐÂY ***
+      {
+        path: 'license-history', // <-- Route cho Admin (vd: /admin/license-history)
+        component: LicenseHistoryComponent // Dùng chung component
       },
       // (Add other admin pages here)
 

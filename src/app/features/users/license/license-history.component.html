@@ -10,15 +10,18 @@
     </mat-form-field>
 
     <button mat-flat-button class="search-button" (click)="applyFilterFromInput(searchInput.value)">
-      <span>Tìm kiếm</span>
+      <mat-icon>search</mat-icon>
+      <span>Tìm</span>
     </button>
 
-    <button mat-flat-button
-            class="buy-license-button"
-            [routerLink]="['/purchase-license']">
-      <mat-icon>add_shopping_cart</mat-icon>
-      <span>Mua License</span>
-    </button>
+    @if (!isAdmin) {
+      <button mat-flat-button
+              class="buy-license-button"
+              [routerLink]="['/purchase-license']">
+        <mat-icon>add_shopping_cart</mat-icon>
+        <span>Mua License</span>
+      </button>
+    }
 
   </mat-toolbar>
 
@@ -68,15 +71,23 @@
         </td>
       </ng-container>
 
+
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Hành động </th>
         <td mat-cell *matCellDef="let row">
+
           <button mat-icon-button color="primary" matTooltip="Xem chi tiết" (click)="viewDetails(row)">
             <mat-icon>visibility</mat-icon>
           </button>
-          <button mat-icon-button color="warn" matTooltip="Xóa lịch sử" (click)="deleteHistory(row)">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
+
+          @if (isAdmin) {
+            <button mat-icon-button color="accent" matTooltip="Cập nhật (Admin)" (click)="editHistory(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Xóa lịch sử" (click)="deleteHistory(row)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          }
         </td>
       </ng-container>
 

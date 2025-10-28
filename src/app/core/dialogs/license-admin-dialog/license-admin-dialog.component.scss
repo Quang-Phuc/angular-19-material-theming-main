@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  width: 500px; /* Rộng hơn dialog "view" một chút */
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 16px;
+}
+
+.dialog-content {
+  padding-top: 16px;
+}
+
+/* Thông tin tĩnh */
+.static-info dl {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.static-info dt {
+  font-weight: 500;
+  color: #555;
+}
+
+.static-info dd {
+  margin: 0;
+  color: #111;
+  font-weight: 600;
+}
+
+/* Form của Admin */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[mat-dialog-actions] {
+  padding: 0 24px 20px;
+}

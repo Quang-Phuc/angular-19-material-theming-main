@@ -60,6 +60,10 @@ export interface HistoryRequest {
 export interface HistoryResponse {
   id: number;
 }
+
+/**
+ * *** CẬP NHẬT INTERFACE: THÊM 'note' ***
+ */
 export interface LicenseHistoryEntry {
   id: number;
   packageCode: string; // Mã gói (vd: TRIAL, PRO)
@@ -69,6 +73,7 @@ export interface LicenseHistoryEntry {
   userId: number;       // ID người mua
   userName?: string;      // Tên người mua (optional)
   status: string;       // Trạng thái (vd: PENDING, COMPLETED, FAILED)
+  note?: string;        // <-- THÊM GHI CHÚ (cho Admin)
   // Thêm các trường chi tiết khác nếu API trả về
   transactionCode?: string;
   paymentMethod?: string;
@@ -134,9 +139,9 @@ export class LicenseService {
       })
     );
   }
-  // (getLicensePlans, createQrCode, saveLicenseHistory giữ nguyên)
+
   /**
-   * === CẬP NHẬT PHƯƠNG THỨC LẤY LỊCH SỬ ===
+   * === LẤY LỊCH SỬ PHÂN TRANG ===
    */
   getLicenseHistory(page: number, size: number, searchTerm?: string): Observable<PagedResponse<LicenseHistoryEntry>> {
     let params = new HttpParams()
@@ -162,6 +167,7 @@ export class LicenseService {
           amountPaid: item.packagePrice ?? 0, // Lấy giá nếu có, nếu không thì 0
           userId: item.userId,
           status: this.mapStatusToString(item.status), // Map số sang chữ
+          note: item.note ?? '', // <-- MAP GHI CHÚ (nếu có)
           originalStatus: item.status, // Giữ lại status gốc nếu cần
           licensePackageId: item.licensePackageId,
           createdDate: item.createdDate,
@@ -191,6 +197,23 @@ export class LicenseService {
       // case 9: return 'FAILED';
       default: return 'UNKNOWN';
     }
+  }
+
+  /**
+   * *** THÊM HÀM MỚI: CẬP NHẬT LỊCH SỬ (ADMIN) ***
+   */
+  updateLicenseHistory(historyId: number, data: { status: string, note: string }): Observable<any> {
+    const url = `${this.historyApiUrl}/${historyId}`;
+
+    // TODO: Bạn có thể cần chuyển đổi 'status' string (COMPLETED)
+    // về dạng số (5) trước khi gửi cho API nếu API yêu cầu
+    // const payload = {
+    //   status: this.mapStatusToNumber(data.status),
+    //   note: data.note
+    // };
+
+    // Hiện tại, gửi thẳng data nhận được từ form
+    return this.apiService.put<any>(url, data);
   }
 
   deleteLicenseHistory(historyId: number): Observable<void> {

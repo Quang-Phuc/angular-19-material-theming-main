@@ -28,9 +28,10 @@ import { NotificationService } from '../../../core/services/notification.service
 // DIALOGS
 import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
+import { LicenseAdminDialogComponent } from '../../../core/dialogs/license-admin-dialog/license-admin-dialog.component';
 
-// THÊM ROUTERLINK ĐỂ CHUYỂN TRANG
-import { RouterLink } from '@angular/router';
+// *** CẬP NHẬT IMPORT ROUTER ***
+import { RouterLink, ActivatedRoute } from '@angular/router'; // Thêm ActivatedRoute
 
 @Component({
   selector: 'app-license-history',
@@ -45,6 +46,7 @@ import { RouterLink } from '@angular/router';
     // THÊM DIALOGS VÀ ROUTERLINK VÀO IMPORTS
     ConfirmDialogComponent,
     LicenseHistoryDetailDialogComponent,
+    LicenseAdminDialogComponent,
     RouterLink
   ],
   templateUrl: './license-history.component.html',
@@ -54,6 +56,10 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute); // <-- *** INJECT ROUTE ***
+
+  // *** BIẾN MỚI ĐỂ PHÂN QUYỀN ***
+  public isAdmin: boolean = false;
 
   displayedColumns: string[] = ['stt', 'packageCode', 'packageName', 'purchaseDate', 'amountPaid', 'status', 'actions'];
   dataSource = new MatTableDataSource<LicenseHistoryEntry>([]);
@@ -77,6 +83,13 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   ngOnInit(): void {
     AOS.init({ duration: 600, once: true });
     this.setupSearch();
+
+    // *** THÊM LOGIC KIỂM TRA ADMIN ***
+    // Lấy segment đầu tiên của route cha (ví dụ: 'store' hoặc 'admin')
+    const parentPath = this.route.parent?.snapshot.url[0]?.path;
+    this.isAdmin = (parentPath === 'admin');
+
+    this.loadData();
   }
 
   ngAfterViewInit(): void {
@@ -87,7 +100,8 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
         }
       });
     }
-    this.loadData();
+    // Chuyển loadData() vào ngOnInit() để 'isAdmin' được set trước khi load
+    // this.loadData();
   }
 
   ngOnDestroy(): void {
@@ -231,6 +245,41 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
 
         // 3. Kích hoạt tải lại dữ liệu bảng
         // Hàm loadData() sẽ tự xử lý việc bật/tắt loading
+        this.refreshDataSubject.next();
+      }
+    });
+  }
+
+  /**
+   * *** THÊM HÀM MỚI: CẬP NHẬT (ADMIN) ***
+   */
+  editHistory(row: LicenseHistoryEntry): void {
+    // 1. Mở dialog Admin, truyền dữ liệu 'row' vào
+    const dialogRef = this.dialog.open(LicenseAdminDialogComponent, {
+      width: '550px',
+      data: row, // Truyền toàn bộ 'row' (bao gồm cả 'note' nếu có)
+      autoFocus: false
+    });
+
+    // 2. Xử lý sau khi dialog đóng
+    dialogRef.afterClosed().pipe(
+      filter(result => !!result), // Chỉ tiếp tục nếu admin bấm "Lưu" (result là object data)
+      switchMap((updatedData: { status: string, note: string }) => {
+        // GỌI API CẬP NHẬT
+        // TODO: Đảm bảo bạn có hàm 'updateLicenseHistory' trong LicenseService
+        return this.licenseService.updateLicenseHistory(row.id, updatedData).pipe(
+          map(() => true) // Chuyển thành true để xử lý ở subscribe
+        );
+      }),
+      catchError((err) => {
+        console.error('Update error:', err);
+        this.notification.showError('Cập nhật thất bại. Vui lòng thử lại.');
+        return of(null); // Ngăn pipe tiếp tục
+      })
+    ).subscribe(result => {
+      if (result) {
+        this.notification.showSuccess('Cập nhật lịch sử thành công!');
+        // Tải lại bảng để hiển thị dữ liệu mới
         this.refreshDataSubject.next();
       }
     });
