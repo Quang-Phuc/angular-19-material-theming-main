@@ -184,3 +184,12 @@ mat-paginator {
 .menu-item-icon.delete {
   color: $color-warn-red;
 }
+
+/* === STYLE MỚI CHO CỘT TEXT DÀI === */
+.truncate-cell {
+  max-width: 200px; /* Bạn có thể điều chỉnh độ rộng tối đa */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}

@@ -1,4 +1,4 @@
-// store-list.component.ts (ĐÃ CẬP NHẬT HOÀN CHỈNH)
+// store-list.component.ts (ĐÃ CẬP NHẬT)
 
 import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -53,7 +53,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../core/dial
 })
 export class StoreListComponent implements AfterViewInit, OnInit {
 
-  displayedColumns: string[] = ['stt', 'storeName', 'userFullName', 'actions'];
+  // === THÊM 2 CỘT MỚI VÀO ĐÂY ===
+  displayedColumns: string[] = ['stt', 'storeName', 'userFullName', 'storeAddress', 'notes', 'actions'];
   dataSource = new MatTableDataSource<any>();
 
   resultsLength = 0;

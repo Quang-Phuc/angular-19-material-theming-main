@@ -53,6 +53,20 @@
         <td mat-cell *matCellDef="let row"> {{ row.userFullName }} </td>
       </ng-container>
 
+      <ng-container matColumnDef="storeAddress">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Địa chỉ </th>
+        <td mat-cell *matCellDef="let row" class="truncate-cell" [matTooltip]="row.storeAddress">
+          {{ row.storeAddress || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="notes">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Ghi chú </th>
+        <td mat-cell *matCellDef="let row" class="truncate-cell" [matTooltip]="row.notes">
+          {{ row.notes || 'N/A' }}
+        </td>
+      </ng-container>
+
 
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Hành động </th>

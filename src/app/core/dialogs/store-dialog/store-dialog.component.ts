@@ -40,13 +40,13 @@ export class StoreDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.isEditMode = !!data; // Nếu có data truyền vào, là chế độ Edit
 
+    // === THAY ĐỔI FORMGROUP Ở ĐÂY ===
     this.storeForm = this.fb.group({
       storeName: ['', [Validators.required]],
-      userFullName: ['', [Validators.required]],
-      // Thêm các trường khác nếu cần, ví dụ:
-      // storePhone: [''],
-      // storeAddress: ['']
+      storeAddress: [''], // Thêm địa chỉ (không bắt buộc)
+      notes: ['']          // Thêm ghi chú (không bắt buộc)
     });
+    // Đã bỏ userFullName
   }
 
   ngOnInit(): void {

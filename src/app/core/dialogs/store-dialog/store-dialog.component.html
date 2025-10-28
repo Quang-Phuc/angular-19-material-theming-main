@@ -16,11 +16,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Chủ Tiệm</mat-label>
-      <input matInput formControlName="userFullName">
-      @if (storeForm.get('userFullName')?.hasError('required')) {
-        <mat-error>Vui lòng nhập tên chủ tiệm</mat-error>
-      }
+      <mat-label>Địa chỉ</mat-label>
+      <input matInput formControlName="storeAddress" placeholder="Ví dụ: 123 Nguyễn Huệ, Q.1">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ghi chú</mat-label>
+      <textarea matInput formControlName="notes"
+                placeholder="Nhập ghi chú (nếu có)..."
+                rows="3"></textarea>
     </mat-form-field>
 
   </mat-dialog-content>

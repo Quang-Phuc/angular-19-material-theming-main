@@ -38,9 +38,9 @@ export interface ConfirmDialogData {
     }
   `]
 })
-export class ConfirmDialogComponent {
+export class StoreConfirmDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
+    public dialogRef: MatDialogRef<StoreConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
   ) {}
 }
