@@ -16,7 +16,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 
-// THÊM CÁC IMPORT CẦN THIẾT
 import { Subject, Subscription, merge, of, throwError } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, catchError, map, filter, delay } from 'rxjs/operators';
 import * as AOS from 'aos';
@@ -25,9 +24,12 @@ import * as AOS from 'aos';
 import { LicenseService, LicenseHistoryEntry, PagedResponse } from '../../../core/services/license.service'; // cite: 1
 import { NotificationService } from '../../../core/services/notification.service';
 
-// THÊM IMPORT CHO DIALOGS MỚI
-import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/confirm-dialog.component'; // <-- CẬP NHẬT ĐƯỜNG DẪN NÀY
-import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component'; // <-- CẬP NHẬT ĐƯỜNG DẪN NÀY
+// DIALOGS
+import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
+
+// THÊM ROUTERLINK ĐỂ CHUYỂN TRANG
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-license-history',
@@ -39,63 +41,61 @@ import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/licen
     MatProgressSpinnerModule, MatProgressBarModule,
     MatToolbarModule, MatTooltipModule, MatChipsModule,
 
-    // THÊM DIALOGS VÀO IMPORTS
+    // THÊM DIALOGS VÀ ROUTERLINK VÀO IMPORTS
     ConfirmDialogComponent,
-    LicenseHistoryDetailDialogComponent
+    LicenseHistoryDetailDialogComponent,
+    RouterLink
   ],
   templateUrl: './license-history.component.html', // cite: 1
   styleUrl: './license-history.component.scss' // cite: 2
 })
 export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy {
-  // ... (Các thuộc tính inject và @ViewChild giữ nguyên) ...
-  private licenseService = inject(LicenseService);
+  // ... (Tất cả các thuộc tính khác giữ nguyên) ...
+  private licenseService = inject(LicenseService); // cite: 1
   private notification = inject(NotificationService);
-  private dialog = inject(MatDialog); // Đã inject sẵn
+  private dialog = inject(MatDialog);
 
-  displayedColumns: string[] = ['stt', 'packageCode', 'packageName', 'purchaseDate', 'amountPaid', 'status', 'actions'];
-  dataSource = new MatTableDataSource<LicenseHistoryEntry>([]);
+  displayedColumns: string[] = ['stt', 'packageCode', 'packageName', 'purchaseDate', 'amountPaid', 'status', 'actions']; // cite: 1
+  dataSource = new MatTableDataSource<LicenseHistoryEntry>([]); // cite: 1
+  @ViewChild(MatPaginator) paginator!: MatPaginator; // cite: 1
+  @ViewChild(MatSort) sort!: MatSort; // cite: 1
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-  totalElements = 0;
-  pageSize = 10;
-  pageSizeOptions = [5, 10, 20, 50];
+  totalElements = 0; // cite: 1
+  pageSize = 10; // cite: 1
+  pageSizeOptions = [5, 10, 20, 50]; // cite: 1
 
-  private searchSubject = new Subject<string>();
-  private searchSubscription!: Subscription;
-  searchTerm = '';
+  private searchSubject = new Subject<string>(); // cite: 1
+  private searchSubscription!: Subscription; // cite: 1
+  searchTerm = ''; // cite: 1
 
-  isLoading = true;
-  private dataSubscription!: Subscription;
+  isLoading = true; // cite: 1
+  private dataSubscription!: Subscription; // cite: 1
 
-  // THÊM SUBJECT ĐỂ KÍCH HOẠT TẢI LẠI DỮ LIỆU
-  private refreshDataSubject = new Subject<void>();
+  private refreshDataSubject = new Subject<void>(); // cite: 1
 
   ngOnInit(): void {
     AOS.init({ duration: 600, once: true });
-    this.setupSearch();
+    this.setupSearch(); // cite: 1
   }
 
   ngAfterViewInit(): void {
-    if (this.sort) {
+    if (this.sort) { // cite: 1
       this.sort.sortChange.subscribe(() => {
         if (this.paginator) {
           this.paginator.pageIndex = 0;
         }
       });
     }
-    this.loadData();
+    this.loadData(); // cite: 1
   }
 
-
   ngOnDestroy(): void {
-    this.searchSubscription?.unsubscribe();
-    this.dataSubscription?.unsubscribe();
+    this.searchSubscription?.unsubscribe(); // cite: 1
+    this.dataSubscription?.unsubscribe(); // cite: 1
   }
 
   setupSearch(): void {
-    // ... (Giữ nguyên)
-    this.searchSubscription = this.searchSubject.pipe(
+    this.searchSubscription = this.searchSubject.pipe( // cite: 1
       debounceTime(400),
       distinctUntilChanged()
     ).subscribe(value => {
@@ -107,34 +107,32 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   loadData(): void {
-    this.isLoading = true;
-
+    // Không set isLoading ở đây, để switchMap tự xử lý
     if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
+      this.dataSubscription.unsubscribe(); // cite: 1
     }
 
-    if (!this.paginator || !this.sort) {
+    if (!this.paginator || !this.sort) { // cite: 1
       setTimeout(() => this.loadData(), 50);
       return;
     }
 
-    // CẬP NHẬT MERGE ĐỂ LẮNG NGHE refreshDataSubject
-    this.dataSubscription = merge(
+    this.dataSubscription = merge( // cite: 1
       this.sort.sortChange,
       this.paginator.page,
       this.searchSubject.pipe(debounceTime(0)),
-      this.refreshDataSubject.pipe(startWith(null)) // Thêm refresh trigger
+      this.refreshDataSubject.pipe(startWith(null))
     )
       .pipe(
         startWith({}),
         switchMap(() => {
-          this.isLoading = true;
-          return this.licenseService.getLicenseHistory(
+          this.isLoading = true; // cite: 1
+          return this.licenseService.getLicenseHistory( // cite: 1
             this.paginator.pageIndex,
             this.paginator.pageSize,
             this.searchTerm
           ).pipe(
-            catchError(() => {
+            catchError(() => { // cite: 1
               console.error('Failed to load license history');
               this.notification.showError('Không thể tải lịch sử mua.');
               return of({
@@ -143,25 +141,23 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
             })
           );
         }),
-        map(data => {
-          this.isLoading = false;
-          this.totalElements = data.totalElements;
+        map(data => { // cite: 1
+          this.isLoading = false; // cite: 1
+          this.totalElements = data.totalElements; // cite: 1
           return data.content;
         })
       )
       .subscribe(data => {
-        this.dataSource.data = data;
+        this.dataSource.data = data; // cite: 1
       });
   }
 
-  // ... (Các hàm applyFilterFromInput, pageChanged, announceSortChange, getStatusClass, getStatusText giữ nguyên) ...
-
   applyFilterFromInput(filterValue: string): void {
-    this.searchSubject.next(filterValue.trim());
+    this.searchSubject.next(filterValue.trim()); // cite: 1
   }
 
   pageChanged(event: PageEvent): void {
-    this.pageSize = event.pageSize;
+    this.pageSize = event.pageSize; // cite: 1
   }
 
   announceSortChange(sortState: Sort): void {
@@ -186,23 +182,20 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-  /**
-   * CẬP NHẬT HÀM XEM CHI TIẾT
-   */
   viewDetails(row: LicenseHistoryEntry): void {
-    this.dialog.open(LicenseHistoryDetailDialogComponent, {
+    this.dialog.open(LicenseHistoryDetailDialogComponent, { // cite: 1
       data: row,
-      width: '500px', // Đặt chiều rộng dialog
+      width: '500px',
       autoFocus: false
     });
   }
 
   /**
-   * CẬP NHẬT HÀM XÓA
+   * CẬP NHẬT HÀM XÓA - ĐÃ XÓA `isLoading`
    */
   deleteHistory(row: LicenseHistoryEntry): void {
     // 1. Mở dialog xác nhận
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { // cite: 1
       width: '400px',
       data: {
         title: 'Xác nhận Xóa',
@@ -212,34 +205,29 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
 
     // 2. Xử lý sau khi dialog đóng
     dialogRef.afterClosed().pipe(
-      filter(result => result === true), // Chỉ tiếp tục nếu người dùng bấm "Xác nhận"
+      filter(result => result === true), // cite: 1
       switchMap(() => {
-        this.isLoading = true; // Bật thanh loading
+        // this.isLoading = true; // <-- ĐÃ XÓA
 
-        // --- MÔ PHỎNG GỌI API ---
-        // TODO: Thay thế bằng lệnh gọi service thật
-         return this.licenseService.deleteLicenseHistory(row.id);
-
-        // Trả về một Observable mô phỏng thành công sau 1 giây
-
-        // (Nếu muốn mô phỏng lỗi, dùng: return throwError(() => new Error('Delete Failed')).pipe(delay(1000));)
-        // ------------------------
+        return this.licenseService.deleteLicenseHistory(row.id).pipe( // cite: 1
+          map(() => true)
+        );
       }),
-      catchError((err) => {
-        // Xử lý nếu API trả về lỗi
+      catchError((err) => { // cite: 1
         console.error('Delete error:', err);
-        this.isLoading = false;
+        // this.isLoading = false; // <-- ĐÃ XÓA
         this.notification.showError('Xóa thất bại. Vui lòng thử lại.');
         return of(null); // Ngăn pipe tiếp tục
       })
     ).subscribe(result => {
-      // Chỉ chạy nếu API thành công (result không phải là null)
+      // Chỉ chạy nếu API thành công (result là 'true')
       if (result) {
-        this.isLoading = false;
+        // this.isLoading = false; // <-- ĐÃ XÓA
         this.notification.showSuccess('Xóa lịch sử thành công!');
 
         // 3. Kích hoạt tải lại dữ liệu bảng
-        this.refreshDataSubject.next();
+        // Hàm loadData() sẽ tự xử lý việc bật/tắt loading
+        this.refreshDataSubject.next(); // cite: 1
       }
     });
   }

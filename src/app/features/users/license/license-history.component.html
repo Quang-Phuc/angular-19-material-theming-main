@@ -13,10 +13,17 @@
       <mat-icon>search</mat-icon>
       <span>Tìm</span>
     </button>
+
+    <button mat-flat-button color="accent"
+            class="buy-license-button"
+            [routerLink]="['/purchase-license']">
+      <mat-icon>add_shopping_cart</mat-icon>
+      <span>Mua License</span>
+    </button>
+
   </mat-toolbar>
 
   <div class="mat-elevation-z4 table-container">
-
     @if (isLoading) {
       <mat-progress-bar mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
     } @else {
@@ -90,6 +97,5 @@
                    showFirstLastButtons
                    aria-label="Chọn trang">
     </mat-paginator>
-
   </div>
 </div>
