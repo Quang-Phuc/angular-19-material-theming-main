@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>
+  <mat-icon>visibility</mat-icon>
+  Chi tiết Lịch sử Mua
+</h2>
+<div mat-dialog-content class="dialog-content">
+  <dl>
+    <dt>Mã Gói</dt>
+    <dd>{{ data.packageCode }}</dd>
+
+    <dt>Tên Gói</dt>
+    <dd>{{ data.packageName }}</dd>
+
+    <dt>Ngày Mua</dt>
+    <dd>{{ data.purchaseDate | date:'dd/MM/yyyy HH:mm:ss' }}</dd>
+
+    <dt>Số Tiền</dt>
+    <dd>{{ data.amountPaid | currency:'VND':'symbol':'1.0-0' }}</dd>
+
+    <dt>Trạng thái</dt>
+    <dd>
+      <mat-chip-option [ngClass]="getStatusClass(data.status)" selected disableRipple>
+        {{ getStatusText(data.status) }}
+      </mat-chip-option>
+    </dd>
+  </dl>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="onClose()">Đóng</button>
+</div>
