@@ -20,7 +20,7 @@ import { debounceTime, distinctUntilChanged, switchMap, startWith, catchError, m
 import * as AOS from 'aos';
 
 // Services and Interfaces
-import { LicenseService, LicenseHistoryEntry, PagedResponse } from '../../../core/services/license.service';
+import { LicenseService, LicenseHistoryEntry, PagedResponse } from '../../../core/services/license.service'; // cite: 1
 import { NotificationService } from '../../../core/services/notification.service';
 // TODO: Create these dialog components
 // import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
@@ -35,8 +35,8 @@ import { NotificationService } from '../../../core/services/notification.service
     MatInputModule, MatIconModule, MatButtonModule, MatDialogModule,
     MatProgressSpinnerModule, MatToolbarModule, MatTooltipModule, MatChipsModule
   ],
-  templateUrl: './license-history.component.html',
-  styleUrl: './license-history.component.scss'
+  templateUrl: './license-history.component.html', // cite: 1
+  styleUrl: './license-history.component.scss' // cite: 2
 })
 export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -93,7 +93,6 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
       }
       // Note: loadData is triggered by merge() in ngAfterViewInit,
       // no need to call it explicitly here unless merge strategy changes.
-      // this.loadData();
     });
   }
 
@@ -116,7 +115,7 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
         startWith({}), // Trigger initial load
         switchMap(() => {
           this.isLoading = true; // Set loading true before API call
-          return this.licenseService.getLicenseHistory(
+          return this.licenseService.getLicenseHistory( // cite: 1
             this.paginator.pageIndex,
             this.paginator.pageSize,
             this.searchTerm
@@ -124,17 +123,17 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
             catchError(() => {
               console.error('Failed to load license history');
               this.notification.showError('Không thể tải lịch sử mua.'); // Show error to user
-              return of({ // Return default structure on error
+              // FIX: Add missing properties for PagedResponse on error
+              return of({
                 content: [],
                 totalElements: 0,
-                totalPages: 0,
-                number: 0,
-                size: this.pageSize
+                totalPages: 0, // Add missing property
+                number: 0,     // Add missing property (current page)
+                size: this.pageSize // Add missing property (page size)
               } as PagedResponse<LicenseHistoryEntry>);
             })
           );
         }),
-        // Moved map inside the main pipe, after switchMap and catchError
         map(data => {
           this.isLoading = false; // Set loading false after data processing
           this.totalElements = data.totalElements;
@@ -146,11 +145,14 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
       });
   }
 
-
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.searchSubject.next(filterValue);
+  /**
+   * Apply filter value from input or button click
+   */
+  applyFilterFromInput(filterValue: string): void {
+    // Trim and pass the value to the search subject
+    this.searchSubject.next(filterValue.trim());
   }
+
 
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
