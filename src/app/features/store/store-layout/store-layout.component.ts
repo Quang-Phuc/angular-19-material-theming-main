@@ -128,8 +128,18 @@ export class StoreLayoutComponent implements OnInit {
     });
   }
 
-  loadMenuBasedOnRole(): void { /* ... (giữ nguyên) ... */ }
-  logout(): void { /* ... (giữ nguyên) ... */ }
+  loadMenuBasedOnRole(): void {
+    const roles = this.authService.getUserRoles();
+    if (roles.includes('1') || roles.includes('2')) {
+      this.menuItems = this.ownerMenu;
+    } else if (roles.includes('3')) {
+      this.menuItems = this.employeeMenu;
+    } else {
+      console.error('Role không hợp lệ sau khi kiểm tra license!');
+      this.authService.logout();
+    }
+  }
+  logout(): void { this.authService.logout();}
 
   /**
    * 5. THÊM HÀM MỞ DIALOG (Giống login.component.ts)

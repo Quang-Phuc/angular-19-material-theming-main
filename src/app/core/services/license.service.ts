@@ -6,6 +6,7 @@ import { map, tap } from 'rxjs/operators';
 // import { HttpHeaders } from '@angular/common/http'; // Đã xóa
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
+import {HttpParams} from '@angular/common/http';
 
 // Ensure all these interfaces are exported
 export interface ApiResponse<T> {
@@ -54,12 +55,32 @@ export interface QrResponse {
   base64Data: string;
 }
 export interface HistoryRequest {
-  license_package_id: number;
+  licensePackageId: number;
 }
 export interface HistoryResponse {
   id: number;
 }
+export interface LicenseHistoryEntry {
+  id: number;
+  packageCode: string; // Mã gói (vd: TRIAL, PRO)
+  packageName: string; // Tên gói (vd: Dùng thử, Chuyên nghiệp)
+  purchaseDate: string; // Ngày mua (API trả về dạng string ISO)
+  amountPaid: number;   // Số tiền
+  userId: number;       // ID người mua
+  userName?: string;      // Tên người mua (optional)
+  status: string;       // Trạng thái (vd: PENDING, COMPLETED, FAILED)
+  // Thêm các trường chi tiết khác nếu API trả về
+  transactionCode?: string;
+  paymentMethod?: string;
+}
 
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number; // Trang hiện tại (zero-based)
+  size: number;   // Kích thước trang
+}
 
 @Injectable({
   providedIn: 'root'
@@ -70,7 +91,7 @@ export class LicenseService {
   private authService = inject(AuthService);
   private apiUrl = '/license-packages';
   private historyApiUrl = '/license-history';
-  // private licenseCheckUrl = '/license/check'; // <-- 1. ĐÃ XÓA API CŨ
+  private currentCheck = '/license/check'; // <-- 2. SẼ SỬ DỤNG API NÀY
   private currentUsageUrl = '/license/check'; // <-- 2. SẼ SỬ DỤNG API NÀY
 
   private currentUsageSubject = new BehaviorSubject<CurrentUsage | null>(null);
@@ -105,7 +126,7 @@ export class LicenseService {
     return this.apiService.post<QrResponse>(`${this.apiUrl}/qr`, payload);
   }
   saveLicenseHistory(packageId: number): Observable<HistoryResponse> {
-    const payload: HistoryRequest = { license_package_id: packageId };
+    const payload: HistoryRequest = { licensePackageId: packageId };
     return this.apiService.post<HistoryResponse>(this.historyApiUrl, payload);
   }
 
@@ -117,7 +138,7 @@ export class LicenseService {
    * Lưu lại để trang Purchase License có thể so sánh.
    */
   fetchCurrentUsage(): Observable<CurrentUsage> {
-    return this.apiService.get<CurrentUsage>(this.currentUsageUrl).pipe(
+    return this.apiService.get<CurrentUsage>(this.currentCheck).pipe(
       tap(response => {
         // Lưu lại thông tin usage
         this.currentUsageSubject.next(response);
@@ -129,4 +150,27 @@ export class LicenseService {
   getStoredUsage(): CurrentUsage | null {
     return this.currentUsageSubject.getValue();
   }
+
+  getLicenseHistory(page: number, size: number, searchTerm?: string): Observable<PagedResponse<LicenseHistoryEntry>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      params = params.set('search', searchTerm.trim());
+    }
+
+    // SỬA LẠI: Bỏ dấu {} bao quanh params
+    return this.apiService.get<PagedResponse<LicenseHistoryEntry>>(this.historyApiUrl, params); // Truyền trực tiếp params
+  }
+
+  /**
+   * === 4. PHƯƠNG THỨC MỚI: XÓA LỊCH SỬ MUA ===
+   * (Nếu API hỗ trợ)
+   * @param historyId ID của mục lịch sử cần xóa
+   */
+  deleteLicenseHistory(historyId: number): Observable<void> { // Hoặc kiểu trả về khác tùy API
+    return this.apiService.delete<void>(`${this.historyApiUrl}/${historyId}`);
+  }
+
 }
