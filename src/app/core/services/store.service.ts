@@ -46,4 +46,18 @@ export class StoreService {
   deleteStore(id: string): Observable<any> {
     return this.api.delete<any>(`${this.endpoint}/${id}`);
   }
+
+  // Thêm hàm này vào tệp store.service.ts, bên trong class StoreService
+
+  /**
+   * Lấy danh sách tiệm rút gọn cho dropdown (không phân trang)
+   */
+  getStoreDropdownList(): Observable<any[]> {
+    // Giả sử API có endpoint /stores/dropdown trả về [{ storeId: 1, storeName: 'Tiệm A' }, ...]
+    // Nếu không có, bạn có thể dùng tạm:
+    // const params = new HttpParams().set('size', 1000); // Lấy 1000 tiệm
+    // return this.api.get<any>(this.endpoint, params).pipe(map(res => res.data.content));
+
+    return this.api.get<any[]>(`${this.endpoint}/dropdown`);
+  }
 }

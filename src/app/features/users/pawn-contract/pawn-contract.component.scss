@@ -1,0 +1,294 @@
+/* pawn-contract.component.scss */
+/* KẾ THỪA TOÀN BỘ STYLE TỪ LICENSE-HISTORY */
+@use '@angular/material' as mat;
+@use 'sass:color';
+
+// Biến màu (Giữ nguyên)
+$popular-border-color: #3f51b5;
+$popular-accent-color: #ff4081;
+$color-green-success: #28a745;
+$color-warn-red: #f44336;
+$table-row-hover-bg: #e9ecef;
+$table-row-stripe-bg: #f8f9fa;
+$table-border-color: #dee2e6;
+$table-header-bg: #f8f9fa;
+$color-green-bg: #10b981;
+$color-green-text: #ffffff;
+$color-blue-bg: #3b82f6;
+$color-blue-text: #ffffff;
+$color-orange-bg: #fd7e14;
+$color-orange-text: #ffffff;
+$color-purple-bg: #8b5cf6;
+$color-purple-text: #ffffff;
+
+
+.page-container {
+  padding: 24px;
+  position: relative;
+}
+
+/* THAY ĐỔI: Chỉnh lại filter-toolbar để chứa nhiều item hơn */
+.filter-toolbar {
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-wrap: wrap; // Cho phép rớt dòng trên màn hình nhỏ
+  align-items: center;
+  margin-bottom: 16px; // Giảm margin
+  gap: 12px; // Tăng gap
+
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* THAY ĐỔI: Style chung cho các trường filter */
+.filter-field {
+  width: 200px; // Đặt chiều rộng cố định
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 50px !important; // Đặt chiều cao
+  }
+}
+
+/* Nút Tìm (Giữ nguyên từ .search-button) */
+.search-button {
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 50px;
+  box-sizing: border-box;
+  border: none;
+  background-color: $popular-border-color;
+  color: white;
+  &:hover {
+    background-color: color.adjust($popular-border-color, $lightness: 8%);
+  }
+}
+
+/* --- STYLE MỚI CHO THANH HÀNH ĐỘNG --- */
+.action-toolbar {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 24px;
+  box-shadow: none;
+  border: none;
+}
+
+/* Nút Thêm Mới (Style giống .buy-license-button) */
+.add-new-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 44px; // Có thể nhỏ hơn
+  box-sizing: border-box;
+  border: none;
+  background-color: $color-green-success;
+  color: white;
+  &:hover {
+    background-color: color.adjust($color-green-success, $lightness: -8%);
+  }
+}
+
+/* Nút Thanh lý (Màu đỏ) */
+.liquidate-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 44px;
+  box-sizing: border-box;
+  border: none;
+  background-color: $color-warn-red;
+  color: white;
+  &:hover {
+    background-color: color.adjust($color-warn-red, $lightness: -8%);
+  }
+}
+/* --- HẾT STYLE MỚI --- */
+
+
+/* --- TOÀN BỘ STYLE BẢNG ĐƯỢC KẾ THỪA --- */
+.table-container {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid $table-border-color;
+  position: relative;
+}
+
+table.mat-table {
+  width: 100%;
+}
+
+th.mat-mdc-header-cell {
+  background: linear-gradient(135deg, $popular-border-color 0%, color.adjust($popular-border-color, $lightness: 10%) 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  border-bottom: none;
+}
+tr.mat-mdc-header-row {
+  border-bottom: none;
+}
+
+tr.mat-mdc-row {
+  transition: background-color 0.2s ease;
+  &:nth-child(even) {
+    background-color: $table-row-stripe-bg;
+  }
+  &:hover {
+    background-color: $table-row-hover-bg;
+  }
+}
+
+td.mat-mdc-cell {
+  padding: 14px 16px;
+  border-bottom: 1px solid $table-border-color;
+  color: #333;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom: none;
+}
+
+/* Style cho các ô đặc biệt trong bảng mới */
+.cell-subtext {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+.cell-contract-id strong {
+  color: $popular-border-color;
+  font-weight: 600;
+}
+.cell-amount {
+  font-weight: 600;
+  color: #000;
+}
+.cell-amount-paid {
+  color: $color-green-success;
+  font-weight: 500;
+}
+.cell-amount-interest {
+  color: $color-warn-red;
+  font-weight: 600;
+}
+
+
+th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
+  width: 80px;
+  text-align: center;
+  padding-right: 16px;
+}
+th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+tr.mat-mdc-row.mat-no-data-row {
+  background-color: #fff;
+  td.mat-mdc-cell {
+    text-align: center;
+    padding: 32px;
+    color: #777;
+    font-style: italic;
+    border: none;
+  }
+}
+
+mat-paginator {
+  background-color: $table-header-bg;
+  border-top: 1px solid $table-border-color;
+  border-radius: 0 0 12px 12px;
+}
+
+/* STYLE CHO PROGRESS BAR (Giữ nguyên) */
+.table-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 4px;
+}
+.table-progress-bar-placeholder {
+  height: 4px;
+}
+
+
+/* STYLE CHO TRẠNG THÁI (Giữ nguyên) */
+::ng-deep mat-chip-option {
+  .mat-mdc-chip-checkmark {
+    display: none !important;
+  }
+}
+.status-chip {
+  &.mat-mdc-chip-selected {
+    color: #fff !important;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* THAY ĐỔI: Định nghĩa màu Status mới */
+.status-borrowing { // Đang vay (Xanh dương)
+  &.mat-mdc-chip-selected {
+    background-color: $color-blue-bg !important;
+  }
+}
+.status-paid { // Đã trả (Xanh lá)
+  &.mat-mdc-chip-selected {
+    background-color: $color-green-success !important;
+  }
+}
+.status-overdue { // Quá hạn (Đỏ)
+  &.mat-mdc-chip-selected {
+    background-color: $color-warn-red !important;
+  }
+}
+.status-liquidated { // Thanh lý (Cam)
+  &.mat-mdc-chip-selected {
+    background-color: $color-orange-bg !important;
+  }
+}
+.status-default { // Mặc định
+  &.mat-mdc-chip-selected {
+    background-color: #6c757d !important;
+  }
+}
+
+
+/* STYLE CHO ICON TRONG MENU (Giữ nguyên) */
+.menu-item-icon {
+  margin-right: 12px;
+  vertical-align: middle;
+}
+.menu-item-icon.view {
+  color: $popular-border-color; // Blue
+}
+.menu-item-icon.edit {
+  color: $popular-accent-color; // Pink
+}
+.menu-item-icon.delete {
+  color: $color-warn-red; // Red
+}
+/* THAY ĐỔI: Bổ sung màu cho icon mới */
+.menu-item-icon.print {
+  color: #673ab7; // Purple
+}
+.menu-item-icon.payment {
+  color: $color-green-success; // Green
+}

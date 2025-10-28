@@ -57,7 +57,7 @@ export class StoreLayoutComponent implements OnInit {
     // (Các menu cũ giữ nguyên)
     { name: 'Quản lý Hợp đồng', icon: 'description', children: [ /* ... */ ]},
     { name: 'Khách hàng', icon: 'people', route: '/store/customers' },
-    { name: 'Quản lý Nhân viên', icon: 'manage_accounts', route: '/store/staff' },
+    { name: 'Quản lý Nhân viên', icon: 'manage_accounts', route: 'users/list' },
     // *** THÊM MENU MỚI VÀO ĐÂY ***
     {
       name: 'Quản lý License',

@@ -1,4 +1,4 @@
-// license-history.component.ts
+// license-history.component.ts (ĐÃ CẬP NHẬT)
 
 import { Component, OnInit, ViewChild, AfterViewInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
@@ -15,9 +15,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu'; // <-- *** THÊM IMPORT NÀY ***
+import { MatMenuModule } from '@angular/material/menu';
 
-// THÊM CÁC IMPORT CẦN THIẾT
 import { Subject, Subscription, merge, of, throwError } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, catchError, map, filter, delay } from 'rxjs/operators';
 import * as AOS from 'aos';
@@ -26,13 +25,12 @@ import * as AOS from 'aos';
 import { LicenseService, LicenseHistoryEntry, PagedResponse } from '../../../core/services/license.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
-// DIALOGS
+// DIALOGS (Vẫn import ở đây để service có thể gọi)
 import { ConfirmDialogComponent } from '../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 import { LicenseHistoryDetailDialogComponent } from '../../../core/dialogs/license-history-detail-dialog/license-history-detail-dialog.component';
 import { LicenseAdminDialogComponent } from '../../../core/dialogs/license-admin-dialog/license-admin-dialog.component';
 
-// CẬP NHẬT IMPORT ROUTER
-import { RouterLink, ActivatedRoute } from '@angular/router'; // Thêm ActivatedRoute
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-license-history',
@@ -43,12 +41,9 @@ import { RouterLink, ActivatedRoute } from '@angular/router'; // Thêm Activated
     MatInputModule, MatIconModule, MatButtonModule, MatDialogModule,
     MatProgressSpinnerModule, MatProgressBarModule,
     MatToolbarModule, MatTooltipModule, MatChipsModule,
-    MatMenuModule, // <-- *** THÊM VÀO IMPORTS ***
+    MatMenuModule,
 
-    // THÊM DIALOGS VÀ ROUTERLINK VÀO IMPORTS
-    ConfirmDialogComponent,
-    LicenseHistoryDetailDialogComponent,
-    LicenseAdminDialogComponent,
+    // === SỬA Ở ĐÂY: Đã xóa các Dialog Component ra khỏi mảng imports ===
     RouterLink
   ],
   templateUrl: './license-history.component.html',
@@ -58,9 +53,8 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   private licenseService = inject(LicenseService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
-  private route = inject(ActivatedRoute); // <-- INJECT ROUTE
+  private route = inject(ActivatedRoute);
 
-  // BIẾN MỚI ĐỂ PHÂN QUYỀN
   public isAdmin: boolean = false;
 
   displayedColumns: string[] = ['stt', 'packageCode', 'packageName', 'purchaseDate', 'amountPaid', 'status', 'actions'];
@@ -79,14 +73,12 @@ export class LicenseHistoryComponent implements OnInit, AfterViewInit, OnDestroy
   isLoading = true;
   private dataSubscription!: Subscription;
 
-  // SUBJECT ĐỂ KÍCH HOẠT TẢI LẠI DỮ LIỆU
   private refreshDataSubject = new Subject<void>();
 
   ngOnInit(): void {
     AOS.init({ duration: 600, once: true });
     this.setupSearch();
 
-    // THÊM LOGIC KIỂM TRA ADMIN
     const parentPath = this.route.parent?.snapshot.url[0]?.path;
     this.isAdmin = (parentPath === 'admin');
 

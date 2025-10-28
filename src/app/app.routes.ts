@@ -1,4 +1,4 @@
-// app.routes.ts
+// app.routes.ts (ĐÃ CẬP NHẬT)
 
 import { Routes } from '@angular/router';
 
@@ -11,18 +11,18 @@ import { PurchaseLicenseComponent } from './features/public/purchase-license/pur
 // Admin routes
 import { AdminLayoutComponent } from './features/admin/layout/admin-layout/admin-layout.component';
 import { AdminDashboardComponent } from './features/admin/pages/dashboard/admin-dashboard.component';
-// *** StoreListComponent ĐƯỢC DÙNG CHUNG ***
+// *** CÁC COMPONENT DÙNG CHUNG ***
 import { StoreListComponent } from './features/admin/pages/store-list/store-list.component';
+import { LicenseHistoryComponent } from './features/users/license/license-history.component';
+// === THÊM IMPORT MỚI ===
+import { UserListComponent } from './features/employee/user-list.component';
+
 import { PlanListComponent } from './features/admin/components/plan-list/plan-list.component';
 import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-login.component';
 
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
-
-// *** LicenseHistoryComponent ĐƯỢC DÙNG CHUNG ***
-import {LicenseHistoryComponent} from './features/users/license/license-history.component';
-
 
 export const routes: Routes = [
   // --- Public Routes ---
@@ -57,11 +57,15 @@ export const routes: Routes = [
         path: 'license-history', // <-- Route cho User
         component: LicenseHistoryComponent
       },
-
-      // *** ĐÃ THÊM ROUTE USER TẠI ĐÂY ***
       {
         path: 'stores/list', // <-- Route cho User (vd: /store/stores/list)
         component: StoreListComponent // Dùng chung component
+      },
+
+      // === ROUTE MỚI CHO USER LIST (STORE) ===
+      {
+        path: 'users/list', // (vd: /store/users/list)
+        component: UserListComponent // Dùng chung component
       },
       // (Add other store management pages here, e.g., contracts, customers)
 
@@ -92,6 +96,13 @@ export const routes: Routes = [
         path: 'stores/list', // <-- Route cho Admin (vd: /admin/stores/list)
         component: StoreListComponent
       },
+
+      // === ROUTE MỚI CHO USER LIST (ADMIN) ===
+      {
+        path: 'users/list', // (vd: /admin/users/list)
+        component: UserListComponent // Dùng chung component
+      },
+
       {
         path: 'plans',
         component: PlanListComponent
