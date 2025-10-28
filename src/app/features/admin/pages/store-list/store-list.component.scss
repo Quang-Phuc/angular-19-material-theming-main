@@ -1,233 +1,246 @@
-/* =======================================
-   BIẾN MÀU (Lấy từ theme chung)
-   ======================================= */
-:host {
-  --gradient: linear-gradient(135deg, #007BFF 0%, #00B09B 100%);
-  --primary-blue: #007BFF;
-  --primary-teal: #00B09B;
-  --glow-shadow: 0 0 12px 0px rgba(0, 123, 255, 0.7);
+/* store-list.component.scss */
+/* NỘI DUNG ĐƯỢC SAO CHÉP TỪ license-history.component.scss */
 
-  --light-bg: #ffffff;
-  --light-card: #f8f9fa;
-  --light-hover: #e9ecef;
+@use '@angular/material' as mat;
+@use 'sass:color'; // Import sass color module
 
-  --text-dark: #212529;
-  --text-medium: #495057;
-  --text-light: #6c757d;
+// Biến màu
+$popular-border-color: #3f51b5;
+$popular-accent-color: #ff4081;
+$color-green-success: #28a745;
+$color-warn-red: #f44336;
+$table-row-hover-bg: #e9ecef;
+$table-row-stripe-bg: #f8f9fa;
+$table-border-color: #dee2e6;
+$table-header-bg: #f8f9fa;
+$color-green-bg: #10b981;
+$color-green-text: #ffffff;
+$color-blue-bg: #3b82f6;
+$color-blue-text: #ffffff;
+$color-orange-bg: #fd7e14;
+$color-orange-text: #ffffff;
+$color-purple-bg: #8b5cf6;
+$color-purple-text: #ffffff;
 
-  --border-color: #dee2e6;
 
-  --success: #10b981;    // Xanh lá (active)
-  --warning: #f59e0b;   // Vàng (expired)
-  --info: #0dcaf0;      // Xanh dương nhạt (trial)
-  --danger: #dc3545;     // Đỏ (locked)
-
-  // Đảm bảo :host là block để style áp dụng đúng
-  display: block;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  background-color: #f5f7fa; // Nền trang giống admin layout
-  min-height: 100%; // Đảm bảo nền full trang
-}
-
-/* =======================================
-   BỐ CỤC TRANG & HEADER
-   ======================================= */
 .page-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px; // Tăng khoảng cách
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
-
-  h1 {
-    font-size: 1.8rem;
-    font-weight: 700; // Đậm hơn
-    color: var(--text-dark);
-    margin: 0;
-  }
-
-  // Nút Thêm Mới (Gradient)
-  button[mat-flat-button] {
-    background: var(--gradient);
-    border-radius: 20px;
-    padding: 0 20px;
-    height: 40px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: var(--glow-shadow);
-      transform: translateY(-2px);
-    }
-  }
-}
-
-/* =======================================
-   KHU VỰC TÌM KIẾM ("SMART")
-   ======================================= */
-.search-card {
-  border-radius: 12px;
-  padding: 20px 24px;
-  background-color: var(--light-bg);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); // Shadow nhẹ
-}
-
-.search-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap; // Cho responsive
-}
-
-.search-basic-field {
-  flex: 1;
-  min-width: 300px;
-  // Làm ô search đẹp hơn
-  ::ng-deep .mat-mdc-form-field-flex {
-    background-color: var(--light-card) !important;
-    border-radius: 8px !important;
-  }
-  ::ng-deep .mdc-notched-outline > * {
-    border-color: transparent !important; // Bỏ viền
-  }
-  ::ng-deep &.mat-focused .mdc-notched-outline > * {
-    border-color: var(--primary-blue) !important; // Hiện viền khi focus
-    border-width: 2px !important;
-  }
-}
-
-.advanced-toggle {
-  color: var(--primary-blue);
-  font-weight: 500;
-}
-
-.advanced-search-panel {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding-top: 20px;
-  margin-top: 20px;
-  border-top: 1px solid var(--border-color);
-
-  // Làm ô select đẹp hơn
-  .mat-mdc-form-field {
-    ::ng-deep .mat-mdc-form-field-flex {
-      background-color: var(--light-card) !important;
-      border-radius: 8px !important;
-    }
-    ::ng-deep .mdc-notched-outline > * {
-      border-color: transparent !important;
-    }
-    ::ng-deep &.mat-focused .mdc-notched-outline > * {
-      border-color: var(--primary-blue) !important;
-      border-width: 2px !important;
-    }
-  }
-}
-
-.search-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  align-items: center;
-  grid-column: -1 / 1; // Luôn nằm cuối
-
-  button[mat-flat-button] {
-    background: var(--gradient);
-    border-radius: 20px;
-    &:hover { box-shadow: var(--glow-shadow); }
-  }
-  button[mat-stroked-button] {
-    border-radius: 20px;
-    color: var(--text-medium);
-  }
-}
-
-/* =======================================
-   BẢNG DỮ LIỆU ("ĐẸP VÀO")
-   ======================================= */
-.table-container {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden; // Quan trọng để bo góc table
-  background-color: var(--light-bg); // Nền trắng cho bảng
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-// Lớp phủ Loading
-.loading-shade { /* ... (Giữ nguyên) ... */ }
-
-// Style cho Table Header
-::ng-deep .mat-mdc-header-row {
-  background-color: var(--light-card) !important; // Nền xám nhạt cho header
-  height: 56px;
-}
-::ng-deep .mat-mdc-header-cell {
-  color: var(--text-medium) !important; // Chữ header xám
-  font-weight: 500 !important;
-  font-size: 0.875rem !important; // Font nhỏ hơn
-}
-
-// Style cho Table Row
-::ng-deep .mat-mdc-row {
-  height: 52px;
-  &:hover {
-    background-color: var(--light-hover); // Hiệu ứng hover
-  }
-}
-::ng-deep .mat-mdc-cell {
-  color: var(--text-dark); // Chữ đen
-  font-size: 0.9rem;
-  border-bottom-color: var(--border-color); // Viền mờ hơn
-}
-
-// Hàng "Không có dữ liệu"
-::ng-deep .mat-mdc-no-data-row td {
-  text-align: center;
   padding: 24px;
-  color: var(--text-light);
+  position: relative;
 }
 
-// Nút Hành động (Sửa/Xóa)
-.action-buttons {
-  button {
-    margin-right: 4px; // Giảm khoảng cách
-    &:last-child { margin-right: 0; }
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.filter-toolbar {
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 8px; // Thêm gap để tạo khoảng cách
+
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    margin-right: 16px;
   }
-  // Màu nút edit
-  button[color="primary"] { color: var(--primary-blue); }
-  // Màu nút delete
-  button[color="warn"] { color: var(--danger); }
 }
 
-/* "Pill" Trạng thái (ĐẸP HƠN) */
-.status-pill {
-  padding: 5px 12px; // To hơn
-  border-radius: 16px; // Bo tròn hơn
-  font-size: 0.75rem; // Nhỏ hơn
-  font-weight: 600; // Đậm hơn
-  text-transform: uppercase; // In hoa
-  letter-spacing: 0.5px;
-  color: #fff;
-  display: inline-block; // Cần thiết
-
-  &.status-active { background-color: var(--success); }
-  &.status-trial { background-color: var(--info); color: var(--text-dark); } // Trial màu sáng
-  &.status-expired { background-color: var(--warning); color: var(--text-dark); } // Expired màu sáng
-  &.status-locked { background-color: var(--danger); }
+.spacer {
+  flex: 1 1 auto;
 }
 
-/* =======================================
-   PHÂN TRANG (PAGINATOR)
-   ======================================= */
-::ng-deep .mat-mdc-paginator {
-  background-color: var(--light-card) !important; // Nền xám nhạt
-  border-top: 1px solid var(--border-color);
-  color: var(--text-medium);
+.search-field {
+  width: 300px;
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+
+  /* Đặt chiều cao cố định cho ô input */
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 50px !important; // Đặt chiều cao
+  }
+}
+
+/* Đặt chiều cao và bỏ margin */
+.search-button, .buy-license-button {
+  margin-left: 0; // Bỏ margin, dùng gap của toolbar
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 50px; // Đặt chiều cao bằng với ô input
+  box-sizing: border-box; // Đảm bảo padding không làm tăng chiều cao
+  border: none;
+}
+
+/* MÀU MỚI CHO NÚT TÌM */
+.search-button {
+  background-color: $popular-border-color;
+  color: white;
+  &:hover {
+    background-color: color.adjust($popular-border-color, $lightness: 8%);
+  }
+}
+
+/* MÀU MỚI CHO NÚT MUA LICENSE (Sẽ được dùng cho nút Thêm Tiệm) */
+.buy-license-button {
+  background-color: $color-green-success;
+  color: white;
+  &:hover {
+    background-color: color.adjust($color-green-success, $lightness: -8%);
+  }
+}
+
+.table-container {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid $table-border-color;
+  position: relative;
+}
+
+table.mat-table {
+  width: 100%;
+}
+
+th.mat-mdc-header-cell {
+  background: linear-gradient(135deg, $popular-border-color 0%, color.adjust($popular-border-color, $lightness: 10%) 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  border-bottom: none;
+}
+tr.mat-mdc-header-row {
+  border-bottom: none;
+}
+
+tr.mat-mdc-row {
+  transition: background-color 0.2s ease;
+  &:nth-child(even) {
+    background-color: $table-row-stripe-bg;
+  }
+  &:hover {
+    background-color: $table-row-hover-bg;
+  }
+}
+
+td.mat-mdc-cell {
+  padding: 14px 16px;
+  border-bottom: 1px solid $table-border-color;
+  color: #333;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom: none;
+}
+
+th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
+  /* Điều chỉnh lại cho vừa nút 3 chấm */
+  width: 80px;
+  text-align: center;
+  padding-right: 16px;
+}
+th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+tr.mat-mdc-row.mat-no-data-row {
+  background-color: #fff;
+  td.mat-mdc-cell {
+    text-align: center;
+    padding: 32px;
+    color: #777;
+    font-style: italic;
+    border: none;
+  }
+}
+
+mat-paginator {
+  background-color: $table-header-bg;
+  border-top: 1px solid $table-border-color;
+  border-radius: 0 0 12px 12px;
+}
+
+/* STYLE CHO PROGRESS BAR MỚI */
+.table-progress-bar {
+  position: absolute;
+  top: 0; // Nằm trên cùng của table-container
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 4px; // Chiều cao của progress-bar
+}
+
+.table-progress-bar-placeholder {
+  height: 4px; // Giữ đúng chiều cao khi không loading
+}
+
+
+/* STYLE CHO TRẠNG THÁI (SAO CHÉP TỪ LICENSE) */
+::ng-deep mat-chip-option {
+  // Ẩn cái dấu tick '✓' đi
+  .mat-mdc-chip-checkmark {
+    display: none !important;
+  }
+}
+
+.status-chip {
+  &.mat-mdc-chip-selected { // Chỉ áp dụng khi chip đang 'selected'
+    color: #fff !important; // Chữ trắng cho tất cả
+    padding: 4px 10px; // Chỉnh lại padding
+    font-size: 0.8rem;
+  }
+}
+
+// Hoàn thành (Green) - Dùng cho 'active'
+.status-completed {
+  &.mat-mdc-chip-selected {
+    background-color: #468053 !important; // Màu xanh lá
+  }
+}
+
+// Chờ xử lý (Orange) - Dùng cho 'trial'
+.status-pending {
+  &.mat-mdc-chip-selected {
+    background-color: #fd7e14 !important; // Màu cam
+  }
+}
+
+// Thất bại (Red) - Dùng cho 'locked'
+.status-failed {
+  &.mat-mdc-chip-selected {
+    background-color: #dc3545 !important; // Màu đỏ
+  }
+}
+
+// Mặc định (Gray) - Dùng cho 'expired'
+.status-default {
+  &.mat-mdc-chip-selected {
+    background-color: #6c757d !important; // Màu xám
+  }
+}
+
+/* STYLE CHO ICON TRONG MENU (SAO CHÉP TỪ LICENSE) */
+.menu-item-icon {
+  margin-right: 12px; // Tạo khoảng cách
+  vertical-align: middle;
+}
+
+.menu-item-icon.view {
+  color: $popular-border-color; // Màu Primary (Blue)
+}
+
+.menu-item-icon.edit {
+  color: $popular-accent-color; // Màu Accent (Pink)
+}
+
+.menu-item-icon.delete {
+  color: $color-warn-red; // Màu Warn (Red)
 }
