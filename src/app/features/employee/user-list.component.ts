@@ -68,7 +68,8 @@ export class UserListComponent implements AfterViewInit, OnInit {
   constructor() {
     this.searchForm = this.fb.group({
       basicSearch: [''],
-      storeId: [null]
+      storeId: [null],
+      role: [null] // <-- 1. THÊM MỚI
     });
   }
 
@@ -82,6 +83,15 @@ export class UserListComponent implements AfterViewInit, OnInit {
       if (this.paginator) this.paginator.pageIndex = 0;
       this.refreshTrigger.next();
     });
+
+    // <-- 2. THÊM MỚI: Lắng nghe thay đổi của bộ lọc role -->
+    this.searchForm.get('role')?.valueChanges.pipe(
+      distinctUntilChanged()
+    ).subscribe(() => {
+      if (this.paginator) this.paginator.pageIndex = 0;
+      this.refreshTrigger.next();
+    });
+    // <-- KẾT THÚC THÊM MỚI (2) -->
   }
 
   ngAfterViewInit(): void {
@@ -95,17 +105,16 @@ export class UserListComponent implements AfterViewInit, OnInit {
   }
 
   /**
-   * === THAY ĐỔI: Subscribe và gán vào this.storeList ===
+   * === CẬP NHẬT (3): Xử lý API response có object 'data' ===
    */
-  // Trong tệp user-list.component.ts
-
   loadStoreDropdown(): void {
-    this.storeService.getStoreDropdownList().pipe( // Lỗi 1 sẽ hết sau khi bạn sửa store.service.ts
+    this.storeService.getStoreDropdownList().pipe(
+      map((response: any) => response.data || []), // <-- SỬA Ở ĐÂY: Trích xuất mảng 'data'
       catchError(() => {
         this.notification.showError('Không tải được danh sách cửa hàng');
         return of([]);
       })
-    ).subscribe((stores: any[]) => { // <-- SỬA Ở ĐÂY: Thêm (stores: any[])
+    ).subscribe((stores: any[]) => {
       this.storeList = stores;
     });
   }
@@ -142,6 +151,13 @@ export class UserListComponent implements AfterViewInit, OnInit {
 
     const storeId = this.searchForm.get('storeId')?.value;
     if (storeId) params = params.set('storeId', storeId);
+
+    // <-- 4. THÊM MỚI: Thêm tham số 'role' -->
+    const role = this.searchForm.get('role')?.value;
+    if (role) {
+      params = params.set('role', role);
+    }
+    // <-- KẾT THÚC THÊM MỚI (4) -->
 
     return params;
   }
