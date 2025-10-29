@@ -43,9 +43,9 @@ export class PledgeDialogComponent implements OnInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showAdvancedInfo = false; // <-- THÊM MỚI: Biến để ẩn/hiện
+  showAdvancedInfo = false; // <-- MẶC ĐỊNH LÀ ẨN
 
-  // ... (Tất cả các mock data giữ nguyên) ...
+  // === DỮ LIỆU GIẢ LẬP ===
   assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
@@ -57,7 +57,7 @@ export class PledgeDialogComponent implements OnInit {
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
 
-
+  // === INJECTS ===
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
   @Inject(MAT_DIALOG_DATA) public data: PledgeContract | null = inject(MAT_DIALOG_DATA);
@@ -68,7 +68,6 @@ export class PledgeDialogComponent implements OnInit {
   constructor() {
     this.isEditMode = !!this.data;
 
-    // ... (Toàn bộ logic constructor và các Form Group giữ nguyên) ...
     this.pledgeForm = this.fb.group({
       portraitInfo: this.fb.group({ imageUrl: [null] }),
       customerInfo: this.fb.group({
@@ -135,32 +134,42 @@ export class PledgeDialogComponent implements OnInit {
     });
   }
 
-  // ... (Tất cả các hàm helper và logic (onSave, onCancel...) giữ nguyên) ...
+  // Helper tạo form group cho 1 thành viên gia đình
   private createFamilyMemberGroup(): FormGroup {
     return this.fb.group({ hoTen: [''], soDienThoai: [''], ngheNghiep: [''] });
   }
+
+  // Helper tạo form group cho 1 loại phí
   private createFeeGroup(): FormGroup {
     return this.fb.group({ type: ['NhapTien'], value: [0] });
   }
+
+
   ngOnInit(): void {
     if (this.isEditMode && this.data) {
       this.patchFormData(this.data);
     }
   }
+
   patchFormData(contract: PledgeContract): void {
+    // (Cần mở rộng 'PledgeContract' interface để chứa tất cả dữ liệu mới này)
     this.pledgeForm.patchValue({
       //... (patch các form group)
     });
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
+
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
       this.pledgeForm.markAllAsTouched();
       return;
     }
+
     this.isLoading = true;
     const formData = this.pledgeForm.getRawValue();
+
+    // Gộp dữ liệu từ các form group
     const payload: any = {
       id: this.isEditMode ? this.data?.id : undefined,
       portrait: formData.portraitInfo,
@@ -179,27 +188,36 @@ export class PledgeDialogComponent implements OnInit {
       fees: formData.feesInfo,
       collateral: formData.collateralInfo
     };
+
     console.log('Dữ liệu gửi đi:', payload);
+
     const saveObservable = this.isEditMode
       ? this.pledgeService.updatePledge(this.data!.id!, payload as PledgeContract)
       : this.pledgeService.createPledge(payload as PledgeContract);
+
+    // Giả lập
     this.notification.showSuccess(this.isEditMode ? 'Cập nhật hợp đồng thành công!' : 'Thêm mới hợp đồng thành công!');
     this.isLoading = false;
     this.dialogRef.close(true);
   }
+
   onCancel(): void {
     this.dialogRef.close(false);
   }
+
   private formatDate(date: Date | string | null): string | null {
     if (!date) return null;
     return this.datePipe.transform(date, 'yyyy-MM-dd');
   }
+
   findCustomer(): void {
     this.notification.showInfo('Chức năng tìm kiếm khách hàng đang phát triển.');
   }
+
   addNewAssetType(): void {
     this.notification.showInfo('Mở dialog Thêm mới loại tài sản (chưa làm).');
   }
+
   takePicture(field: string): void {
     this.notification.showInfo(`Chức năng chụp ảnh cho ${field} (chưa làm).`);
   }

@@ -10,7 +10,7 @@
 
 <mat-dialog-content [formGroup]="pledgeForm">
 
-  <fieldset class="customer-info-box content-block"> <legend>Thông tin khách vay</legend>
+  <fieldset class="customer-info-box"> <legend>Thông tin khách vay</legend>
     <div class="customer-main-grid">
       <div class="portrait-capture-box" formGroupName="portraitInfo">
         <mat-icon>account_box</mat-icon>
@@ -295,8 +295,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading">Hủy</button>
-  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="isLoading">
+  <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading" class="cancel-button">Hủy</button>
+  <button mat-flat-button (click)="onSave()" [disabled]="isLoading" class="save-button">
     <mat-icon>save</mat-icon>
     <span>Lưu Hợp đồng</span>
   </button>
