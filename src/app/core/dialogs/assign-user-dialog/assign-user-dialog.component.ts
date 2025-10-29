@@ -1,4 +1,4 @@
-// /core/dialogs/assign-user-dialog/assign-user-dialog.component.ts (TỆP MỚI)
+// /core/dialogs/assign-user-dialog/assign-user-dialog.component.ts (ĐÃ SỬA)
 
 import { Component, Inject, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { HttpParams } from '@angular/common/http';
-import { finalize, switchMap, map, catchError, of } from 'rxjs/operators';
+
+// SỬA LỖI 1: 'of' được import từ 'rxjs', không phải 'rxjs/operators'
+import { finalize, switchMap, map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 // Import service
 import { UserService } from '../../services/user.service';
@@ -83,10 +86,12 @@ export class AssignUserDialogComponent implements OnInit {
     this.isLoading = true;
     const userIdToAssign = this.assignForm.value.userId;
 
+    // SỬA LỖI 2: Đổi tên hàm 'getUser' thành 'getUserById'
     // 1. Lấy thông tin đầy đủ của user
-    this.userService.getUser(userIdToAssign).pipe(
+    this.userService.getUserById(userIdToAssign).pipe(
       // 2. Cập nhật user đó với storeId mới
       switchMap(fullUser => {
+        // Lỗi TS2698 (Lỗi 3) sẽ tự hết khi Lỗi 2 được sửa
         const payload = { ...fullUser, storeId: this.storeId };
         return this.userService.updateUser(userIdToAssign, payload);
       }),

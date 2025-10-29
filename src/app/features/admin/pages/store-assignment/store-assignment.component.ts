@@ -1,4 +1,4 @@
-// /features/admin/pages/store-assignment/store-assignment.component.ts (TỆP MỚI)
+// /features/admin/pages/store-assignment/store-assignment.component.ts (ĐÃ SỬA)
 
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -64,11 +64,11 @@ export class StoreAssignmentComponent implements OnInit {
   ngOnInit(): void {
     this.loadStoreDropdown();
 
-    // Lắng nghe khi người dùng chọn tiệm
-    this.storeSelectionControl.valueChanges.subscribe(store => {
+    // SỬA LỖI 4: Thêm kiểu 'any' cho biến 'store' để tránh lỗi 'never'
+    this.storeSelectionControl.valueChanges.subscribe((store: any) => {
       this.selectedStore = store;
-      if (store && store.id) {
-        this.loadUsersForStore(store.id);
+      if (store && store.id) { // Lỗi 5 (TS2339) tự hết
+        this.loadUsersForStore(store.id); // Lỗi 6 (TS2339) tự hết
       } else {
         this.assignedUsersDataSource.data = [];
       }
@@ -152,10 +152,10 @@ export class StoreAssignmentComponent implements OnInit {
       if (result === true) {
         this.isLoadingUsers = true;
 
-        // Chúng ta cần lấy full thông tin user rồi mới update
-        // (Trừ khi API của bạn cho phép update_patch chỉ 1 trường)
-        this.userService.getUser(user.userId).pipe(
+        // SỬA LỖI 6: Đổi tên hàm 'getUser' thành 'getUserById'
+        this.userService.getUserById(user.userId).pipe(
           switchMap(fullUser => {
+            // Lỗi TS2698 (Lỗi 7) sẽ tự hết khi Lỗi 6 được sửa
             const payload = { ...fullUser, storeId: null };
             return this.userService.updateUser(user.userId, payload);
           }),

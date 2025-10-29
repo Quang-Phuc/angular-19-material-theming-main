@@ -20,6 +20,9 @@ import { UserListComponent } from './features/employee/user-list.component';
 import { PlanListComponent } from './features/admin/components/plan-list/plan-list.component';
 import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-login.component';
 
+// === IMPORT TRANG GÁN GHÉP MỚI ===
+import { StoreAssignmentComponent } from './features/admin/pages/store-assignment/store-assignment.component';
+
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
@@ -102,6 +105,13 @@ export const routes: Routes = [
         path: 'users/list', // (vd: /admin/users/list)
         component: UserListComponent // Dùng chung component
       },
+
+      // ===== BẮT ĐẦU THÊM MỚI =====
+      {
+        path: 'store-assignments', // (vd: /admin/store-assignments)
+        component: StoreAssignmentComponent
+      },
+      // ===== KẾT THÚC THÊM MỚI =====
 
       {
         path: 'plans',
