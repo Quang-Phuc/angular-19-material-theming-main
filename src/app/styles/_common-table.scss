@@ -1,17 +1,21 @@
 /* src/app/styles/_common-table.scss */
 /* Tệp này chứa tất cả các style chung cho MatTable trong dự án */
+@use 'sass:color';
 
 // === BIẾN MÀU CHUNG ===
-// (Lưu ý: Bạn có thể cần di chuyển các biến này ra
-// một tệp _variables.scss riêng nếu muốn)
 $popular-border-color: #3f51b5;
 $popular-accent-color: #ff4081;
 $color-green-success: #28a745;
 $color-warn-red: #f44336;
-$table-row-hover-bg: #e9ecef;
-$table-row-stripe-bg: #f8f9fa;
-$table-border-color: #dee2e6;
-$table-header-bg: #f8f9fa;
+
+// === CÁC BIẾN MÀU MỚI CHO BẢNG ĐẸP HƠN ===
+$table-border-color: #dee2e6;      // Viền mờ
+$table-header-bg: #f8f9fa;         // Nền header sáng
+$table-header-text: #343a40;       // Chữ header đậm
+$table-row-stripe-bg: #fdfdfd;     // Nền hàng chẵn (gần như trắng)
+$table-row-hover-bg: #eef5ff;      // Màu hover (xanh nhạt)
+$table-cell-text: #495057;         // Màu chữ trong ô
+
 
 // === STYLE BẢNG CHUNG ===
 
@@ -20,68 +24,105 @@ $table-header-bg: #f8f9fa;
   border-radius: 12px;
   border: 1px solid $table-border-color;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); // Thêm shadow nhẹ
 }
 
 table.mat-table {
   width: 100%;
+  border-collapse: separate; // Giúp border-right hoạt động
+  border-spacing: 0; // Cần cho border-collapse
 }
 
-// Header của bảng
+// === 1. SỬA HEADER (MÀU SÁNG) & 2. CĂN GIỮA ===
 th.mat-mdc-header-cell {
-  background: linear-gradient(135deg, $popular-border-color 0%, adjust-color($popular-border-color, $lightness: 10%) 100%);
-  color: white;
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 12px 16px;
-  border-bottom: none;
+  background: $table-header-bg;
+  color: $table-header-text;
+  font-weight: 600; // Đậm
+  font-size: 0.925rem;
+  padding: 14px 16px; // Tăng padding
+  border-bottom: 1px solid $table-border-color;
+  text-align: center !important; // Căn giữa TẤT CẢ tiêu đề
+
+  // === 3. THÊM VIỀN DỌC (LÀM RÕ CỘT) ===
+  border-right: 1px solid $table-border-color;
+  &:last-child {
+    border-right: none; // Bỏ viền ở cột cuối
+  }
 }
+
 tr.mat-mdc-header-row {
   border-bottom: none;
 }
 
-// Các hàng của bảng
+// === 4. SỬA HÀNG (HIỆU ỨNG HOVER ĐẸP) ===
 tr.mat-mdc-row {
-  transition: background-color 0.2s ease;
+  // Bỏ 'transition' ở đây để đặt vào 'td' cho mượt hơn
   &:nth-child(even) {
     background-color: $table-row-stripe-bg;
   }
+
+  // Hiệu ứng khi hover
   &:hover {
     background-color: $table-row-hover-bg;
+    // Hiệu ứng "nâng"
+    transform: scale(1.005);
+    box-shadow: 0 3px 10px rgba(63, 81, 181, 0.1);
+    z-index: 2;
+    position: relative;
   }
 }
 
-// Các ô của bảng
+// === 5. SỬA Ô (VIỀN DỌC & FONT) ===
 td.mat-mdc-cell {
   padding: 14px 16px;
   border-bottom: 1px solid $table-border-color;
-  color: #333;
+  color: $table-cell-text; // Màu chữ dễ đọc
   font-size: 0.9rem;
   vertical-align: middle;
+  transition: background-color 0.2s ease; // Chuyển transition vào đây
+
+  // === 3. THÊM VIỀN DỌC (LÀM RÕ CỘT) ===
+  border-right: 1px solid $table-border-color;
+  &:last-child {
+    border-right: none; // Bỏ viền ở cột cuối
+  }
 }
 tr.mat-mdc-row:last-child td.mat-mdc-cell {
   border-bottom: none;
 }
 
 // Căn chỉnh cột đầu và cuối (STT & Actions)
-th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
-  width: 80px;
-  text-align: center;
-  padding-right: 16px;
-}
-th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
-  width: 60px;
+// Chỉ cần căn giữa TD, vì TH đã được căn giữa ở trên
+td.mat-mdc-cell:first-child {
   text-align: center;
 }
+td.mat-mdc-cell:last-child {
+  text-align: center;
+}
+// Bỏ width cố định để bảng tự chia cột đẹp hơn
+// (Bạn có thể thêm lại nếu muốn)
+// th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
+//   width: 80px; ...
+// }
+// th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
+//   width: 60px; ...
+// }
 
 // Hàng "Không có dữ liệu"
 tr.mat-mdc-row.mat-no-data-row {
   background-color: #fff;
+  &:hover { // Bỏ hiệu ứng hover cho hàng rỗng
+    background-color: #fff;
+    transform: none;
+    box-shadow: none;
+  }
   td.mat-mdc-cell {
     text-align: center;
     padding: 32px;
     color: #777;
     font-style: italic;
     border: none;
+    border-right: none; // Tắt viền dọc cho hàng rỗng
   }
 }
 
@@ -123,3 +164,4 @@ mat-paginator {
   text-overflow: ellipsis;
   cursor: default;
 }
+
