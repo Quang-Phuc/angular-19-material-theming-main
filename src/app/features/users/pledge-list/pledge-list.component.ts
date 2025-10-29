@@ -14,59 +14,18 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatBadgeModule } from '@angular/material/badge'; // Thêm MatBadgeModule
-import { MatDatepickerModule } from '@angular/material/datepicker'; // Cho bộ lọc thời gian (nếu cần)
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { merge, Subject, of, Observable } from 'rxjs';
+// *** THÊM 'delay' VÀO IMPORT ***
 import { catchError, map, startWith, switchMap, delay } from 'rxjs/operators';
 import { NotificationService } from '../../../core/services/notification.service';
-// (Giả sử bạn sẽ tạo PledgeDialogComponent sau)
-// import { PledgeDialogComponent } from '../../../../core/dialogs/pledge-dialog/pledge-dialog.component';
 
-// Dữ liệu giả lập dựa trên ảnh
-const MOCK_DATA: any[] = [
-  {
-    id: 'CD252710-001',
-    ngayVay: new Date('2025-10-23'),
-    ngayHetHan: new Date('2025-11-26'),
-    customerName: 'Nguyễn Văn C',
-    collateral: 'SH 2021',
-    loanAmount: 10000000,
-    interestRate: '1.5%/tháng',
-    paid: 0,
-    remaining: 10000000,
-    interestToday: 1050000,
-    interestPeriod: '1 kỳ',
-    status: 'Nợ'
-  },
-  {
-    id: 'CD252310-005',
-    ngayVay: new Date('2025-10-23'),
-    ngayHetHan: new Date('2025-11-21'),
-    customerName: 'Nguyễn Văn A',
-    collateral: 'Xe SH mod...',
-    loanAmount: 20000000,
-    interestRate: '1 triệu/kỳ',
-    paid: 400000,
-    remaining: 20000000,
-    interestToday: 1000000,
-    interestPeriod: '1 kỳ',
-    status: 'Nợ'
-  },
-  {
-    id: 'CD252310-004',
-    ngayVay: new Date('2025-10-23'),
-    ngayHetHan: new Date('2025-11-21'),
-    customerName: 'Nguyễn Văn A',
-    collateral: 'SH mode',
-    loanAmount: 20000000,
-    interestRate: '250k/kỳ',
-    paid: 100000,
-    remaining: 20000000,
-    interestToday: 250000,
-    interestPeriod: '1 kỳ',
-    status: 'Nợ'
-  }
-];
+// *** THAY ĐỔI 1: Import Service và Dialog mới ***
+import { PledgeService, PledgeContract, PagedResponse } from '../../../core/services/pledge.service';
+import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
+
+// (Xóa MOCK_DATA ở đây vì nó đã được chuyển vào service để giả lập)
 
 @Component({
   selector: 'app-pledge-list',
@@ -87,7 +46,8 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
     'stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay',
     'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'
   ];
-  dataSource = new MatTableDataSource<any>();
+  // *** THAY ĐỔI 2: Sử dụng interface PledgeContract ***
+  dataSource = new MatTableDataSource<PledgeContract>();
 
   totalElements = 0;
   isLoading = true;
@@ -101,6 +61,9 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
+
+  // *** THAY ĐỔI 3: Inject PledgeService ***
+  private pledgeService = inject(PledgeService);
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -123,37 +86,43 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
     merge(this.sort.sortChange, this.paginator.page, this.refreshTrigger)
       .pipe(
         startWith({}),
-        switchMap(() => this.loadPledges())
+        // *** SỬA LỖI: Thêm delay(0) để tránh lỗi NG0100 ***
+        delay(0),
+        // *** THAY ĐỔI 4: Gọi service thay vì mock data ***
+        switchMap(() => {
+          this.isLoading = true;
+          return this.pledgeService.getPledges(
+            this.paginator.pageIndex,
+            this.paginator.pageSize,
+            this.filterForm.value
+          ).pipe(
+            catchError((error: Error) => {
+              this.isLoading = false;
+              this.notification.showError(error.message || 'Lỗi khi tải hợp đồng');
+              return of(null); // Trả về null nếu lỗi
+            })
+          );
+        }),
+        map(data => {
+          this.isLoading = false;
+          if (data === null) {
+            return []; // Mảng rỗng nếu có lỗi
+          }
+          this.totalElements = data.totalElements;
+          return data.content;
+        })
       ).subscribe(data => {
       this.dataSource.data = data;
     });
   }
 
   /**
-   * Tải danh sách hợp đồng (Giả lập)
+   * (Đã được thay thế bằng logic trong ngAfterViewInit)
    */
-  loadPledges(): Observable<any[]> {
-    this.isLoading = true;
-
-    // Lấy giá trị filter
-    const filterValues = this.filterForm.value;
-    console.log('Đang tải dữ liệu với filter:', filterValues);
-
-    // === GIẢ LẬP API CALL ===
-    // Thay thế 'of(MOCK_DATA)' bằng 'this.pledgeService.getPledges(...)'
-    return of(MOCK_DATA).pipe(
-      delay(500), // Giả lập độ trễ mạng
-      map(data => {
-        this.isLoading = false;
-        this.totalElements = data.length;
-        return data;
-      }),
-      catchError((error: Error) => {
-        this.isLoading = false;
-        this.notification.showError(error.message);
-        return of([]);
-      })
-    );
+  loadPledges(): void {
+    // Hàm này giờ không cần thiết vì logic đã ở trong switchMap
+    // nhưng nếu muốn gọi thủ công, có thể dùng refreshTrigger
+    this.refreshTrigger.next();
   }
 
   /**
@@ -178,41 +147,46 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   }
 
   /**
-   * Mở dialog thêm mới
+   * Mở dialog thêm mới/chỉnh sửa
    */
-  openPledgeDialog(row?: any): void {
-    this.notification.showInfo('Chức năng "Thêm/Sửa Hợp đồng" đang được phát triển.');
-    // const dialogRef = this.dialog.open(PledgeDialogComponent, {
-    //   width: '800px',
-    //   data: row,
-    //   disableClose: true
-    // });
+  openPledgeDialog(row?: PledgeContract): void {
+    // *** THAY ĐỔI 5: Mở PledgeDialogComponent ***
+    const dialogRef = this.dialog.open(PledgeDialogComponent, {
+      width: '900px', // Tăng độ rộng cho dialog
+      maxWidth: '95vw',
+      data: row, // Truyền 'row' vào dialog (sẽ là null nếu Thêm mới)
+      disableClose: true
+    });
 
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result === true) {
-    //     this.refreshTrigger.next();
-    //   }
-    // });
+    dialogRef.afterClosed().subscribe(result => {
+      // Nếu dialog trả về 'true' (lưu thành công)
+      if (result === true) {
+        this.refreshTrigger.next(); // Tải lại danh sách
+      }
+    });
   }
 
   // === CÁC HÀNH ĐỘNG TRÊN ROW ===
-  onEdit(row: any): void {
+  onEdit(row: PledgeContract): void {
+    // Truyền dữ liệu 'row' vào dialog để Sửa
     this.openPledgeDialog(row);
   }
 
-  onPrint(row: any): void {
+  onPrint(row: PledgeContract): void {
     this.notification.showInfo(`Đang in hợp đồng ${row.id}...`);
   }
 
-  onShowHistory(row: any): void {
+  onShowHistory(row: PledgeContract): void {
     this.notification.showInfo(`Xem lịch sử HĐ ${row.id}...`);
   }
 
-  onDelete(row: any): void {
-    this.notification.showError(`Chức năng xóa HĐ ${row.id} chưa được kích hoạt.`);
+  onDelete(row: PledgeContract): void {
+    // TODO: Thêm dialog xác nhận trước khi xóa
+    this.notification.showWarning(`Bạn có chắc muốn xóa HĐ ${row.id}? (Chưa thực thi)`);
+    // this.pledgeService.deletePledge(row.id!).subscribe(...)
   }
 
   openLiquidationAssets(): void {
-   // this.notification.showWarning('Xem danh sách "Tài sản cần thanh lý"...');
+    // this.notification.showWarning('Xem danh sách "Tài sản cần thanh lý"...');
   }
 }

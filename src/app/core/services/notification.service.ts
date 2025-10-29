@@ -1,39 +1,43 @@
-import {inject, Injectable} from '@angular/core';
-import {MatSnackBar, MatSnackBarConfig} from '@angular/material/snack-bar';
+import { inject, Injectable } from '@angular/core';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
   private snackBar = inject(MatSnackBar);
 
-  // Cấu hình chung cho vị trí
-  private commonConfig: MatSnackBarConfig = {
-    horizontalPosition: 'right', verticalPosition: 'top',
-  };
+  /**
+   * Hàm helper Cấu hình chung
+   * Lấy cấu hình chung và gán panelClass
+   */
+  private getConfig(panelClass: string, duration = 5000): MatSnackBarConfig {
+    return {
+      duration: duration,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: [panelClass], // Key để custom màu trong styles.scss
+    };
+  }
 
   /**
    * Hiển thị thông báo thành công (màu xanh)
    */
   showSuccess(message: string): void {
-    this.snackBar.open(message, 'Đóng', {
-      ...this.commonConfig, // Áp dụng cấu hình vị trí
-      duration: 3000, panelClass: ['snackbar-success'] // (Bạn cần định nghĩa class này trong styles.scss)
-    });
+    const config = this.getConfig('snackbar-success', 3000);
+    this.snackBar.open(message, 'Đóng', config);
   }
 
   /**
    * Hiển thị thông báo lỗi (màu đỏ)
+   * (Sử dụng logic phân tích lỗi của bạn)
    */
   showError(error: any): void {
     let errorMessage = 'Đã có lỗi xảy ra';
+    const config = this.getConfig('snackbar-error', 7000); // Lỗi hiển thị lâu hơn
 
     if (!error) {
-      this.snackBar.open(errorMessage, 'Đóng', {
-        ...this.commonConfig,
-        duration: 5000,
-        panelClass: ['snackbar-error']
-      });
+      this.snackBar.open(errorMessage, 'Đóng', config);
       return;
     }
 
@@ -68,24 +72,22 @@ export class NotificationService {
         'Đã có lỗi xảy ra';
     }
 
-    this.snackBar.open(errorMessage, 'Đóng', {
-      ...this.commonConfig,
-      duration: 5000,
-      panelClass: ['snackbar-error'],
-    });
+    this.snackBar.open(errorMessage, 'Đóng', config);
   }
 
-
-
-
   /**
-   * NEW: Shows an informational notification (blue)
+   * Hiển thị thông báo thông tin (màu xanh dương)
    */
   showInfo(message: string): void {
-    this.snackBar.open(message, 'Đóng', {
-      ...this.commonConfig, // Apply position config
-      duration: 3000,       // Duration like success
-      panelClass: ['snackbar-info'] // Needs CSS definition
-    });
+    const config = this.getConfig('snackbar-info', 3000);
+    this.snackBar.open(message, 'Đóng', config);
+  }
+
+  /**
+   * Hiển thị thông báo cảnh báo (màu cam/vàng)
+   */
+  showWarning(message: string): void {
+    const config = this.getConfig('snackbar-warning', 5000); //
+    this.snackBar.open(message, 'Đóng', config);
   }
 }

@@ -1,0 +1,195 @@
+<h2 mat-dialog-title class="dialog-title">
+  {{ isEditMode ? 'Cập nhật hợp đồng cầm đồ' : 'Thêm mới hợp đồng cầm đồ' }}
+</h2>
+
+@if (isLoading) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+} @else {
+  <div class.="progress-bar-placeholder"></div>
+}
+
+<mat-dialog-content [formGroup]="pledgeForm">
+
+  <fieldset class="customer-info-box" formGroupName="customerInfo">
+    <legend>Thông tin khách vay</legend>
+
+    <div class="form-grid-3-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Họ Tên *</mat-label>
+        <input matInput formControlName="hoTen">
+        @if (pledgeForm.get('customerInfo.hoTen')?.hasError('required')) {
+          <mat-error>Họ tên là bắt buộc</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ngày Sinh</mat-label>
+        <input matInput [matDatepicker]="pickerNgaySinh" formControlName="ngaySinh">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerNgaySinh"></mat-datepicker-toggle>
+        <mat-datepicker #pickerNgaySinh></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Số CCCD</mat-label>
+        <input matInput formControlName="soCCCD">
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid-3-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Số Điện Thoại *</mat-label>
+        <input matInput formControlName="soDienThoai">
+        <button mat-icon-button matSuffix (click)="findCustomer()" matTooltip="Tìm khách hàng">
+          <mat-icon color="primary">person_search</mat-icon>
+        </button>
+        @if (pledgeForm.get('customerInfo.soDienThoai')?.hasError('required')) {
+          <mat-error>Số điện thoại là bắt buộc</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-span-2">
+        <mat-label>Địa Chỉ</mat-label>
+        <input matInput formControlName="diaChi">
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid-3-col">
+      <mat-form-field appearance="outline" class="col-start-3">
+        <mat-label>Ngày Cấp CCCD</mat-label>
+        <input matInput [matDatepicker]="pickerNgayCap" formControlName="ngayCapCCCD">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerNgayCap"></mat-datepicker-toggle>
+        <mat-datepicker #pickerNgayCap></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </fieldset>
+
+  <fieldset class="form-section" formGroupName="loanInfo">
+    <legend>Thông tin cho vay</legend>
+
+    <div class="form-grid-3-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Tên Tài Sản *</mat-label>
+        <input matInput formControlName="tenTaiSan">
+        @if (pledgeForm.get('loanInfo.tenTaiSan')?.hasError('required')) {
+          <mat-error>Tên tài sản là bắt buộc</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Loại Tài Sản *</mat-label>
+        <input type="text" matInput formControlName="loaiTaiSan" [matAutocomplete]="autoAssetType">
+        <mat-autocomplete #autoAssetType="matAutocomplete">
+          @for (option of (assetTypes$ | async); track option) {
+            <mat-option [value]="option">{{option}}</mat-option>
+          }
+        </mat-autocomplete>
+        @if (pledgeForm.get('loanInfo.loaiTaiSan')?.hasError('required')) {
+          <mat-error>Loại tài sản là bắt buộc</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-stroked-button color="primary" class="add-asset-type-btn" (click)="addNewAssetType()">
+        <mat-icon>add</mat-icon>
+        Thêm mới loại tài sản
+      </button>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ngày Vay *</mat-label>
+        <input matInput [matDatepicker]="pickerNgayVay" formControlName="ngayVay">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerNgayVay"></mat-datepicker-toggle>
+        <mat-datepicker #pickerNgayVay></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mã Hợp Đồng</mat-label>
+        <input matInput formControlName="maHopDong" placeholder="Tự động sinh (hoặc nhập)">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tổng Tiền Vay *</mat-label>
+        <input matInput type="number" formControlName="tongTienVay">
+        @if (pledgeForm.get('loanInfo.tongTienVay')?.hasError('required')) {
+          <mat-error>Tổng tiền vay là bắt buộc</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid-4-col">
+      <mat-form-field appearance="outline" class="col-span-2">
+        <mat-label>Kỳ Đóng Lãi *</mat-label>
+        <input matInput type="number" formControlName="kyDongLai_So" class="input-prefix">
+        <mat-select formControlName="kyDongLai_DonVi" class="select-suffix">
+          <mat-option value="Ngay">Ngày</mat-option>
+          <mat-option value="Thang">Tháng</mat-option>
+          <mat-option value="Nam">Năm</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-span-2">
+        <mat-label>Lãi Suất *</mat-label>
+        <input matInput type="number" formControlName="laiSuat_So" class="input-prefix">
+        <mat-select formControlName="laiSuat_DonVi" class="select-suffix">
+          <mat-option value="PhanTram">% / Kỳ</mat-option>
+          <mat-option value="TienMat">Lãi / Triệu / Kỳ</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Số Lần Trả *</mat-label>
+        <input matInput type="number" formControlName="soLanTra">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Kiểu Thu Lãi *</mat-label>
+        <mat-select formControlName="kieuThuLai">
+          <mat-option value="Truoc">Trước</mat-option>
+          <mat-option value="Sau">Sau</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Ghi Chú</mat-label>
+      <textarea matInput formControlName="ghiChu" rows="3"></textarea>
+    </mat-form-field>
+  </fieldset>
+
+
+  <mat-accordion multi>
+    <mat-expansion-panel formGroupName="feesInfo">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Các loại phí
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Các trường nhập liệu về phí (phí mở HĐ, phí bảo hiểm...) sẽ ở đây.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel formGroupName="collateralInfo">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Thông tin tài sản thế chấp
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Các trường nhập liệu chi tiết về tài sản (Số khung, số máy, mô tả...) sẽ ở đây.</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel formGroupName="attachments">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Đính kèm file
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Chức năng upload file (Ảnh CCCD, ảnh tài sản...) sẽ ở đây.</p>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading">Hủy</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="isLoading">
+    <mat-icon>save</mat-icon>
+    <span>Lưu Hợp đồng</span>
+  </button>
+</mat-dialog-actions>

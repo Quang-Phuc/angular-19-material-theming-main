@@ -14,37 +14,37 @@ import { AdminDashboardComponent } from './features/admin/pages/dashboard/admin-
 // *** CÁC COMPONENT DÙNG CHUNG ***
 import { StoreListComponent } from './features/admin/pages/store-list/store-list.component';
 import { LicenseHistoryComponent } from './features/users/license/license-history.component';
-// === THÊM IMPORT MỚI ===
 import { UserListComponent } from './features/employee/user-list.component';
 
 import { PlanListComponent } from './features/admin/components/plan-list/plan-list.component';
 import { AdminLoginComponent } from './features/admin/pages/admin-login/admin-login.component';
-
-// === IMPORT TRANG GÁN GHÉP MỚI ===
 import { StoreAssignmentComponent } from './features/admin/pages/store-assignment/store-assignment.component';
 
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
-import {LicensePackageListComponent} from './features/admin/pages/license-package-list/license-package-list.component';
+import { LicensePackageListComponent } from './features/admin/pages/license-package-list/license-package-list.component';
+
+// ===== IMPORT MỚI CHO TRANG CẦM ĐỒ =====
+import { PledgeListComponent } from './features/users/pledge-list/pledge-list.component';
 
 export const routes: Routes = [
   // --- Public Routes ---
   {
     path: 'home',
-    component: HomepageComponent
+    component: HomepageComponent,
   },
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
   },
   {
     path: 'register',
-    component: RegisterComponent
+    component: RegisterComponent,
   },
   {
     path: 'purchase-license',
-    component: PurchaseLicenseComponent
+    component: PurchaseLicenseComponent,
   },
 
   // --- Store Management Routes (User) ---
@@ -55,37 +55,45 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: StoreDashboardComponent // Dashboard for store owner/employee
+        component: StoreDashboardComponent, // Dashboard for store owner/employee
       },
       {
         path: 'license-history', // <-- Route cho User
-        component: LicenseHistoryComponent
+        component: LicenseHistoryComponent,
       },
       {
         path: 'stores/list', // <-- Route cho User (vd: /store/stores/list)
-        component: StoreListComponent // Dùng chung component
+        component: StoreListComponent, // Dùng chung component
       },
 
       // === ROUTE MỚI CHO USER LIST (STORE) ===
       {
         path: 'users/list', // (vd: /store/users/list)
-        component: UserListComponent // Dùng chung component
+        component: UserListComponent, // Dùng chung component
       },
+
+      // ===== THÊM MỚI ROUTE CẦM ĐỒ =====
+      {
+        path: 'pledges', // (vd: /store/pledges)
+        component: PledgeListComponent,
+      },
+      // ====================================
+
       // (Add other store management pages here, e.g., contracts, customers)
 
       // Redirect base /store to dashboard
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
-      }
-    ]
+        pathMatch: 'full',
+      },
+    ],
   },
 
   // --- Admin Routes ---
   {
     path: 'admin/login', // Standalone admin login page
-    component: AdminLoginComponent
+    component: AdminLoginComponent,
   },
   {
     path: 'admin',
@@ -94,37 +102,37 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: AdminDashboardComponent // Admin dashboard
+        component: AdminDashboardComponent, // Admin dashboard
       },
       {
         path: 'stores/list', // <-- Route cho Admin (vd: /admin/stores/list)
-        component: StoreListComponent
+        component: StoreListComponent,
       },
 
       // === ROUTE MỚI CHO USER LIST (ADMIN) ===
       {
         path: 'users/list', // (vd: /admin/users/list)
-        component: UserListComponent // Dùng chung component
+        component: UserListComponent, // Dùng chung component
       },
 
       // ===== BẮT ĐẦU THÊM MỚI =====
       {
         path: 'store-assignments', // (vd: /admin/store-assignments)
-        component: StoreAssignmentComponent
+        component: StoreAssignmentComponent,
       },
       {
         path: 'license-packages', // (vd: /admin/license-packages)
-        component: LicensePackageListComponent
+        component: LicensePackageListComponent,
       },
       // ===== KẾT THÚC THÊM MỚI =====
 
       {
         path: 'plans',
-        component: PlanListComponent
+        component: PlanListComponent,
       },
       {
         path: 'license-history', // <-- Route cho Admin (vd: /admin/license-history)
-        component: LicenseHistoryComponent // Dùng chung component
+        component: LicenseHistoryComponent, // Dùng chung component
       },
       // (Add other admin pages here)
 
@@ -132,9 +140,9 @@ export const routes: Routes = [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
-      }
-    ]
+        pathMatch: 'full',
+      },
+    ],
   },
 
   // --- Default Route ---
@@ -142,7 +150,7 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: '/login', // Or '/home' depending on your logic
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   // --- Wildcard Route (404) ---

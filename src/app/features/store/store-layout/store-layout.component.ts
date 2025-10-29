@@ -55,7 +55,7 @@ export class StoreLayoutComponent implements OnInit {
   private ownerMenu: NavItem[] = [
     { name: 'Dashboard', icon: 'dashboard', route: '/store/dashboard' },
     // (Các menu cũ giữ nguyên)
-    { name: 'Quản lý Hợp đồng', icon: 'description', children: [ /* ... */ ]},
+    { name: 'Quản lý Hợp đồng', icon: 'description', children: [ { name: 'Khách hàng', icon: 'people', route: '/store/pledges' }]},
     { name: 'Khách hàng', icon: 'people', route: '/store/customers' },
     { name: 'Quản lý Nhân viên', icon: 'manage_accounts', route: 'users/list' },
     // *** THÊM MENU MỚI VÀO ĐÂY ***
