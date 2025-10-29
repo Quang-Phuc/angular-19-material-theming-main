@@ -26,6 +26,7 @@ import { StoreAssignmentComponent } from './features/admin/pages/store-assignmen
 // Store management routes (NEW)
 import { StoreLayoutComponent } from './features/store/store-layout/store-layout.component';
 import { StoreDashboardComponent } from './features/store/store-dashboard/store-dashboard.component';
+import {LicensePackageListComponent} from './features/admin/pages/license-package-list/license-package-list.component';
 
 export const routes: Routes = [
   // --- Public Routes ---
@@ -110,6 +111,10 @@ export const routes: Routes = [
       {
         path: 'store-assignments', // (vd: /admin/store-assignments)
         component: StoreAssignmentComponent
+      },
+      {
+        path: 'license-packages', // (vd: /admin/license-packages)
+        component: LicensePackageListComponent
       },
       // ===== KẾT THÚC THÊM MỚI =====
 
