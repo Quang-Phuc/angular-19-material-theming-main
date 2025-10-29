@@ -1,60 +1,70 @@
-<h2 mat-dialog-title class="dialog-title">
-  {{ isEditMode ? 'Cập nhật hợp đồng cầm đồ' : 'Thêm mới hợp đồng cầm đồ' }}
-</h2>
-
-@if (isLoading) {
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-} @else {
-  <div class="progress-bar-placeholder"></div>
-}
-
 <mat-dialog-content [formGroup]="pledgeForm">
 
-  <fieldset class="customer-info-box" formGroupName="customerInfo">
+  <fieldset class="customer-info-box">
     <legend>Thông tin khách vay</legend>
-    <div class="form-grid-3-col">
-      <mat-form-field appearance="outline">
-        <mat-label>Họ Tên *</mat-label>
-        <input matInput formControlName="hoTen">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Ngày Sinh</mat-label>
-        <input matInput [matDatepicker]="pickerNgaySinh" formControlName="ngaySinh">
-        <mat-datepicker-toggle matIconSuffix [for]="pickerNgaySinh"></mat-datepicker-toggle>
-        <mat-datepicker #pickerNgaySinh></mat-datepicker>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Số CCCD</mat-label>
-        <input matInput formControlName="soCCCD">
-        <button mat-icon-button matSuffix (click)="takePicture('CCCD')" matTooltip="Chụp ảnh CCCD">
-          <mat-icon color="primary">photo_camera</mat-icon>
+    <div class="customer-main-grid">
+
+      <div class="portrait-capture-box" formGroupName="portraitInfo">
+        <mat-icon>account_box</mat-icon>
+        <span>Ảnh chân dung</span>
+        <button mat-flat-button color="primary" type="button" class="capture-btn" (click)="takePicture('Portrait')">
+          <mat-icon>photo_camera</mat-icon>
+          Chụp ảnh
         </button>
-      </mat-form-field>
-    </div>
-    <div class="form-grid-3-col">
-      <mat-form-field appearance="outline">
-        <mat-label>Số Điện Thoại *</mat-label>
-        <input matInput formControlName="soDienThoai">
-        <button mat-icon-button matSuffix (click)="findCustomer()" matTooltip="Tìm khách hàng">
-          <mat-icon color="primary">person_search</mat-icon>
+        <button mat-stroked-button type="button" class="upload-btn">
+          <mat-icon>upload</mat-icon>
+          Tải lên
         </button>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="col-span-2">
-        <mat-label>Địa Chỉ</mat-label>
-        <input matInput formControlName="diaChi">
-      </mat-form-field>
-    </div>
-    <div class="form-grid-3-col">
-      <mat-form-field appearance="outline">
-        <mat-label>Ngày Cấp CCCD</mat-label>
-        <input matInput [matDatepicker]="pickerNgayCap" formControlName="ngayCapCCCD">
-        <mat-datepicker-toggle matIconSuffix [for]="pickerNgayCap"></mat-datepicker-toggle>
-        <mat-datepicker #pickerNgayCap></mat-datepicker>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Nơi Cấp CCCD</mat-label>
-        <input matInput formControlName="noiCapCCCD">
-      </mat-form-field>
+      </div>
+
+      <div class="customer-fields-grid" formGroupName="customerInfo">
+        <div class="form-grid-2-col">
+          <mat-form-field appearance="outline">
+            <mat-label>Họ Tên *</mat-label>
+            <input matInput formControlName="hoTen">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Số Điện Thoại *</mat-label>
+            <input matInput formControlName="soDienThoai">
+            <button mat-icon-button matSuffix (click)="findCustomer()" matTooltip="Tìm khách hàng">
+              <mat-icon color="primary">person_search</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ngày Sinh</mat-label>
+            <input matInput [matDatepicker]="pickerNgaySinh" formControlName="ngaySinh">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerNgaySinh"></mat-datepicker-toggle>
+            <mat-datepicker #pickerNgaySinh></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Số CCCD</mat-label>
+            <input matInput formControlName="soCCCD">
+            <button mat-icon-button matSuffix (click)="takePicture('CCCD')" matTooltip="Chụp ảnh CCCD">
+              <mat-icon color="primary">photo_camera</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ngày Cấp CCCD</mat-label>
+            <input matInput [matDatepicker]="pickerNgayCap" formControlName="ngayCapCCCD">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerNgayCap"></mat-datepicker-toggle>
+            <mat-datepicker #pickerNgayCap></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nơi Cấp CCCD</mat-label>
+            <input matInput formControlName="noiCapCCCD">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-span-2">
+            <mat-label>Địa Chỉ</mat-label>
+            <input matInput formControlName="diaChi">
+          </mat-form-field>
+        </div>
+      </div>
     </div>
   </fieldset>
 
@@ -62,77 +72,71 @@
     <mat-tab label="Thông tin khác">
       <div class="tab-content" formGroupName="customerExtraInfo">
         <div class="form-grid-3-col">
+          <mat-form-field appearance="outline"><mat-label>Mã Khách Hàng</mat-label><input matInput formControlName="maKhachHang"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Nghề nghiệp</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email"></mat-form-field>
+          <mat-form-field appearance="outline" class="col-span-2"><mat-label>Nơi làm việc</mat-label><input matInput formControlName="noiLamViec"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Thu nhập</mat-label><input matInput type="number" formControlName="thuNhap"></mat-form-field>
+          <mat-form-field appearance="outline" class="col-span-3"><mat-label>Hộ khẩu thường trú</mat-label><input matInput formControlName="hoKhau"></mat-form-field>
+          <mat-form-field appearance="outline" class="col-span-3"><mat-label>Ghi chú (Khách hàng)</mat-label><textarea matInput formControlName="ghiChu" rows="2"></textarea></mat-form-field>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Thành phần gia đình"> <div class="tab-content" formGroupName="familyInfo">
+      <div class="form-grid-2-col">
+        <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="nguoiLienHe"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Số điện thoại người liên hệ</mat-label><input matInput formControlName="sdtNguoiLienHe"></mat-form-field>
+      </div>
+      <hr>
+      <div class="form-grid-3-col" formGroupName="voChong">
+        <mat-form-field appearance="outline"><mat-label>Họ tên chồng/vợ</mat-label><input matInput formControlName="hoTen"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Số điện thoại chồng/vợ</mat-label><input matInput formControlName="soDienThoai"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Nghề nghiệp chồng/vợ</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
+      </div>
+      <div class="form-grid-3-col" formGroupName="bo">
+        <mat-form-field appearance="outline"><mat-label>Họ tên bố</mat-label><input matInput formControlName="hoTen"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Số điện thoại bố</mat-label><input matInput formControlName="soDienThoai"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Nghề nghiệp bố</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
+      </div>
+      <div class="form-grid-3-col" formGroupName="me">
+        <mat-form-field appearance="outline"><mat-label>Họ tên mẹ</mat-label><input matInput formControlName="hoTen"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Số điện thoại mẹ</mat-label><input matInput formControlName="soDienThoai"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Nghề nghiệp mẹ</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
+      </div>
+    </div>
+    </mat-tab>
+
+    <mat-tab label="Thông tin cho vay">
+      <div class="tab-content" formGroupName="loanExtraInfo">
+        <div class="form-grid-4-col"> <mat-form-field appearance="outline">
+          <mat-label>Tình trạng</mat-label>
+          <mat-select formControlName="tinhTrang">
+            @for (item of (tinhTrangList$ | async); track item) { <mat-option [value]="item">{{item}}</mat-option> }
+          </mat-select>
+        </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Mã Khách Hàng</mat-label>
-            <input matInput formControlName="maKhachHang">
+            <mat-label>Loại đối tác</mat-label>
+            <mat-select formControlName="loaiDoiTac">
+              @for (item of (doiTacList$ | async); track item) { <mat-option [value]="item.id">{{item.name}}</mat-option> }
+            </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Nghề nghiệp</mat-label>
-            <input matInput formControlName="ngheNghiep">
+            <mat-label>Người Theo Dõi</mat-label>
+            <mat-select formControlName="nguoiTheoDoi">
+              @for (item of (nguoiTheoDoiList$ | async); track item) { <mat-option [value]="item.id">{{item.name}}</mat-option> }
+            </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="col-span-2">
-            <mat-label>Nơi làm việc</mat-label>
-            <input matInput formControlName="noiLamViec">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Thu nhập</mat-label>
-            <input matInput type="number" formControlName="thuNhap">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="col-span-3">
-            <mat-label>Hộ khẩu thường trú</mat-label>
-            <input matInput formControlName="hoKhau">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="col-span-3">
-            <mat-label>Ghi chú (Khách hàng)</mat-label>
-            <textarea matInput formControlName="ghiChu" rows="2"></textarea>
+            <mat-label>Nguồn khách hàng</mat-label>
+            <mat-select formControlName="nguonKhachHang">
+              @for (item of (nguonKhachHangList$ | async); track item) { <mat-option [value]="item.id">{{item.name}}</mat-option> }
+            </mat-select>
           </mat-form-field>
         </div>
       </div>
     </mat-tab>
 
-    <mat-tab label="Người liên hệ & Gia đình">
-      <div class="tab-content" formGroupName="familyInfo">
-        <div class="form-grid-2-col">
-          <mat-form-field appearance="outline">
-            <mat-label>Người liên hệ</mat-label>
-            <input matInput formControlName="nguoiLienHe">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Số điện thoại người liên hệ</mat-label>
-            <input matInput formControlName="sdtNguoiLienHe">
-          </mat-form-field>
-        </div>
-        <hr>
-        <div class="form-grid-3-col" formGroupName="voChong">
-          <mat-form-field appearance="outline">
-            <mat-label>Họ tên chồng/vợ</mat-label>
-            <input matInput formControlName="hoTen">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Số điện thoại chồng/vợ</mat-label>
-            <input matInput formControlName="soDienThoai">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Nghề nghiệp chồng/vợ</mat-label>
-            <input matInput formControlName="ngheNghiep">
-          </mat-form-field>
-        </div>
-        <div class="form-grid-3-col" formGroupName="bo">
-          <mat-form-field appearance="outline"><mat-label>Họ tên bố</mat-label><input matInput formControlName="hoTen"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số điện thoại bố</mat-label><input matInput formControlName="soDienThoai"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Nghề nghiệp bố</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
-        </div>
-        <div class="form-grid-3-col" formGroupName="me">
-          <mat-form-field appearance="outline"><mat-label>Họ tên mẹ</mat-label><input matInput formControlName="hoTen"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số điện thoại mẹ</mat-label><input matInput formControlName="soDienThoai"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Nghề nghiệp mẹ</mat-label><input matInput formControlName="ngheNghiep"></mat-form-field>
-        </div>
-      </div>
-    </mat-tab>
   </mat-tab-group>
 
   <fieldset class="form-section" formGroupName="loanInfo">
@@ -179,26 +183,7 @@
         <mat-select formControlName="kieuThuLai"><mat-option value="Truoc">Trước</mat-option><mat-option value="Sau">Sau</mat-option></mat-select>
       </mat-form-field>
     </div>
-    <div class="form-grid-3-col">
-      <mat-form-field appearance="outline">
-        <mat-label>Tình trạng</mat-label>
-        <mat-select formControlName="tinhTrang">
-          @for (item of (tinhTrangList$ | async); track item) { <mat-option [value]="item">{{item}}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Loại đối tác</mat-label>
-        <mat-select formControlName="loaiDoiTac">
-          @for (item of (doiTacList$ | async); track item) { <mat-option [value]="item.id">{{item.name}}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Nguồn khách hàng</mat-label>
-        <mat-select formControlName="nguonKhachHang">
-          @for (item of (nguonKhachHangList$ | async); track item) { <mat-option [value]="item.id">{{item.name}}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-    </div>
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Ghi Chú (Hợp đồng)</mat-label>
       <textarea matInput formControlName="ghiChu" rows="2"></textarea>
@@ -207,7 +192,6 @@
 
 
   <mat-accordion multi>
-
     <mat-expansion-panel formGroupName="feesInfo">
       <mat-expansion-panel-header><mat-panel-title>Các loại phí</mat-panel-title></mat-expansion-panel-header>
       <div class="fee-grid" formGroupName="phiKho">
@@ -243,7 +227,6 @@
         </mat-radio-group>
       </div>
     </mat-expansion-panel>
-
     <mat-expansion-panel formGroupName="collateralInfo">
       <mat-expansion-panel-header><mat-panel-title>Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
       <div class="form-grid-4-col">
@@ -282,10 +265,8 @@
         <textarea matInput formControlName="ghiChuTaiSan" rows="2"></textarea>
       </mat-form-field>
     </mat-expansion-panel>
-
     <mat-expansion-panel formGroupName="attachments">
       <mat-expansion-panel-header><mat-panel-title>Đính kèm file</mat-panel-title></mat-expansion-panel-header>
-
       <div class="file-dropzone">
         <mat-icon>cloud_upload</mat-icon>
         <span>Đính kèm ảnh</span>
@@ -295,7 +276,6 @@
           <span>Hoặc kéo thả ảnh tại đây</span>
         </button>
       </div>
-
       <div class="attachment-upload-link">
         <a href="javascript:;"><mat-icon>add</mat-icon> UPLOAD FILE ĐÍNH KÈM</a>
       </div>

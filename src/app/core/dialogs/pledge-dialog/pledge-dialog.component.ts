@@ -1,4 +1,5 @@
-// *** ĐẢM BẢO DÒNG NÀY ĐƯỢC IMPORT ĐẦU TIÊN ***
+// src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
+
 import { Component, OnInit, inject, Inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -17,14 +18,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
 
 import { NotificationService } from '../../services/notification.service';
-import { PledgeService, PledgeContract } from '../../services/pledge.service'; // Import service
+import { PledgeService, PledgeContract } from '../../services/pledge.service';
 import { Observable, of } from 'rxjs';
 
 // Interface giả lập cho các dropdown
 interface DropdownOption { id: string; name: string; }
 interface FamilyMember { hoTen: string; soDienThoai: string; ngheNghiep: string; }
 
-// *** DECORATOR @Component NẰM Ở ĐÂY ***
 @Component({
   selector: 'app-pledge-dialog',
   standalone: true,
@@ -43,6 +43,7 @@ export class PledgeDialogComponent implements OnInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
+  // showAdvancedLoanInfo = false; // <-- ĐÃ XÓA
 
   // === DỮ LIỆU GIẢ LẬP CHO CÁC DROPDOWN MỚI ===
   assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
@@ -54,6 +55,8 @@ export class PledgeDialogComponent implements OnInit {
     { id: 'all', name: 'Tất cả' }, { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' },
     { id: 'an', name: 'an' }, { id: 'nguyen_a', name: 'Nguyễn A' }
   ]);
+  // THÊM MỚI
+  nguoiTheoDoiList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'user_1', name: 'User 1' }]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
 
   // Accordion "Thông tin tài sản"
@@ -70,6 +73,11 @@ export class PledgeDialogComponent implements OnInit {
     this.isEditMode = !!this.data;
 
     this.pledgeForm = this.fb.group({
+      // 0. Thông tin ảnh chân dung
+      portraitInfo: this.fb.group({
+        imageUrl: [null]
+      }),
+
       // 1. Thông tin khách vay (Chính)
       customerInfo: this.fb.group({
         hoTen: ['', Validators.required],
@@ -78,7 +86,7 @@ export class PledgeDialogComponent implements OnInit {
         soDienThoai: ['', Validators.required],
         diaChi: [''],
         ngayCapCCCD: [null],
-        noiCapCCCD: [''] // <-- MỚI
+        noiCapCCCD: ['']
       }),
 
       // 1b. Tab Thông tin khác (Khách hàng)
@@ -101,7 +109,15 @@ export class PledgeDialogComponent implements OnInit {
         me: this.createFamilyMemberGroup()
       }),
 
-      // 2. Thông tin cho vay (Chính)
+      // 1d. Tab Thông tin cho vay (Tab mới)
+      loanExtraInfo: this.fb.group({
+        tinhTrang: ['Binh Thuong'],
+        loaiDoiTac: ['khach_hang'],
+        nguoiTheoDoi: ['all'],
+        nguonKhachHang: ['all']
+      }),
+
+      // 2. Thông tin cho vay (Chính - Fieldset)
       loanInfo: this.fb.group({
         tenTaiSan: ['', Validators.required],
         loaiTaiSan: ['', Validators.required],
@@ -115,10 +131,6 @@ export class PledgeDialogComponent implements OnInit {
         soLanTra: [1],
         kieuThuLai: ['Truoc', Validators.required],
         ghiChu: [''],
-        // <-- MỚI -->
-        tinhTrang: ['Binh Thuong'],
-        loaiDoiTac: ['khach_hang'],
-        nguonKhachHang: ['all']
       }),
 
       // 3. Accordion Các loại phí
@@ -141,9 +153,7 @@ export class PledgeDialogComponent implements OnInit {
       }),
 
       // 5. Accordion Đính kèm file
-      attachments: this.fb.group({
-        // (logic upload file sẽ ở đây)
-      })
+      attachments: this.fb.group({})
     });
   }
 
@@ -154,7 +164,7 @@ export class PledgeDialogComponent implements OnInit {
 
   // Helper tạo form group cho 1 loại phí
   private createFeeGroup(): FormGroup {
-    return this.fb.group({ type: ['NhapTien'], value: [0] }); // 'NhapTien' hoặc 'Nhap %'
+    return this.fb.group({ type: ['NhapTien'], value: [0] });
   }
 
 
@@ -164,23 +174,14 @@ export class PledgeDialogComponent implements OnInit {
     }
   }
 
-  /**
-   * Điền dữ liệu vào form khi ở chế độ Sửa
-   */
   patchFormData(contract: PledgeContract): void {
-    // (Lưu ý: Cần mở rộng 'PledgeContract' interface để chứa tất cả dữ liệu mới này)
+    // (Cần mở rộng 'PledgeContract' interface để chứa tất cả dữ liệu mới này)
     this.pledgeForm.patchValue({
-      customerInfo: contract.customer,
-      loanInfo: contract.loan,
-      // TODO: patchValue cho customerExtraInfo, familyInfo, feesInfo, collateralInfo...
+      //... (patch các form group)
     });
-
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
 
-  /**
-   * Xử lý lưu
-   */
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
@@ -192,21 +193,23 @@ export class PledgeDialogComponent implements OnInit {
     const formData = this.pledgeForm.getRawValue();
 
     // Gộp dữ liệu từ các form group
-    const payload: any = { // (Nên cập nhật PledgeContract interface)
+    const payload: any = {
       id: this.isEditMode ? this.data?.id : undefined,
+      portrait: formData.portraitInfo,
       customer: {
         ...formData.customerInfo,
-        ...formData.customerExtraInfo, // Gộp thông tin
+        ...formData.customerExtraInfo,
         ngaySinh: this.formatDate(formData.customerInfo.ngaySinh),
         ngayCapCCCD: this.formatDate(formData.customerInfo.ngayCapCCCD)
       },
-      family: formData.familyInfo, // Gộp thông tin
+      family: formData.familyInfo,
       loan: {
         ...formData.loanInfo,
+        ...formData.loanExtraInfo, // <-- GỘP CẢ THÔNG TIN TỪ TAB MỚI
         ngayVay: this.formatDate(formData.loanInfo.ngayVay)!,
       },
-      fees: formData.feesInfo, // Gộp thông tin
-      collateral: formData.collateralInfo // Gộp thông tin
+      fees: formData.feesInfo,
+      collateral: formData.collateralInfo
     };
 
     console.log('Dữ liệu gửi đi:', payload);
@@ -236,11 +239,9 @@ export class PledgeDialogComponent implements OnInit {
   }
 
   addNewAssetType(): void {
-    // TODO: Mở dialog "Thêm mới loại tài sản" tại đây
     this.notification.showInfo('Mở dialog Thêm mới loại tài sản (chưa làm).');
   }
 
-  // Chụp ảnh
   takePicture(field: string): void {
     this.notification.showInfo(`Chức năng chụp ảnh cho ${field} (chưa làm).`);
   }

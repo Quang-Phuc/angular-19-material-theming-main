@@ -152,8 +152,8 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   openPledgeDialog(row?: PledgeContract): void {
     // *** THAY ĐỔI 5: Mở PledgeDialogComponent ***
     const dialogRef = this.dialog.open(PledgeDialogComponent, {
-      width: '900px', // Tăng độ rộng cho dialog
-      maxWidth: '95vw',
+      width: '90%', // Tăng độ rộng cho dialog
+      maxWidth: '1200px',
       data: row, // Truyền 'row' vào dialog (sẽ là null nếu Thêm mới)
       disableClose: true
     });
