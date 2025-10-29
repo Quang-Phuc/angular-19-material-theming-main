@@ -108,8 +108,9 @@
         </mat-autocomplete>
       </mat-form-field>
 
-      <button mat-flat-button color="primary" matTooltip="Thêm mới loại tài sản" class="add-asset-type-btn" (click)="addNewAssetType()">
+      <button mat-stroked-button type="button" matTooltip="Thêm mới loại tài sản" class="add-asset-type-btn" (click)="addNewAssetType()">
         <mat-icon>add</mat-icon>
+        <span>Thêm mới loại tài sản</span>
       </button>
 
       <mat-form-field appearance="outline">
@@ -154,16 +155,103 @@
   </fieldset>
 
 
-  <mat-accordion multi class="content-block"> <mat-expansion-panel formGroupName="feesInfo">
-    <mat-expansion-panel-header><mat-panel-title>3. Các loại phí</mat-panel-title></mat-expansion-panel-header>
-  </mat-expansion-panel>
+  <mat-accordion multi class="content-block">
+    <mat-expansion-panel formGroupName="feesInfo">
+      <mat-expansion-panel-header><mat-panel-title>3. Các loại phí</mat-panel-title></mat-expansion-panel-header>
+
+      <div class="fee-grid" formGroupName="phiKho">
+        <label>Phí kho</label>
+        <mat-radio-group formControlName="type">
+          <mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button>
+          <mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button>
+        </mat-radio-group>
+        <mat-form-field appearance="outline">
+          <mat-label>Giá trị</mat-label>
+          <input matInput type="number" formControlName="value">
+        </mat-form-field>
+      </div>
+      <hr>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header><mat-panel-title>Các loại phí hàng kỳ</mat-panel-title></mat-expansion-panel-header>
+        <div class="fee-grid" formGroupName="phiLuuKho">
+          <label>Phí lưu kho</label>
+          <mat-radio-group formControlName="type">
+            <mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button>
+            <mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button>
+          </mat-radio-group>
+          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+        </div>
+        <div class="fee-grid" formGroupName="phiRuiRo">
+          <label>Phí rủi ro</label>
+          <mat-radio-group formControlName="type">
+            <mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button>
+            <mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button>
+          </mat-radio-group>
+          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+        </div>
+        <div class="fee-grid" formGroupName="phiQuanLi">
+          <label>Phí quản lí</label>
+          <mat-radio-group formControlName="type">
+            <mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button>
+            <mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button>
+          </mat-radio-group>
+          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+        </div>
+      </mat-expansion-panel>
+    </mat-expansion-panel>
 
     <mat-expansion-panel formGroupName="collateralInfo">
       <mat-expansion-panel-header><mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
+
+      <div class="form-grid-4-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Định Giá Tài Sản</mat-label>
+          <input matInput type="number" formControlName="dinhGia">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Biển Kiếm Soát</mat-label>
+          <input matInput formControlName="bienKiemSoat">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Số Khung</mat-label>
+          <input matInput formControlName="soKhung">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Số Máy</mat-label>
+          <input matInput formControlName="soMay">
+        </mat-form-field>
+      </div>
+      <div class="form-grid-2-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Kho</mat-label>
+          <mat-select formControlName="kho">
+            @for (option of (khoList$ | async); track option.id) {
+              <mat-option [value]="option.id">{{option.name}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Mã Tài Sản</mat-label>
+          <input matInput formControlName="maTaiSan">
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ghi Chú (Tài sản)</mat-label>
+        <textarea matInput formControlName="ghiChuTaiSan" rows="2"></textarea>
+      </mat-form-field>
     </mat-expansion-panel>
 
     <mat-expansion-panel formGroupName="attachments">
       <mat-expansion-panel-header><mat-panel-title>5. Đính kèm file</mat-panel-title></mat-expansion-panel-header>
+
+      <div class="file-dropzone">
+        <mat-icon>cloud_upload</mat-icon>
+        <span>Bấm tải ảnh <span style="font-weight: 400; color: #6c757d;">Hoặc kéo thả ảnh tại đây</span></span>
+        <div class="dropzone-subtext" style="margin-top: 4px;">JPG, JPEG, PNG nhỏ hơn 1MB</div>
+      </div>
+      <div class="attachment-upload-link">
+        <a><mat-icon>add</mat-icon>UPLOAD FILE ĐÍNH KÈM</a>
+      </div>
     </mat-expansion-panel>
   </mat-accordion>
 

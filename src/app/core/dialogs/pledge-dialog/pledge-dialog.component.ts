@@ -112,7 +112,8 @@ export class PledgeDialogComponent implements OnInit {
         laiSuat_So: [0, Validators.required],
 
         // SỬA LỖI 2: Đổi 'PhanTram' thành giá trị khớp với HTML
-        laiSuat_DonVi: ['Lai%/Thang', Validators.required],
+        // === THAY ĐỔI THEO YÊU CẦU: Đổi giá trị mặc định khớp với ảnh ===
+        laiSuat_DonVi: ['Lai/Trieu/Ngay', Validators.required],
 
         soLanTra: [1],
         kieuThuLai: ['Truoc', Validators.required],

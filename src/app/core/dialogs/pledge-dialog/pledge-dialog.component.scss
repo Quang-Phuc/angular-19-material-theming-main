@@ -217,11 +217,21 @@ mat-expansion-panel {
 hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 
 /* === SỬA NÚT "THÊM MỚI TÀI SẢN" === */
+/* === THAY ĐỔI THEO YÊU CẦU === */
 .add-asset-type-btn {
   height: 48px;
-  min-width: 48px;
-  width: 48px;
-  padding: 0;
+  /* min-width: 48px; */ /* <-- XÓA */
+  width: auto; /* <-- SỬA */
+  padding: 0 16px; /* <-- SỬA */
+  display: inline-flex; /* <-- THÊM */
+  align-items: center; /* <-- THÊM */
+  gap: 6px; /* <-- THÊM */
+
+  mat-icon { /* <-- THÊM */
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* Style cho input có prefix/suffix (Kỳ đóng lãi, Lãi suất) */
@@ -346,6 +356,7 @@ mat-dialog-actions {
   .add-asset-type-btn {
     height: 48px;
     width: 100%; // <-- Sửa cho mobile: Nút vuông thành rộng 100%
+    justify-content: center; /* <-- THÊM */
   }
 
   ::ng-deep .input-prefix { width: 100% !important; border: none; }
