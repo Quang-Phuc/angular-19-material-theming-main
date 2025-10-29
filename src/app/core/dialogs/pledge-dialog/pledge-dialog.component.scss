@@ -276,6 +276,48 @@ mat-dialog-actions {
   }
 }
 
+/* === NÚT THÊM LOẠI TÀI SẢN - VUÔNG XANH LÁ === */
+/* DÁN VÀO pledge-dialog.component.scss */
+
+.add-asset-type-btn {
+  height: 48px !important;           /* Cùng chiều cao với mat-form-field */
+  min-height: 48px !important;
+  line-height: 48px !important;
+  padding: 0 16px !important;        /* Khoảng cách chữ */
+  border-radius: 8px !important;
+  background-color: $color-green-success !important; /* Xanh lá */
+  color: white !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+  transition: all 0.3s ease;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0 !important;
+  }
+
+  span {
+    font-size: 0.95rem;
+  }
+
+  &:hover {
+    background-color: #{darken($color-green-success, 8%)} !important;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
   .form-grid-3-col, .form-grid-4-col { grid-template-columns: repeat(2, 1fr); }

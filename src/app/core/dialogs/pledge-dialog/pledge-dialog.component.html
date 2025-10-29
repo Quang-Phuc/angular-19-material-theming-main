@@ -198,11 +198,13 @@
     <fieldset class="form-section content-block" formGroupName="loanInfo">
       <legend>2. Thông tin cho vay</legend>
 
+      <!-- THAY ĐOẠN NÀY TRONG pledge-dialog.component.html -->
       <div class="form-grid-3-col">
         <mat-form-field appearance="outline">
           <mat-label>Tên Tài Sản *</mat-label>
           <input matInput formControlName="tenTaiSan" placeholder="Xe Wave RSX">
         </mat-form-field>
+
         <mat-form-field appearance="outline">
           <mat-label>Loại Tài Sản *</mat-label>
           <input type="text" matInput formControlName="loaiTaiSan" [matAutocomplete]="autoAssetType">
@@ -212,8 +214,11 @@
             }
           </mat-autocomplete>
         </mat-form-field>
-        <button mat-stroked-button type="button" class="add-asset-type-btn" (click)="addNewAssetType()">
-          <mat-icon>add</mat-icon> <span>Thêm mới</span>
+
+        <!-- NÚT MỚI: CÓ CHỮ "THÊM MỚI", NỀN XANH LÁ, CÙNG CHIỀU CAO -->
+        <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()" matTooltip="Thêm loại tài sản mới">
+          <mat-icon>add</mat-icon>
+          <span>Thêm mới</span>
         </button>
       </div>
 
