@@ -8,13 +8,15 @@ $popular-accent-color: #ff4081;
 $color-green-success: #28a745;
 $color-warn-red: #f44336;
 
-// === CÁC BIẾN MÀU MỚI CHO BẢNG ĐẸP HƠN ===
+// === CÁC BIẾN MÀU CHO BẢNG ===
 $table-border-color: #dee2e6;      // Viền mờ
-$table-header-bg: #f8f9fa;         // Nền header sáng
-$table-header-text: #343a40;       // Chữ header đậm
 $table-row-stripe-bg: #fdfdfd;     // Nền hàng chẵn (gần như trắng)
 $table-row-hover-bg: #eef5ff;      // Màu hover (xanh nhạt)
 $table-cell-text: #495057;         // Màu chữ trong ô
+
+// Nền header (sẽ dùng màu xanh)
+$table-header-bg: #f8f9fa;
+$table-header-text: #343a40;
 
 
 // === STYLE BẢNG CHUNG ===
@@ -33,18 +35,22 @@ table.mat-table {
   border-spacing: 0; // Cần cho border-collapse
 }
 
-// === 1. SỬA HEADER (MÀU SÁNG) & 2. CĂN GIỮA ===
+// === 1. SỬA HEADER (TRẢ LẠI MÀU XANH) & 2. CĂN GIỮA ===
 th.mat-mdc-header-cell {
-  background: $table-header-bg;
-  color: $table-header-text;
+  // Trả lại màu xanh gradient
+  background: linear-gradient(135deg, $popular-border-color 0%, color.adjust($popular-border-color, $lightness: 10%) 100%);
+  color: white; // Chữ màu trắng
+
   font-weight: 600; // Đậm
   font-size: 0.925rem;
   padding: 14px 16px; // Tăng padding
   border-bottom: 1px solid $table-border-color;
+
   text-align: center !important; // Căn giữa TẤT CẢ tiêu đề
 
   // === 3. THÊM VIỀN DỌC (LÀM RÕ CỘT) ===
-  border-right: 1px solid $table-border-color;
+  // Dùng màu viền trắng mờ để hợp với nền xanh
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
   &:last-child {
     border-right: none; // Bỏ viền ở cột cuối
   }
@@ -56,7 +62,6 @@ tr.mat-mdc-header-row {
 
 // === 4. SỬA HÀNG (HIỆU ỨNG HOVER ĐẸP) ===
 tr.mat-mdc-row {
-  // Bỏ 'transition' ở đây để đặt vào 'td' cho mượt hơn
   &:nth-child(even) {
     background-color: $table-row-stripe-bg;
   }
@@ -99,14 +104,7 @@ td.mat-mdc-cell:first-child {
 td.mat-mdc-cell:last-child {
   text-align: center;
 }
-// Bỏ width cố định để bảng tự chia cột đẹp hơn
-// (Bạn có thể thêm lại nếu muốn)
-// th.mat-mdc-header-cell:last-child, td.mat-mdc-cell:last-child {
-//   width: 80px; ...
-// }
-// th.mat-mdc-header-cell:first-child, td.mat-mdc-cell:first-child {
-//   width: 60px; ...
-// }
+
 
 // Hàng "Không có dữ liệu"
 tr.mat-mdc-row.mat-no-data-row {
@@ -128,7 +126,7 @@ tr.mat-mdc-row.mat-no-data-row {
 
 // Thanh Paginator
 mat-paginator {
-  background-color: $table-header-bg;
+  background-color: $table-header-bg; // Dùng nền sáng cho paginator
   border-top: 1px solid $table-border-color;
   border-radius: 0 0 12px 12px;
 }
