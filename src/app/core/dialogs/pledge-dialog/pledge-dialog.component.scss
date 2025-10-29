@@ -1,12 +1,25 @@
 /* src/app/core/dialogs/pledge-dialog/pledge-dialog.component.scss */
 
 /* Biến màu (giống trong ảnh) */
-$color-header-bg: #004d40; // Xanh đậm
-$color-customer-bg: #e0f2f1; // Xanh lá nhạt
+$color-header-bg: #004d40;
+$color-customer-bg: #e0f2f1;
 $color-customer-border: #b2dfdb;
 $color-dropzone-bg: #f8f9fa;
 $color-dropzone-border: #dee2e6;
 $color-portrait-border: #cde4e2;
+$color-focus: $color-header-bg; // Dùng màu xanh đậm làm màu focus
+
+/* === MỚI: Keyframes cho hiệu ứng === */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 :host { display: block; }
 
@@ -24,25 +37,80 @@ mat-dialog-content {
   max-height: 75vh;
 }
 
-/* === CẬP NHẬT BOX THÔNG TIN KHÁCH HÀNG === */
+/* === MỚI: Class phân chia khối === */
+.content-block {
+  margin-bottom: 24px !important; // Tạo khoảng cách rõ rệt
+  border-radius: 8px;
+}
+
+/* === HIỆU ỨNG SMART: Form Fields === */
+mat-form-field {
+  transition: all 0.3s ease;
+
+  // Tinh chỉnh viền
+  ::ng-deep .mdc-notched-outline-leading,
+  ::ng-deep .mdc-notched-outline-notch,
+  ::ng-deep .mdc-notched-outline-trailing {
+    transition: all 0.3s ease;
+  }
+
+  // Hiệu ứng Hover
+  &:hover {
+    ::ng-deep .mdc-notched-outline-leading,
+    ::ng-deep .mdc-notched-outline-notch,
+    ::ng-deep .mdc-notched-outline-trailing {
+      border-color: $color-focus; // Đổi màu viền khi hover
+      border-width: 1px;
+    }
+  }
+
+  // Hiệu ứng Focus (khi nhập)
+  &.mat-focused {
+    ::ng-deep .mdc-notched-outline-leading,
+    ::ng-deep .mdc-notched-outline-notch,
+    ::ng-deep .mdc-notched-outline-trailing {
+      border-width: 2px; // Viền dày lên
+    }
+  }
+}
+
+/* === HIỆU ỨNG SMART: Accordions === */
+mat-expansion-panel {
+  transition: box-shadow 0.3s ease;
+  // Bóng mờ nhẹ
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 8px !important;
+  border-radius: 4px !important; // Bo góc
+
+  &:hover {
+    // Bóng mờ rõ hơn khi hover
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  }
+
+  // Bỏ viền khi mở
+  &.mat-expanded {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  }
+}
+
+/* Box thông tin khách hàng */
 .customer-info-box {
   background-color: $color-customer-bg;
   border: 1px solid $color-customer-border;
-  border-radius: 8px;
   padding: 8px 16px 16px 16px;
-  margin-bottom: 0;
+  margin-bottom: 0; // Sát nút "nâng cao"
   legend { font-weight: 600; font-size: 1.1rem; padding: 0 8px; }
 }
 
-/* === MỚI: Bố cục chính (Ảnh + Form) === */
+/* Bố cục chính (Ảnh + Form) */
 .customer-main-grid {
   display: grid;
-  grid-template-columns: 200px 1fr; // Cột ảnh 200px, còn lại là form
+  grid-template-columns: 200px 1fr;
   gap: 24px;
   align-items: flex-start;
 }
 
-/* === MỚI: Box ảnh chân dung === */
+/* Box ảnh chân dung */
 .portrait-capture-box {
   border: 2px dashed $color-portrait-border;
   background-color: #f0f7f7;
@@ -53,45 +121,50 @@ mat-dialog-content {
   align-items: center;
   justify-content: center;
   text-align: center;
-  height: 250px; // Chiều cao cố định
+  height: 250px;
   gap: 12px;
+  transition: all 0.3s ease;
 
-  mat-icon {
-    font-size: 80px;
-    width: 80px;
-    height: 80px;
-    color: #80cbc4;
+  mat-icon { font-size: 80px; width: 80px; height: 80px; color: #80cbc4; }
+  span { font-weight: 600; color: $color-header-bg; }
+  .capture-btn { width: 100%; }
+  .upload-btn { width: 100%; color: #555;
+    ::ng-deep .mat-icon { font-size: 20px; width: 20px; height: 20px; color: inherit; }
   }
-  span {
-    font-weight: 600;
-    color: $color-header-bg;
+
+  &:hover {
+    border-color: $color-focus;
+    background-color: #fff;
   }
-  .capture-btn {
-    width: 100%;
-  }
-  .upload-btn {
-    width: 100%;
+}
+.customer-fields-grid {}
+
+/* === MỚI: Nút Ẩn/Hiện thông tin nâng cao === */
+.advanced-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 20px 0; // Khoảng cách trên dưới
+
+  .advanced-toggle-btn {
     color: #555;
-    ::ng-deep .mat-icon { // Thu nhỏ icon trong nút upload
-      font-size: 20px; width: 20px; height: 20px;
-      color: inherit;
+    font-weight: 500;
+
+    mat-icon {
+      margin-right: 6px;
     }
   }
 }
-/* === MỚI: Grid cho các trường thông tin bên phải === */
-.customer-fields-grid {
-  // Không cần style, chỉ để bọc grid 2 cột
-}
 
-/* === MỚI: Style cho Mat Tabs === */
+/* Style cho Mat Tabs */
 .sub-tabs {
-  margin-bottom: 24px;
+  animation: fadeInDown 0.5s ease; // <-- THÊM HIỆU ỨNG
+
   ::ng-deep .mat-mdc-tab-header { border-bottom: none; }
   .tab-content {
     padding: 20px 16px;
     border: 1px solid #e0e0e0;
     border-top: none;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 8px 8px;
   }
 }
 
@@ -99,8 +172,21 @@ mat-dialog-content {
 .form-section {
   border: none;
   padding: 0;
-  margin-bottom: 24px;
-  legend { font-weight: 600; font-size: 1.1rem; margin-bottom: 12px; }
+  margin-bottom: 0; // Xóa margin (đã dùng content-block)
+  legend {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    padding-left: 8px; // Thêm padding cho đẹp
+  }
+
+  // Thêm viền trắng và bóng mờ cho fieldset
+  &.content-block {
+    background-color: #fff;
+    border: 1px solid #eee;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
 }
 
 /* Lưới CSS cho form */
@@ -123,23 +209,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   .mat-mdc-select-trigger { padding-left: 10px; }
 }
 
-/* === MỚI: Nút Ẩn/Hiện thông tin vay nâng cao === */
-.advanced-toggle-btn {
-  margin-bottom: 16px;
-  color: #555;
-  font-weight: 500;
-  padding: 0;
-
-  mat-icon {
-    margin-right: 4px;
-  }
-}
-.advanced-loan-info {
-  margin-bottom: 16px;
-}
-
-
-/* === MỚI: Style cho Grid các loại phí === */
+/* Style cho Grid các loại phí */
 .fee-grid {
   display: grid;
   grid-template-columns: 1fr 180px 200px;
@@ -154,7 +224,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   mat-radio-group { display: flex; gap: 16px; }
 }
 
-/* === MỚI: Style cho Dropzone === */
+/* Style cho Dropzone */
 .file-dropzone {
   border: 2px dashed $color-dropzone-border;
   background-color: $color-dropzone-bg;
@@ -166,6 +236,8 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   justify-content: center;
   text-align: center;
   cursor: pointer;
+  transition: all 0.3s ease;
+
   mat-icon { font-size: 48px; width: 48px; height: 48px; color: #adb5bd; }
   span { font-weight: 600; font-size: 1.1rem; margin-top: 8px; }
   .dropzone-subtext { font-size: 0.85rem; color: #6c757d; margin-bottom: 16px; }
@@ -176,7 +248,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
       margin-right: 8px;
     }
   }
-  &:hover { border-color: #004d40; background-color: #f1f3f5; }
+  &:hover { border-color: $color-focus; background-color: #fff; }
 }
 
 .attachment-upload-link {
@@ -198,26 +270,20 @@ mat-dialog-actions {
   padding: 16px 24px;
   border-top: 1px solid #eee;
   margin: 16px -24px -24px -24px;
+  background-color: #fdfdfd; // Thêm nền mờ
 }
 
-
 /* ================================================== */
-/* === THÊM MỚI: MEDIA QUERIES CHO RESPONSIVE === */
+/* === MEDIA QUERIES CHO RESPONSIVE === */
 /* ================================================== */
 
 /* Cho màn hình tablet (ví dụ: dưới 1024px) */
 @media (max-width: 1024px) {
-  /* Chuyển các grid 3 và 4 cột thành 2 cột */
   .form-grid-3-col,
   .form-grid-4-col {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .col-span-3 {
-    grid-column: span 2; // Full width
-  }
-
-  /* Chuyển grid phí thành 1 cột */
+  .col-span-3 { grid-column: span 2; }
   .fee-grid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -228,36 +294,24 @@ mat-dialog-actions {
 
 /* Cho màn hình điện thoại (ví dụ: dưới 768px) */
 @media (max-width: 768px) {
-  /* Chuyển bố cục Ảnh + Form thành 1 cột */
   .customer-main-grid {
-    grid-template-columns: 1fr; // 1 cột
+    grid-template-columns: 1fr;
   }
-
   .portrait-capture-box {
-    height: auto; // Bỏ chiều cao cố định
+    height: auto;
     max-width: 300px;
-    margin: 0 auto 16px auto; // Căn giữa
+    margin: 0 auto 16px auto;
   }
-
-  /* Chuyển tất cả các grid thành 1 cột */
   .form-grid-2-col,
   .form-grid-3-col,
   .form-grid-4-col {
     grid-template-columns: 1fr;
   }
-
-  /* Reset span */
   .col-span-2,
   .col-span-3 {
     grid-column: span 1;
   }
-
-  /* Căn chỉnh lại nút thêm loại tài sản */
-  .add-asset-type-btn {
-    height: 48px; // Giảm chiều cao
-  }
-
-  /* Sửa lỗi input/select lồng nhau trên 1 cột */
+  .add-asset-type-btn { height: 48px; }
   ::ng-deep .input-prefix { width: 100% !important; border: none; }
   ::ng-deep .select-suffix {
     width: 100% !important;
