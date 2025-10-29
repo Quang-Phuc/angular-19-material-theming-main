@@ -48,15 +48,14 @@
     <mat-form-field appearance="outline">
       <mat-label>Chọn tiệm</mat-label>
       <mat-select formControlName="storeId">
-        @for (store of storeList; track store.storeId) {
-          <mat-option [value]="store.storeId">{{ store.storeName }}</mat-option>
+        @for (store of storeList; track store.id) {
+          <mat-option [value]="store.id">{{ store.name }}</mat-option>
         }
       </mat-select>
       @if (userForm.get('storeId')?.hasError('required')) {
         <mat-error>Vui lòng chọn tiệm</mat-error>
       }
     </mat-form-field>
-
     @if (isEditMode) {
       <button mat-stroked-button color="warn"
               type="button"
