@@ -2,17 +2,17 @@
 
 /* === BIẾN MÀU === */
 $color-header-bg: #004d40;
-$color-customer-bg: #e0f2f1;
-$color-customer-border: #b2dfdb;
+$color-customer-bg: #e8f5e9;
+$color-customer-border: #c8e6c9;
 $color-dropzone-bg: #f8f9fa;
 $color-dropzone-border: #dee2e6;
 $color-portrait-border: #cde4e2;
 $color-focus: $color-header-bg;
-$color-block-border: #e9ecef; // Màu viền xám nhạt cho các khối
-$color-dialog-bg: #f7f9fc; // <-- MÀU NỀN MỚI CHO DIALOG
+$color-block-border: #e9ecef;
+$color-dialog-bg: #f4f6f9;
 $color-green-success: #28a745;
 $color-gray-cancel: #6c757d;
-
+// <-- ĐÃ XÓA $sharp-radius -->
 
 /* === HIỆU ỨNG FADE-IN === */
 @keyframes fadeInDown {
@@ -26,8 +26,9 @@ $color-gray-cancel: #6c757d;
   /* === 1. THU NHỎ TẤT CẢ FORM FIELDS === */
   mat-form-field {
     ::ng-deep .mat-mdc-form-field-flex {
-      height: 50px;
+      height: 48px;
     }
+    // <-- ĐÃ XÓA TẤT CẢ border-radius override -->
   }
 }
 
@@ -42,8 +43,8 @@ $color-gray-cancel: #6c757d;
 
 /* === 3. THAY ĐỔI NỀN DIALOG ĐỂ PHÂN TÁCH === */
 mat-dialog-content {
-  padding: 16px 8px; // Thêm padding
-  background-color: $color-dialog-bg; // <-- NỀN MỚI
+  padding: 16px 8px;
+  background-color: $color-dialog-bg;
   max-height: 75vh;
 }
 
@@ -51,11 +52,11 @@ mat-dialog-content {
 .content-block {
   margin-bottom: 20px !important;
   border: 1px solid $color-block-border;
-  border-radius: 8px;
+  border-radius: 8px; // <-- Quay về bo góc 8px (hoặc bỏ dòng này để dùng default)
   background-color: #ffffff;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   transition: box-shadow 0.3s ease;
-  padding: 20px; // Padding cho thẻ
+  padding: 20px;
 
   &:hover {
     box-shadow: 0 4px 10px rgba(0,0,0,0.07);
@@ -70,7 +71,6 @@ mat-form-field {
   ::ng-deep .mdc-notched-outline-trailing {
     transition: all 0.3s ease;
   }
-  // Hover
   &:hover {
     ::ng-deep .mdc-notched-outline-leading,
     ::ng-deep .mdc-notched-outline-notch,
@@ -79,7 +79,6 @@ mat-form-field {
       border-width: 1px;
     }
   }
-  // Focus (khi nhập)
   &.mat-focused {
     ::ng-deep .mdc-notched-outline-leading,
     ::ng-deep .mdc-notched-outline-notch,
@@ -91,7 +90,7 @@ mat-form-field {
 
 /* === HIỆU ỨNG SMART: Accordions === */
 mat-accordion.content-block {
-  padding: 0; // Xóa padding của thẻ
+  padding: 0;
 }
 mat-expansion-panel {
   transition: box-shadow 0.3s ease;
@@ -106,16 +105,24 @@ mat-expansion-panel {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
   }
+  mat-expansion-panel-header {
+    font-weight: 500;
+  }
 }
 
 /* Box thông tin khách hàng (style riêng, không nền trắng) */
 .customer-info-box {
   background-color: $color-customer-bg;
   border: 1px solid $color-customer-border;
-  padding: 8px 16px 16px 16px;
+  padding: 16px 24px;
   margin-bottom: 0;
-  border-radius: 8px; // Thêm bo góc
-  legend { font-weight: 600; font-size: 1.1rem; padding: 0 8px; }
+  border-radius: 8px;
+  legend {
+    font-weight: 600;
+    font-size: 1.15rem;
+    padding: 0 8px;
+    color: $color-header-bg;
+  }
 }
 
 /* Bố cục chính (Ảnh + Form) */
@@ -163,7 +170,7 @@ mat-expansion-panel {
     mat-icon { margin-right: 6px; }
     &:hover {
       color: $color-focus;
-      background-color: #fff; // Nền trắng khi hover
+      background-color: #fff;
     }
   }
 }
@@ -171,7 +178,7 @@ mat-expansion-panel {
 /* Style cho Mat Tabs */
 .sub-tabs {
   animation: fadeInDown 0.5s ease;
-  padding: 0; // Xóa padding của thẻ
+  padding: 0;
 
   ::ng-deep .mat-mdc-tab-header { border-bottom: none; }
   .tab-content {
@@ -191,9 +198,9 @@ mat-expansion-panel {
   &.content-block {
     legend {
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       margin-bottom: 16px;
-      padding-left: 0; // Reset padding
+      padding-left: 0;
       color: $color-header-bg;
     }
   }
@@ -209,8 +216,12 @@ mat-expansion-panel {
 .full-width { width: 100%; }
 hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 
+/* === SỬA NÚT "THÊM MỚI TÀI SẢN" === */
 .add-asset-type-btn {
-  height: 50px;
+  height: 48px;
+  min-width: 48px;
+  width: 48px;
+  padding: 0;
 }
 
 /* Style cho input có prefix/suffix (Kỳ đóng lãi, Lãi suất) */
@@ -230,7 +241,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   margin-bottom: 8px;
   label { font-weight: 500; }
   mat-form-field {
-    ::ng-deep .mat-mdc-form-field-flex { height: 44px !important; } // <-- Thu nhỏ
+    ::ng-deep .mat-mdc-form-field-flex { height: 44px !important; }
     ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
   }
   mat-radio-group { display: flex; gap: 16px; }
@@ -277,7 +288,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   }
 }
 
-/* === 2. THAY ĐỔI MÀU NÚT BẤM === */
+/* === THAY ĐỔI MÀU NÚT BẤM === */
 mat-dialog-actions {
   padding: 16px 24px;
   border-top: 1px solid #eee;
@@ -333,7 +344,8 @@ mat-dialog-actions {
   .col-span-3 { grid-column: span 1; }
 
   .add-asset-type-btn {
-    height: 50px;
+    height: 48px;
+    width: 100%; // <-- Sửa cho mobile: Nút vuông thành rộng 100%
   }
 
   ::ng-deep .input-prefix { width: 100% !important; border: none; }

@@ -43,7 +43,7 @@ export class PledgeDialogComponent implements OnInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showAdvancedInfo = false; // <-- MẶC ĐỊNH LÀ ẨN
+  showAdvancedInfo = false; // <-- SỬA LỖI 1: Thêm thuộc tính này
 
   // === DỮ LIỆU GIẢ LẬP ===
   assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
@@ -108,9 +108,12 @@ export class PledgeDialogComponent implements OnInit {
         maHopDong: [''],
         tongTienVay: [0, [Validators.required, Validators.min(1000)]],
         kyDongLai_So: [1, Validators.required],
-        kyDongLai_DonVi: ['Thang', Validators.required],
+        kyDongLai_DonVi: ['Thang', Validators.required], // <-- Giá trị này OK
         laiSuat_So: [0, Validators.required],
-        laiSuat_DonVi: ['PhanTram', Validators.required],
+
+        // SỬA LỖI 2: Đổi 'PhanTram' thành giá trị khớp với HTML
+        laiSuat_DonVi: ['Lai%/Thang', Validators.required],
+
         soLanTra: [1],
         kieuThuLai: ['Truoc', Validators.required],
         ghiChu: [''],
