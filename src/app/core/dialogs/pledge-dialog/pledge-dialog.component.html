@@ -22,7 +22,7 @@
           <mat-icon>camera_alt</mat-icon>
           <span>Chụp ảnh chân dung</span>
           <button mat-stroked-button class="capture-btn" (click)="takePicture('portrait')">
-            <mat-icon>photo_camera</mat-icon> Chụp
+             Chụp
           </button>
           <button mat-stroked-button class="upload-btn" (click)="takePicture('upload')">
             <mat-icon>cloud_upload</mat-icon> Tải lên
@@ -262,19 +262,16 @@
         </div>
 
         <div class="interest-item">
-          <label class="interest-label">Số Lần Trả *</label>
-          <mat-form-field appearance="outline" class="compact-field">
-            <input matInput type="number" formControlName="soLanTra">
-          </mat-form-field>
+          <label class="interest-label">Kiểu Thu Lãi *</label>
+          <div class="input-group">
+            <input matInput type="number" formControlName="laiSuat_So" class="number-input" placeholder="0">
+            <mat-select formControlName="laiSuat_DonVi" class="unit-select">
+              <mat-option value="Lai/Trieu/Ngay">Thu trước</mat-option>
+              <mat-option value="Lai%/Thang">Thu sau</mat-option>
+            </mat-select>
+          </div>
         </div>
 
-        <div class="interest-item">
-          <label class="interest-label">Kiểu Thu Lãi *</label>
-          <mat-radio-group formControlName="kieuThuLai" class="radio-horizontal">
-            <mat-radio-button value="Truoc">Thu trước</mat-radio-button>
-            <mat-radio-button value="Sau">Thu sau</mat-radio-button>
-          </mat-radio-group>
-        </div>
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
