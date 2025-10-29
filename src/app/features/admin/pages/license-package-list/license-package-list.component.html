@@ -1,9 +1,23 @@
-<!-- src/app/features/admin/pages/license-package-list/license-package-list.component.html (TỆP MỚI) -->
+<!-- src/app/features/admin/pages/license-package-list/license-package-list.component.html (ĐÃ SỬA) -->
 <div class="page-container" data-aos="fade-in">
 
-  <mat-toolbar class="filter-toolbar">
+  <mat-toolbar class="filter-toolbar" [formGroup]="searchForm"> <!-- THÊM formGroup -->
     <h1 class="page-title">Quản lý Gói License</h1>
     <span class="spacer"></span>
+
+    <!-- ===== THÊM THANH TÌM KIẾM ===== -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Tìm tên, mô tả...</mat-label>
+      <input matInput
+             formControlName="basicSearch"
+             placeholder="Nhập từ khóa...">
+    </mat-form-field>
+
+    <button mat-flat-button class="search-button" (click)="applyFilter(searchForm.get('basicSearch')?.value)">
+      <mat-icon>search</mat-icon>
+      <span>Tìm</span>
+    </button>
+    <!-- ===== KẾT THÚC ===== -->
 
     <button mat-flat-button
             class="add-new-button"
@@ -107,3 +121,4 @@
 
   </div>
 </div>
+

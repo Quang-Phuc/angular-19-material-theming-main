@@ -1,4 +1,4 @@
-/* src/app/features/admin/pages/license-package-list/license-package-list.component.scss (TỆP MỚI) */
+/* src/app/features/admin/pages/license-package-list/license-package-list.component.scss (ĐÃ SỬA) */
 @use '@angular/material' as mat;
 @use 'sass:color';
 
@@ -37,6 +37,35 @@ $table-header-bg: #f8f9fa;
 .spacer {
   flex: 1 1 auto;
 }
+
+/* ===== THÊM STYLE CHO TÌM KIẾM ===== */
+.search-field {
+  width: 300px;
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 50px !important;
+  }
+}
+
+.search-button, .add-new-button {
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 50px;
+  box-sizing: border-box;
+  border: none;
+}
+
+.search-button {
+  background-color: $popular-border-color;
+  color: white;
+  &:hover {
+    background-color: color.adjust($popular-border-color, $lightness: 8%);
+  }
+}
+/* ===== KẾT THÚC ===== */
 
 .add-new-button {
   background-color: $color-green-success;
@@ -141,3 +170,4 @@ tr.mat-mdc-row.mat-no-data-row {
   text-overflow: ellipsis;
   cursor: default;
 }
+
