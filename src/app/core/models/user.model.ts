@@ -9,6 +9,8 @@ export interface User {
   phone: string;
   email?: string;
   store: Store; // Lồng thông tin tiệm
+  storeId?: number| null;
+  type?: string;
   // Thêm các trường khác nếu cần
 }
 

@@ -29,6 +29,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../core/dial
 // === DIALOG MỚI ===
 // (Chúng ta sẽ tạo tệp này ở bước sau)
 import { AssignUserDialogComponent } from '../../../../core/dialogs/assign-user-dialog/assign-user-dialog.component';
+import {User} from '../../../../core/models/user.model';
 
 @Component({
   selector: 'app-store-assignment',
@@ -152,13 +153,15 @@ export class StoreAssignmentComponent implements OnInit {
       if (result === true) {
         this.isLoadingUsers = true;
 
-        // SỬA LỖI 6: Đổi tên hàm 'getUser' thành 'getUserById'
-        this.userService.getUserById(user.userId).pipe(
-          switchMap(fullUser => {
-            // Lỗi TS2698 (Lỗi 7) sẽ tự hết khi Lỗi 6 được sửa
-            const payload = { ...fullUser, storeId: null };
-            return this.userService.updateUser(user.userId, payload);
-          }),
+        // === CẬP NHẬT PAYLOAD THEO YÊU CẦU ===
+        // Gửi ID của tiệm hiện tại và cờ 'type'
+        const payload: Partial<User> = {
+          storeId: this.selectedStore.id, // Sửa lỗi cú pháp và truyền ID
+          type: "DELETE"                  // Thêm cờ 'type'
+        };
+
+        // (Model User đã được cập nhật để chấp nhận 'type')
+        this.userService.updateUser(user.userId, payload).pipe(
           finalize(() => this.isLoadingUsers = false)
         ).subscribe({
           next: () => {
@@ -166,7 +169,8 @@ export class StoreAssignmentComponent implements OnInit {
             this.loadUsersForStore(this.selectedStore.id); // Tải lại
           },
           error: (err: Error) => {
-            this.notification.showError(err.message || 'Gỡ user thất bại');
+            console.log('=== ERR ===', err);
+            this.notification.showError(err);
           }
         });
       }

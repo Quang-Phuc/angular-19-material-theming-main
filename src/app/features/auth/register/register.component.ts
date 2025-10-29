@@ -87,25 +87,7 @@ export class RegisterComponent implements OnInit {
       },
       // *** 2. Add the type here ***
       error: (err) => {
-        // (Logic xử lý lỗi SS004 của bạn giữ nguyên)
-        let errorMessage = 'Lỗi không xác định';
-        let errorCode = null;
-        let raw = err?.error ?? err?.message ?? 'Đã có lỗi';
-
-        if (typeof raw === 'string') {
-          try {
-            const parsed = JSON.parse(raw);
-            errorMessage = parsed.messages?.vn || parsed.message || JSON.stringify(parsed);
-            errorCode = parsed.code || null;
-          } catch {
-            errorMessage = raw;
-          }
-        } else if (typeof raw === 'object') {
-          errorMessage = raw.messages?.vn || raw.message || JSON.stringify(raw);
-          errorCode = raw.code || null;
-        }
-
-          this.notification.showError(errorMessage);
+          this.notification.showError(err);
       }
     });
   }

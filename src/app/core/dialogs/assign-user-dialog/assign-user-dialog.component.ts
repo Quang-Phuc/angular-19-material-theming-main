@@ -17,6 +17,7 @@ import { of } from 'rxjs';
 // Import service
 import { UserService } from '../../services/user.service';
 import { NotificationService } from '../../services/notification.service';
+import {User} from '../../models/user.model';
 
 @Component({
   selector: 'app-assign-user-dialog',
@@ -86,20 +87,21 @@ export class AssignUserDialogComponent implements OnInit {
     this.isLoading = true;
     const userIdToAssign = this.assignForm.value.userId;
 
-    // SỬA LỖI 2: Đổi tên hàm 'getUser' thành 'getUserById'
-    // 1. Lấy thông tin đầy đủ của user
-    this.userService.getUserById(userIdToAssign).pipe(
-      // 2. Cập nhật user đó với storeId mới
-      switchMap(fullUser => {
-        // Lỗi TS2698 (Lỗi 3) sẽ tự hết khi Lỗi 2 được sửa
-        const payload = { ...fullUser, storeId: this.storeId };
-        return this.userService.updateUser(userIdToAssign, payload);
-      }),
+    // TỐI ƯU HÓA:
+    // Chỉ cần tạo payload chứa các trường cần cập nhật.
+    // Vì User interface đã có 'storeId?: number', nên payload này là
+    // một 'Partial<User>' hợp lệ.
+    const payload: Partial<User> = {
+      storeId: this.storeId
+    };
+
+    // Không cần getUserById, gọi thẳng updateUser
+    this.userService.updateUser(userIdToAssign, payload).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe({
       next: () => {
         this.notification.showSuccess('Gán user vào tiệm thành công!');
-        this.dialogRef.close(true); // Trả về 'true' để list component biết cần refresh
+        this.dialogRef.close(true);
       },
       error: (error: Error) => {
         this.notification.showError(error.message || 'Gán user thất bại');
