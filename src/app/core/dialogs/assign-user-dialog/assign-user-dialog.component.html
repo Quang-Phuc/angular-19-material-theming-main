@@ -1,0 +1,41 @@
+@if (isLoading) {
+  <mat-progress-bar mode="indeterminate" class="dialog-progress-bar"></mat-progress-bar>
+}
+
+<h2 mat-dialog-title>Gán User vào tiệm "{{ storeName }}"</h2>
+
+<form [formGroup]="assignForm" (ngSubmit)="onSave()">
+  <mat-dialog-content class="dialog-content">
+
+    @if (unassignedUsers.length > 0) {
+      <mat-form-field appearance="outline">
+        <mat-label>Chọn người dùng (chưa có tiệm)</mat-label>
+        <mat-select formControlName="userId">
+          @for (user of unassignedUsers; track user.userId) {
+            <mat-option [value]="user.userId">
+              {{ user.fullName }} ({{ user.phone }})
+            </mat-option>
+          }
+        </mat-select>
+        @if (assignForm.get('userId')?.hasError('required')) {
+          <mat-error>Vui lòng chọn một người dùng</mat-error>
+        }
+      </mat-form-field>
+    } @else if (!isLoading) {
+      <p class="no-users-message">
+        Không tìm thấy người dùng nào chưa được gán.
+      </p>
+    }
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">Hủy bỏ</button>
+    <button mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="assignForm.invalid || isLoading || unassignedUsers.length === 0">
+      Lưu lại
+    </button>
+  </mat-dialog-actions>
+</form>
