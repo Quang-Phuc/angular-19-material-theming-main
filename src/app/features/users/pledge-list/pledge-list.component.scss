@@ -167,20 +167,31 @@ td.mat-mdc-cell:nth-last-child(2) { // Ô Trạng thái
   color: $color-warn-red;
 }
 
-// Cột Chức năng (GHI ĐÈ _common-table để rộng hơn)
+/* === SỬA LẠI CỘT CHỨC NĂNG === */
 th.mat-mdc-header-cell:last-child {
-  width: 180px;
+  // width: 180px; // <-- XÓA: Bỏ ghi đè, để dùng width mặc định
 }
 td.mat-mdc-cell.actions-cell {
-  width: 180px; // Tăng độ rộng cho nhiều nút
+  // width: 180px; // <-- XÓA: Bỏ ghi đè
   text-align: center; // Ghi đè lại text-align center
 
   .mat-icon {
     font-size: 20px;
   }
-  .icon-edit { color: $popular-accent-color; }
-  .icon-print { color: $popular-border-color; }
-  .icon-history { color: $color-green-success; }
-  .icon-delete { color: $color-warn-red; }
-}
 
+  // Nút Sửa (hiển thị trực tiếp)
+  .icon-edit { color: $popular-accent-color; }
+
+  // Các icon trong menu
+  // (Cần dùng ::ng-deep vì menu được render ở root)
+  ::ng-deep .mat-mdc-menu-panel {
+    .icon-print { color: $popular-border-color; }
+    .icon-history { color: $color-green-success; }
+    .icon-delete { color: $color-warn-red; }
+
+    // Style chung cho icon trong menu
+    .mat-mdc-menu-item .mat-icon {
+      margin-right: 12px;
+    }
+  }
+}

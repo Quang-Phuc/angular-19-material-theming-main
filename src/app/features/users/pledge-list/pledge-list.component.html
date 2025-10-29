@@ -1,7 +1,5 @@
-<!-- src/app/features/store/pages/pledge-list/pledge-list.component.html -->
 <div class="page-container" data-aos="fade-in">
 
-  <!-- Tiêu đề trang và các nút Global -->
   <div class="page-header">
     <h1 class="page-title">Hợp đồng Cầm đồ</h1>
     <div class="header-actions">
@@ -17,7 +15,6 @@
     </div>
   </div>
 
-  <!-- Khu vực Filter -->
   <mat-toolbar class="filter-toolbar" [formGroup]="filterForm">
 
     <mat-form-field appearance="outline" class="filter-field search-field">
@@ -68,7 +65,6 @@
     </button>
   </mat-toolbar>
 
-  <!-- Khu vực Action (Thêm mới, Thanh lý) -->
   <mat-toolbar class="action-toolbar">
     <button mat-flat-button class="add-new-button" (click)="openPledgeDialog()">
       <mat-icon>add</mat-icon>
@@ -81,7 +77,6 @@
     </button>
   </mat-toolbar>
 
-  <!-- Bảng Dữ Liệu -->
   <div class="mat-elevation-z4 table-container">
 
     @if (isLoading) {
@@ -92,7 +87,6 @@
 
     <table mat-table [dataSource]="dataSource" matSort>
 
-      <!-- STT -->
       <ng-container matColumnDef="stt">
         <th mat-header-cell *matHeaderCellDef> STT </th>
         <td mat-cell *matCellDef="let i = index">
@@ -100,7 +94,6 @@
         </td>
       </ng-container>
 
-      <!-- Mã Hợp đồng -->
       <ng-container matColumnDef="maHopDong">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Mã hợp đồng </th>
         <td mat-cell *matCellDef="let row">
@@ -111,7 +104,6 @@
         </td>
       </ng-container>
 
-      <!-- Tên Khách hàng -->
       <ng-container matColumnDef="tenKhachHang">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tên khách hàng </th>
         <td mat-cell *matCellDef="let row">
@@ -119,13 +111,11 @@
         </td>
       </ng-container>
 
-      <!-- TS Thế chấp -->
       <ng-container matColumnDef="tsTheChap">
         <th mat-header-cell *matHeaderCellDef> TS thế chấp </th>
         <td mat-cell *matCellDef="let row"> {{ row.collateral }} </td>
       </ng-container>
 
-      <!-- Số tiền vay -->
       <ng-container matColumnDef="soTienVay">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Số tiền vay </th>
         <td mat-cell *matCellDef="let row">
@@ -134,7 +124,6 @@
         </td>
       </ng-container>
 
-      <!-- Số tiền đã trả -->
       <ng-container matColumnDef="soTienDaTra">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Số tiền đã trả </th>
         <td mat-cell *matCellDef="let row">
@@ -142,7 +131,6 @@
         </td>
       </ng-container>
 
-      <!-- Tiền vay còn lại -->
       <ng-container matColumnDef="tienVayConLai">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tiền vay còn lại </th>
         <td mat-cell *matCellDef="let row">
@@ -150,7 +138,6 @@
         </td>
       </ng-container>
 
-      <!-- Lãi đến hôm nay -->
       <ng-container matColumnDef="laiDenHomNay">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Lãi đến hôm nay </th>
         <td mat-cell *matCellDef="let row">
@@ -159,7 +146,6 @@
         </td>
       </ng-container>
 
-      <!-- Trạng thái -->
       <ng-container matColumnDef="trangThai">
         <th mat-header-cell *matHeaderCellDef> Trạng thái </th>
         <td mat-cell *matCellDef="let row">
@@ -167,32 +153,44 @@
         </td>
       </ng-container>
 
-      <!-- Chức năng -->
       <ng-container matColumnDef="chucNang">
         <th mat-header-cell *matHeaderCellDef> Chức năng </th>
         <td mat-cell *matCellDef="let row" class="actions-cell">
+
           <button mat-icon-button matTooltip="Sửa" (click)="onEdit(row)">
             <mat-icon class="icon-edit">edit</mat-icon>
           </button>
-          <button mat-icon-button matTooltip="In" (click)="onPrint(row)">
-            <mat-icon class="icon-print">print</mat-icon>
-          </button>
-          <button mat-icon-button matTooltip="Lịch sử" (click)="onShowHistory(row)">
-            <mat-icon class="icon-history">history</mat-icon>
-          </button>
-          <button mat-icon-button matTooltip="Xóa" (click)="onDelete(row)">
-            <mat-icon class="icon-delete">delete</mat-icon>
-          </button>
+
           <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Tùy chọn khác">
             <mat-icon>more_vert</mat-icon>
           </button>
+
           <mat-menu #actionsMenu="matMenu">
-            <button mat-menu-item>Đóng hợp đồng</button>
-            <button mat-menu-item>Thanh lý</button>
+            <button mat-menu-item (click)="onPrint(row)">
+              <mat-icon class="icon-print">print</mat-icon>
+              <span>In hợp đồng</span>
+            </button>
+            <button mat-menu-item (click)="onShowHistory(row)">
+              <mat-icon class="icon-history">history</mat-icon>
+              <span>Xem lịch sử</span>
+            </button>
+            <button mat-menu-item (click)="onDelete(row)">
+              <mat-icon class="icon-delete">delete</mat-icon>
+              <span>Xóa hợp đồng</span>
+            </button>
+
+
+            <button mat-menu-item>
+              <mat-icon>check_circle_outline</mat-icon>
+              <span>Đóng hợp đồng</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>gavel</mat-icon>
+              <span>Thanh lý</span>
+            </button>
           </mat-menu>
         </td>
       </ng-container>
-
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 

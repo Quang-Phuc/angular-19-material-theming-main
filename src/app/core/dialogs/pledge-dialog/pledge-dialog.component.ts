@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, Inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common'; // <-- DatePipe đã được import ở đây
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,10 +24,16 @@ import { Observable, of } from 'rxjs';
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
-    MatAutocompleteModule, MatProgressBarModule, DatePipe
+    MatAutocompleteModule, MatProgressBarModule,
+    DatePipe // Giữ lại import này nếu bạn dùng pipe trong HTML
   ],
   templateUrl: './pledge-dialog.component.html',
-  styleUrl: './pledge-dialog.component.scss'
+  styleUrl: './pledge-dialog.component.scss',
+
+  // *** THÊM DÒNG NÀY ĐỂ SỬA LỖI ***
+  providers: [ DatePipe ]
+  // **********************************
+
 })
 export class PledgeDialogComponent implements OnInit {
 
@@ -43,6 +49,8 @@ export class PledgeDialogComponent implements OnInit {
   @Inject(MAT_DIALOG_DATA) public data: PledgeContract | null = inject(MAT_DIALOG_DATA);
   private notification = inject(NotificationService);
   private pledgeService = inject(PledgeService);
+
+  // Dòng này sẽ hết lỗi sau khi thêm 'providers'
   private datePipe = inject(DatePipe);
 
   constructor() {
