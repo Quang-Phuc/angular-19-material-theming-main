@@ -22,7 +22,6 @@ import { PledgeService, PledgeContract } from '../../services/pledge.service';
 import { Observable, of } from 'rxjs';
 
 interface DropdownOption { id: string; name: string; }
-interface FamilyMember { hoTen: string; soDienThoai: string; ngheNghiep: string; }
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -35,28 +34,24 @@ interface FamilyMember { hoTen: string; soDienThoai: string; ngheNghiep: string;
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
-  providers: [ DatePipe ]
+  providers: [DatePipe]
 })
 export class PledgeDialogComponent implements OnInit {
-
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
   showAdvancedInfo = false;
 
-  // === DỮ LIỆU GIẢ LẬP ===
   assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' }, { id: 'nguoi_theo_doi', name: 'Người theo dõi' },
-    { id: 'all', name: 'Tất cả' }, { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' },
-    { id: 'an', name: 'an' }, { id: 'nguyen_a', name: 'Nguyễn A' }
+    { id: 'all', name: 'Tất cả' }, { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' }
   ]);
   nguoiTheoDoiList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'user_1', name: 'User 1' }]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
 
-  // === INJECTS ===
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
   @Inject(MAT_DIALOG_DATA) public data: PledgeContract | null = inject(MAT_DIALOG_DATA);
@@ -129,9 +124,7 @@ export class PledgeDialogComponent implements OnInit {
   }
 
   patchFormData(contract: PledgeContract): void {
-    this.pledgeForm.patchValue({
-      // Cần mở rộng interface PledgeContract nếu cần
-    });
+    this.pledgeForm.patchValue({ /* ... */ });
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
 
@@ -148,54 +141,32 @@ export class PledgeDialogComponent implements OnInit {
     const payload: any = {
       id: this.isEditMode ? this.data?.id : undefined,
       portrait: formData.portraitInfo,
-      customer: {
-        ...formData.customerInfo,
-        ...formData.customerExtraInfo,
+      customer: { ...formData.customerInfo, ...formData.customerExtraInfo,
         ngaySinh: this.formatDate(formData.customerInfo.ngaySinh),
         ngayCapCCCD: this.formatDate(formData.customerInfo.ngayCapCCCD)
       },
       family: formData.familyInfo,
-      loan: {
-        ...formData.loanInfo,
-        ...formData.loanExtraInfo,
+      loan: { ...formData.loanInfo, ...formData.loanExtraInfo,
         ngayVay: this.formatDate(formData.loanInfo.ngayVay)!
       },
       fees: formData.feesInfo,
       collateral: formData.collateralInfo
     };
 
-    console.log('Dữ liệu gửi đi:', payload);
-
-    const saveObservable = this.isEditMode
-      ? this.pledgeService.updatePledge(this.data!.id!, payload as PledgeContract)
-      : this.pledgeService.createPledge(payload as PledgeContract);
-
-    // Giả lập thành công
     setTimeout(() => {
-      this.notification.showSuccess(this.isEditMode ? 'Cập nhật hợp đồng thành công!' : 'Thêm mới hợp đồng thành công!');
+      this.notification.showSuccess(this.isEditMode ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
       this.isLoading = false;
       this.dialogRef.close(true);
     }, 800);
   }
 
-  onCancel(): void {
-    this.dialogRef.close(false);
+  onCancel(): void { this.dialogRef.close(false); }
+
+  private formatDate(date: any): string | null {
+    return date ? this.datePipe.transform(date, 'yyyy-MM-dd') : null;
   }
 
-  private formatDate(date: Date | string | null): string | null {
-    if (!date) return null;
-    return this.datePipe.transform(date, 'yyyy-MM-dd');
-  }
-
-  findCustomer(): void {
-    this.notification.showInfo('Chức năng tìm kiếm khách hàng đang phát triển.');
-  }
-
-  addNewAssetType(): void {
-    this.notification.showInfo('Mở dialog Thêm mới loại tài sản (chưa làm).');
-  }
-
-  takePicture(field: string): void {
-    this.notification.showInfo(`Chức năng chụp ảnh cho ${field} (chưa làm).`);
-  }
+  findCustomer(): void { this.notification.showInfo('Tìm kiếm khách hàng...'); }
+  addNewAssetType(): void { this.notification.showInfo('Thêm loại tài sản...'); }
+  takePicture(field: string): void { this.notification.showInfo(`Chụp ảnh ${field}...`); }
 }
