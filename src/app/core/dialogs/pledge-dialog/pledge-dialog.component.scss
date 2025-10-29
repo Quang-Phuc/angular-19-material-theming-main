@@ -1,6 +1,5 @@
 /* src/app/core/dialogs/pledge-dialog/pledge-dialog.component.scss */
 
-/* === BIẾN MÀU === */
 $color-header-bg: #004d40;
 $color-customer-bg: #e8f5e9;
 $color-customer-border: #c8e6c9;
@@ -12,24 +11,13 @@ $color-block-border: #e9ecef;
 $color-dialog-bg: #f4f6f9;
 $color-green-success: #28a745;
 $color-gray-cancel: #6c757d;
-// <-- ĐÃ XÓA $sharp-radius -->
 
-/* === HIỆU ỨNG FADE-IN === */
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
 
-:host {
-  display: block;
+:host { display: block; }
 
-  /* === 1. THU NHỎ TẤT CẢ FORM FIELDS === */
-  mat-form-field {
-    ::ng-deep .mat-mdc-form-field-flex {
-      height: 48px;
-    }
-    // <-- ĐÃ XÓA TẤT CẢ border-radius override -->
-  }
+mat-form-field {
+  ::ng-deep .mat-mdc-form-field-flex { height: 48px; }
 }
 
 .dialog-title {
@@ -41,36 +29,25 @@ $color-gray-cancel: #6c757d;
 
 .progress-bar-placeholder { height: 4px; }
 
-/* === 3. THAY ĐỔI NỀN DIALOG ĐỂ PHÂN TÁCH === */
 mat-dialog-content {
   padding: 16px 8px;
   background-color: $color-dialog-bg;
   max-height: 75vh;
 }
 
-/* === 3. STYLE CHO "THẺ" (KHỐI NỘI DUNG) === */
 .content-block {
   margin-bottom: 20px !important;
   border: 1px solid $color-block-border;
-  border-radius: 8px; // <-- Quay về bo góc 8px (hoặc bỏ dòng này để dùng default)
+  border-radius: 8px;
   background-color: #ffffff;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   transition: box-shadow 0.3s ease;
   padding: 20px;
-
-  &:hover {
-    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
-  }
+  &:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
 }
 
-/* === HIỆU ỨNG SMART: Form Fields === */
 mat-form-field {
   transition: all 0.3s ease;
-  ::ng-deep .mdc-notched-outline-leading,
-  ::ng-deep .mdc-notched-outline-notch,
-  ::ng-deep .mdc-notched-outline-trailing {
-    transition: all 0.3s ease;
-  }
   &:hover {
     ::ng-deep .mdc-notched-outline-leading,
     ::ng-deep .mdc-notched-outline-notch,
@@ -88,52 +65,27 @@ mat-form-field {
   }
 }
 
-/* === HIỆU ỨNG SMART: Accordions === */
-mat-accordion.content-block {
-  padding: 0;
-}
+mat-accordion.content-block { padding: 0; }
 mat-expansion-panel {
   transition: box-shadow 0.3s ease;
   box-shadow: none;
   margin-bottom: 0 !important;
-
-  &:first-of-type {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  &:last-of-type {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-  mat-expansion-panel-header {
-    font-weight: 500;
-  }
+  &:first-of-type { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+  &:last-of-type { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+  mat-expansion-panel-header { font-weight: 500; }
 }
 
-/* Box thông tin khách hàng (style riêng, không nền trắng) */
 .customer-info-box {
   background-color: $color-customer-bg;
   border: 1px solid $color-customer-border;
   padding: 16px 24px;
   margin-bottom: 0;
   border-radius: 8px;
-  legend {
-    font-weight: 600;
-    font-size: 1.15rem;
-    padding: 0 8px;
-    color: $color-header-bg;
-  }
+  legend { font-weight: 600; font-size: 1.15rem; padding: 0 8px; color: $color-header-bg; }
 }
 
-/* Bố cục chính (Ảnh + Form) */
-.customer-main-grid {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 24px;
-  align-items: flex-start;
-}
+.customer-main-grid { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: flex-start; }
 
-/* Box ảnh chân dung */
 .portrait-capture-box {
   border: 2px dashed $color-portrait-border;
   background-color: #f0f7f7;
@@ -147,102 +99,125 @@ mat-expansion-panel {
   height: 230px;
   gap: 12px;
   transition: all 0.3s ease;
-
   mat-icon { font-size: 80px; width: 80px; height: 80px; color: #80cbc4; }
   span { font-weight: 600; color: $color-header-bg; }
   .capture-btn { width: 100%; }
-  .upload-btn { width: 100%; color: #555;
-    ::ng-deep .mat-icon { font-size: 20px; width: 20px; height: 20px; color: inherit; }
-  }
+  .upload-btn { width: 100%; color: #555; ::ng-deep .mat-icon { font-size: 20px; width: 20px; height: 20px; color: inherit; } }
   &:hover { border-color: $color-focus; background-color: #fff; }
 }
-.customer-fields-grid {}
 
-/* Nút Ẩn/Hiện thông tin nâng cao */
 .advanced-toggle-wrapper {
   display: flex;
   justify-content: center;
   padding: 8px 0 20px 0;
-
   .advanced-toggle-btn {
     color: $color-gray-cancel;
     font-weight: 500;
     mat-icon { margin-right: 6px; }
-    &:hover {
-      color: $color-focus;
-      background-color: #fff;
-    }
+    &:hover { color: $color-focus; background-color: #fff; }
   }
 }
 
-/* Style cho Mat Tabs */
 .sub-tabs {
   animation: fadeInDown 0.5s ease;
-  padding: 0;
-
   ::ng-deep .mat-mdc-tab-header { border-bottom: none; }
-  .tab-content {
-    padding: 20px 16px;
-    border: 1px solid #e0e0e0;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-  }
+  .tab-content { padding: 20px 16px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; }
 }
 
-/* Các section thông tin khác */
 .form-section {
   border: none;
   padding: 0;
   margin-bottom: 0;
-
   &.content-block {
-    legend {
-      font-weight: 600;
-      font-size: 1.15rem;
-      margin-bottom: 16px;
-      padding-left: 0;
-      color: $color-header-bg;
-    }
+    legend { font-weight: 600; font-size: 1.15rem; margin-bottom: 16px; padding-left: 0; color: $color-header-bg; }
   }
 }
 
-/* Lưới CSS cho form */
 .form-grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: center; }
 .form-grid-3-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: center; }
 .form-grid-4-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: center; }
 .col-span-2 { grid-column: span 2; }
-.col-span-3 { grid-column: span 3; }
-.col-start-3 { grid-column-start: 3; }
 .full-width { width: 100%; }
 hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 
-/* === SỬA NÚT "THÊM MỚI TÀI SẢN" === */
-/* === THAY ĐỔI THEO YÊU CẦU === */
 .add-asset-type-btn {
   height: 48px;
-  /* min-width: 48px; */ /* <-- XÓA */
-  width: auto; /* <-- SỬA */
-  padding: 0 16px; /* <-- SỬA */
-  display: inline-flex; /* <-- THÊM */
-  align-items: center; /* <-- THÊM */
-  gap: 6px; /* <-- THÊM */
+  width: auto;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
 
-  mat-icon { /* <-- THÊM */
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+/* SMART INTEREST GROUP */
+.interest-group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+  align-items: end;
+
+  @media (max-width: 1024px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.interest-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  .interest-label { font-weight: 500; color: $color-header-bg; font-size: 0.9rem; }
+}
+
+.input-group {
+  display: flex;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-color: white;
+
+  &:has(input:focus), &:has(mat-select:focus) {
+    border-color: $color-focus;
+    box-shadow: 0 0 0 3px rgba($color-focus, 0.15);
+  }
+
+  .number-input {
+    flex: 1;
+    border: none;
+    padding: 0 12px;
+    height: 44px;
+    font-size: 1rem;
+    outline: none;
+    min-width: 60px;
+  }
+
+  .unit-select {
+    width: 140px;
+    border-left: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    ::ng-deep .mat-mdc-select-trigger {
+      height: 44px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+    ::ng-deep .mat-mdc-select-arrow { color: #555; }
   }
 }
 
-/* Style cho input có prefix/suffix (Kỳ đóng lãi, Lãi suất) */
-::ng-deep .input-prefix { width: 60% !important; border-right: 1px solid #ccc; margin-right: 10px; }
-::ng-deep .select-suffix {
-  width: 40% !important;
-  .mat-mdc-select-arrow-wrapper { display: none !important; }
-  .mat-mdc-select-trigger { padding-left: 10px; }
+.compact-field {
+  ::ng-deep .mat-mdc-form-field-flex { height: 44px !important; }
+  ::ng-deep .mat-mdc-text-field-wrapper { padding: 0 8px; }
 }
 
-/* Style cho Grid các loại phí */
+.radio-horizontal {
+  display: flex;
+  gap: 16px;
+  margin-top: 4px;
+}
+
 .fee-grid {
   display: grid;
   grid-template-columns: 1fr 180px 200px;
@@ -250,14 +225,10 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   align-items: center;
   margin-bottom: 8px;
   label { font-weight: 500; }
-  mat-form-field {
-    ::ng-deep .mat-mdc-form-field-flex { height: 44px !important; }
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-  }
+  mat-form-field { ::ng-deep .mat-mdc-form-field-flex { height: 44px !important; } ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; } }
   mat-radio-group { display: flex; gap: 16px; }
 }
 
-/* Style cho Dropzone */
 .file-dropzone {
   border: 2px dashed $color-dropzone-border;
   background-color: $color-dropzone-bg;
@@ -270,17 +241,9 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-
   mat-icon { font-size: 48px; width: 48px; height: 48px; color: #adb5bd; }
   span { font-weight: 600; font-size: 1.1rem; margin-top: 8px; }
   .dropzone-subtext { font-size: 0.85rem; color: #6c757d; margin-bottom: 16px; }
-  .upload-btn {
-    ::ng-deep .mat-icon {
-      font-size: 20px; width: 20px; height: 20px;
-      color: inherit;
-      margin-right: 8px;
-    }
-  }
   &:hover { border-color: $color-focus; background-color: #fff; }
 }
 
@@ -298,70 +261,25 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   }
 }
 
-/* === THAY ĐỔI MÀU NÚT BẤM === */
 mat-dialog-actions {
   padding: 16px 24px;
   border-top: 1px solid #eee;
   margin: 16px -24px -24px -24px;
   background-color: #fdfdfd;
-
-  .cancel-button {
-    border-color: #ced4da;
-    color: $color-gray-cancel;
-    transition: background-color 0.2s ease;
-    &:hover {
-      background-color: #f1f3f5;
-    }
-  }
-
-  .save-button {
-    background-color: $color-green-success;
-    color: white;
-    transition: background-color 0.2s ease;
-    &:hover {
-      background-color: #{darken($color-green-success, 8%)};
-    }
-  }
+  .cancel-button { border-color: #ced4da; color: $color-gray-cancel; &:hover { background-color: #f1f3f5; } }
+  .save-button { background-color: $color-green-success; color: white; &:hover { background-color: #{darken($color-green-success, 8%)}; } }
 }
 
-/* ================================================== */
-/* === MEDIA QUERIES (Giữ nguyên) === */
-/* ================================================== */
-
+/* RESPONSIVE */
 @media (max-width: 1024px) {
-  .form-grid-3-col,
-  .form-grid-4-col { grid-template-columns: repeat(2, 1fr); }
-  .col-span-3 { grid-column: span 2; }
-  .fee-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    mat-form-field { margin-top: -8px; }
-    mat-radio-group { margin-top: -8px; }
-  }
+  .form-grid-3-col, .form-grid-4-col { grid-template-columns: repeat(2, 1fr); }
+  .fee-grid { grid-template-columns: 1fr; gap: 8px; mat-form-field, mat-radio-group { margin-top: -8px; } }
 }
 
 @media (max-width: 768px) {
   .customer-main-grid { grid-template-columns: 1fr; }
-  .portrait-capture-box {
-    height: auto;
-    max-width: 300px;
-    margin: 0 auto 16px auto;
-  }
-  .form-grid-2-col,
-  .form-grid-3-col,
-  .form-grid-4-col { grid-template-columns: 1fr; }
-  .col-span-2,
-  .col-span-3 { grid-column: span 1; }
-
-  .add-asset-type-btn {
-    height: 48px;
-    width: 100%; // <-- Sửa cho mobile: Nút vuông thành rộng 100%
-    justify-content: center; /* <-- THÊM */
-  }
-
-  ::ng-deep .input-prefix { width: 100% !important; border: none; }
-  ::ng-deep .select-suffix {
-    width: 100% !important;
-    .mat-mdc-select-trigger { padding-left: 0; }
-  }
+  .portrait-capture-box { height: auto; max-width: 300px; margin: 0 auto 16px auto; }
+  .form-grid-2-col, .form-grid-3-col, .form-grid-4-col { grid-template-columns: 1fr; }
+  .col-span-2, .col-span-3 { grid-column: span 1; }
+  .add-asset-type-btn { width: 100%; justify-content: center; }
 }
