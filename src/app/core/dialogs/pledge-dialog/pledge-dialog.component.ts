@@ -3,7 +3,7 @@
 import { Component, OnInit, inject, Inject, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,11 +16,24 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
 import { PledgeService, PledgeContract } from '../../services/pledge.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 
 interface DropdownOption { id: string; name: string; }
+
+interface AssetTypeAttribute {
+  label: string;
+  value?: string;
+}
+
+interface AssetType {
+  maLoai: string;
+  tenLoai: string;
+  trangThai: string;
+  attributes: AssetTypeAttribute[];
+}
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -29,7 +42,8 @@ interface DropdownOption { id: string; name: string; }
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
-    MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule
+    MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
+    MatListModule
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
@@ -45,7 +59,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
+  assetTypes$ = new BehaviorSubject<string[]>(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' }, { id: 'nguoi_theo_doi', name: 'Người theo dõi' },
@@ -55,13 +69,18 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
 
+  // Attachments
+  uploadedFiles: { name: string; url: string }[] = [];
+  isDragOver = false;
+
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
   @Inject(MAT_DIALOG_DATA) public data: PledgeContract | null = inject(MAT_DIALOG_DATA);
   private notification = inject(NotificationService);
   private pledgeService = inject(PledgeService);
   private datePipe = inject(DatePipe);
-  private cdr = inject(ChangeDetectorRef); // Inject ChangeDetectorRef
+  private cdr = inject(ChangeDetectorRef);
+  private matDialog = inject(MatDialog);
   private stream: MediaStream | null = null;
 
   constructor() {
@@ -232,6 +251,84 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  // Attachment handling
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+    const files = event.dataTransfer?.files;
+    if (files) {
+      Array.from(files).forEach(file => this.handleFileUpload(file));
+    }
+  }
+
+  onAttachmentClick(): void {
+    // Trigger hidden file input for attachments if needed
+    // For now, use the same logic as portrait
+    const attachmentInput = document.createElement('input');
+    attachmentInput.type = 'file';
+    attachmentInput.multiple = true;
+    attachmentInput.accept = 'image/*,.pdf,.doc,.docx';
+    attachmentInput.onchange = (e: any) => {
+      if (e.target.files) {
+        Array.from(e.target.files as FileList).forEach((file: File) => this.handleFileUpload(file));
+      }
+    };
+    attachmentInput.click();
+  }
+
+  private handleFileUpload(file: File): void {
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit for attachments
+      this.notification.showError(`File ${file.name} vượt quá 5MB.`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      this.uploadedFiles.push({ name: file.name, url });
+      this.pledgeForm.get('attachments')?.patchValue(this.uploadedFiles);
+      this.notification.showSuccess(`Đã tải ${file.name} thành công!`);
+      this.cdr.detectChanges();
+    };
+    reader.onerror = () => {
+      this.notification.showError(`Lỗi khi đọc file ${file.name}.`);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeAttachment(index: number): void {
+    this.uploadedFiles.splice(index, 1);
+    this.pledgeForm.get('attachments')?.patchValue(this.uploadedFiles);
+    this.cdr.detectChanges();
+  }
+
+  // Asset type addition
+  addNewAssetType(): void {
+    const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
+      width: '500px',
+      data: { assetTypes: this.assetTypes$.value }
+    });
+
+    dialogRef.afterClosed().subscribe((result: AssetType | undefined) => {
+      if (result) {
+        const currentTypes = this.assetTypes$.value;
+        currentTypes.push(result.tenLoai);
+        this.assetTypes$.next(currentTypes);
+        this.notification.showSuccess('Thêm loại tài sản thành công!');
+      }
+    });
+  }
+
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
@@ -254,7 +351,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         ngayVay: this.formatDate(formData.loanInfo.ngayVay)!
       },
       fees: formData.feesInfo,
-      collateral: formData.collateralInfo
+      collateral: formData.collateralInfo,
+      attachments: formData.attachments
     };
 
     setTimeout(() => {
@@ -274,5 +372,127 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   }
 
   findCustomer(): void { this.notification.showInfo('Tìm kiếm khách hàng...'); }
-  addNewAssetType(): void { this.notification.showInfo('Thêm loại tài sản...'); }
+}
+
+// New Dialog Component for Adding Asset Type
+@Component({
+  selector: 'app-add-asset-type-dialog',
+  standalone: true,
+  imports: [
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
+    MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
+    MatExpansionModule, MatListModule
+  ],
+  template: `
+    <mat-dialog-content>
+      <h2 mat-dialog-title>Thêm mới loại tài sản</h2>
+
+      <form [formGroup]="assetTypeForm">
+        <!-- Thông tin chung -->
+        <div class="info-section">
+          <h3>Thông tin chung</h3>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Lĩnh vực</mat-label>
+              <input matInput value="Cầm đồ + Nhận vay" disabled>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Mã loại tài sản (*)</mat-label>
+              <input matInput formControlName="maLoai" placeholder="VD: XM, ĐT">
+            </mat-form-field>
+          </div>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Tên loại tài sản (*)</mat-label>
+              <input matInput formControlName="tenLoai" placeholder="Xe máy">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Trạng thái</mat-label>
+              <mat-select formControlName="trangThai">
+                <mat-option value="Bình thường">Bình thường</mat-option>
+                <mat-option value="Không hoạt động">Không hoạt động</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Cấu hình thuộc tính hàng hóa -->
+        <div class="info-section">
+          <h3>Cấu hình thuộc tính hàng hóa</h3>
+          <div formArrayName="attributes">
+            <div *ngFor="let attrGroup of attributesArray.controls; let i = index" [formGroupName]="i" class="attribute-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Thuộc tính {{ i + 1 }} (VD: Biển số xe)</mat-label>
+                <input matInput formControlName="label" placeholder="VD: Biển số xe">
+                <button mat-icon-button matSuffix (click)="removeAttribute(i)" type="button">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" (click)="addAttribute()" class="add-attribute-btn">
+            <mat-icon>add</mat-icon> Thêm thuộc tính
+          </button>
+        </div>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()">Đóng</button>
+      <button mat-flat-button color="primary" [disabled]="assetTypeForm.invalid" (click)="onSave()">Thêm mới</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    .info-section { margin-bottom: 24px; }
+    .info-section h3 { font-weight: 600; color: #004d40; margin-bottom: 16px; }
+    .attribute-row { margin-bottom: 16px; }
+    .add-attribute-btn { margin-top: 8px; }
+    .form-grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: center; }
+    .full-width { width: 100%; }
+  `]
+})
+export class AddAssetTypeDialogComponent {
+  assetTypeForm: FormGroup;
+  attributesArray: any;
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<AddAssetTypeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
+  ) {
+    this.assetTypeForm = this.fb.group({
+      maLoai: ['', Validators.required],
+      tenLoai: ['', Validators.required],
+      trangThai: ['Bình thường'],
+      attributes: this.fb.array([
+        this.fb.group({ label: [''] })
+      ])
+    });
+    this.attributesArray = this.assetTypeForm.get('attributes') as any;
+  }
+
+  addAttribute(): void {
+    this.attributesArray.push(this.fb.group({ label: [''] }));
+  }
+
+  removeAttribute(index: number): void {
+    this.attributesArray.removeAt(index);
+  }
+
+  onSave(): void {
+    if (this.assetTypeForm.valid) {
+      const formValue = this.assetTypeForm.value;
+      const newAssetType: AssetType = {
+        maLoai: formValue.maLoai,
+        tenLoai: formValue.tenLoai,
+        trangThai: formValue.trangThai,
+        attributes: formValue.attributes
+      };
+      this.dialogRef.close(newAssetType);
+    }
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
 }

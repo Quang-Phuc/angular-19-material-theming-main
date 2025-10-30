@@ -12,6 +12,7 @@ $color-block-border: #e9ecef;
 $color-dialog-bg: #f4f6f9;
 $color-green-success: #28a745;
 $color-gray-cancel: #6c757d;
+$color-loan-bg: #e3f2fd; /* Light blue for loan section */
 
 /* === HIỆU ỨNG === */
 @keyframes fadeInDown {
@@ -53,6 +54,16 @@ mat-dialog-content {
   transition: box-shadow 0.3s ease;
   padding: 20px;
   &:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
+}
+
+/* === LOAN INFO SECTION (BOLD LEGEND WITH BACKGROUND) === */
+.loan-info-section {
+  background-color: $color-loan-bg !important;
+  legend {
+    font-weight: bold !important;
+    font-size: 1.2rem !important;
+    color: $color-header-bg !important;
+  }
 }
 
 /* === FORM FIELD FOCUS & HOVER === */
@@ -190,7 +201,7 @@ mat-expansion-panel {
 .full-width { width: 100%; }
 hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 
-/* === ADD ASSET TYPE BUTTON === */
+/* === ADD ASSET TYPE BUTTON (Aligned) === */
 .add-asset-type-btn {
   height: 48px !important;
   min-height: 48px !important;
@@ -294,7 +305,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   mat-radio-group { display: flex; gap: 16px; }
 }
 
-/* === FILE DROPZONE === */
+/* === FILE DROPZONE (Enhanced for Attachments) === */
 .file-dropzone {
   border: 2px dashed $color-dropzone-border;
   background-color: $color-dropzone-bg;
@@ -311,6 +322,7 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   span { font-weight: 600; font-size: 1.1rem; margin-top: 8px; }
   .dropzone-subtext { font-size: 0.85rem; color: #6c757d; margin-bottom: 16px; }
   &:hover { border-color: $color-focus; background-color: #fff; }
+  &.drag-over { border-color: $color-focus; background-color: #e3f2fd; }
 }
 
 .attachment-upload-link {
@@ -323,8 +335,14 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
     align-items: center;
     gap: 4px;
     mat-icon { font-size: 20px; width: 20px; height: 20px; }
-    &:hover { text-decoration: underline; }
+    &:hover { text-decoration: underline; cursor: pointer; }
   }
+}
+
+.uploaded-files-list {
+  margin-top: 16px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 /* === DIALOG ACTIONS === */
@@ -355,6 +373,6 @@ mat-dialog-actions {
   .customer-main-grid { grid-template-columns: 1fr; }
   .portrait-capture-box { height: auto; max-width: 300px; margin: 0 auto 16px auto; }
   .form-grid-2-col, .form-grid-3-col, .form-grid-4-col { grid-template-columns: 1fr; }
-  .add-asset-type-btn { width: 100%; justify-content: center; }
+  .add-asset-type-btn { width: 100%; justify-content: center; margin-top: 0 !important; }
   .webcam-modal-content { width: 95%; }
 }

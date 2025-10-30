@@ -138,9 +138,8 @@
             <div class="form-grid-3-col">
               <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="nguoiLienHe"></mat-form-field>
               <mat-form-field appearance="outline"><mat-label>Số điện thoại người liên hệ</mat-label><input matInput formControlName="sdtNguoiLienHe"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Nơi cấp GTTT</mat-label><input matInput formControlName="noiLamViec"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Ghi Chú</mat-label><textarea matInput formControlName="ghiChu" rows="2"></textarea></mat-form-field>
             </div>
-            <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú</mat-label><textarea matInput formControlName="ghiChu" rows="2"></textarea></mat-form-field>
           </div>
         </mat-tab>
 
@@ -222,8 +221,8 @@
       </mat-tab-group>
     }
 
-    <!-- === 2. THÔNG TIN CHO VAY === -->
-    <fieldset class="form-section content-block" formGroupName="loanInfo">
+    <!-- === 2. THÔNG TIN CHO VAY (BOLD LEGEND WITH BACKGROUND) === -->
+    <fieldset class="form-section content-block loan-info-section" formGroupName="loanInfo">
       <legend>2. Thông tin cho vay</legend>
 
       <div class="form-grid-3-col">
@@ -242,7 +241,8 @@
           </mat-autocomplete>
         </mat-form-field>
 
-        <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()" matTooltip="Thêm loại tài sản mới">
+        <!-- Adjusted button to align with Loại Tài Sản field -->
+        <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()" matTooltip="Thêm loại tài sản mới" style="margin-top: 20px;">
           <mat-icon>add</mat-icon>
           <span>Thêm mới</span>
         </button>
@@ -359,8 +359,31 @@
       <!-- 5. Đính kèm -->
       <mat-expansion-panel formGroupName="attachments">
         <mat-expansion-panel-header><mat-panel-title>5. Đính kèm file</mat-panel-title></mat-expansion-panel-header>
-        <div class="file-dropzone"><mat-icon>cloud_upload</mat-icon><span>Bấm tải ảnh <span style="font-weight: 400; color: #6c757d;">Hoặc kéo thả ảnh tại đây</span></span><div class="dropzone-subtext">JPG, JPEG, PNG nhỏ hơn 1MB</div></div>
-        <div class="attachment-upload-link"><a><mat-icon>add</mat-icon>UPLOAD FILE ĐÍNH KÈM</a></div>
+        <div class="file-dropzone"
+             (dragover)="onDragOver($event)"
+             (dragleave)="onDragLeave($event)"
+             (drop)="onDrop($event)"
+             [class.drag-over]="isDragOver"
+             (click)="onAttachmentClick()">
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Bấm tải ảnh <span style="font-weight: 400; color: #6c757d;">Hoặc kéo thả ảnh tại đây</span></span>
+          <div class="dropzone-subtext">JPG, JPEG, PNG, PDF, DOC, DOCX nhỏ hơn 5MB</div>
+        </div>
+
+        @if (uploadedFiles.length > 0) {
+          <div class="uploaded-files-list">
+            <mat-list>
+              @for (file of uploadedFiles; track file.name; let i = $index) {
+                <mat-list-item>
+                  <div matListItemTitle>{{ file.name }}</div>
+                  <button mat-icon-button (click)="removeAttachment(i)" matListItemIcon>
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-list-item>
+              }
+            </mat-list>
+          </div>
+        }
       </mat-expansion-panel>
     </mat-accordion>
 
