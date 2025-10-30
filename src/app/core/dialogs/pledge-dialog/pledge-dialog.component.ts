@@ -3,6 +3,7 @@
 import { Component, OnInit, inject, Inject, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,6 +21,7 @@ import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
 import { PledgeService, PledgeContract } from '../../services/pledge.service';
 import { Observable, of, BehaviorSubject } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface DropdownOption { id: string; name: string; }
 
@@ -33,6 +35,28 @@ interface AssetType {
   tenLoai: string;
   trangThai: string;
   attributes: AssetTypeAttribute[];
+}
+
+interface CustomerSearchRequest {
+  phone: string;
+  idNumber: string;
+}
+
+interface CustomerSearchResponse {
+  timeStamp: string;
+  securityVersion: string;
+  result: string;
+  message: string;
+  errorCode: string;
+  data?: {
+    fullName: string;
+    phoneNumber: string;
+    dateOfBirth: string;
+    identityNumber: string;
+    issueDate: string;
+    issuePlace: string;
+    permanentAddress: string;
+  };
 }
 
 @Component({
@@ -81,7 +105,12 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private cdr = inject(ChangeDetectorRef);
   private matDialog = inject(MatDialog);
+  private http = inject(HttpClient);
   private stream: MediaStream | null = null;
+
+  // API Configuration
+  private apiUrl = 'http://localhost:8080/api/user/search';
+  private authToken = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwODY1MDUyMjYyIiwiZXhwIjoxNzYxNjM4MTg0LCJpYXQiOjE3NjE2MjAxODR9.EcIR22rNtPeNLZMb6HeAZIg3NdVd9T926RrXrQdn7haUbAnVziuSfhp7Y35szrM7cpfQj79G77BTqju1iUOQOw';
 
   constructor() {
     this.isEditMode = !!this.data;
@@ -329,6 +358,64 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     });
   }
 
+  findCustomer(): void {
+    const dialogRef = this.matDialog.open(CustomerSearchDialogComponent, {
+      width: '400px',
+      data: {}
+    });
+
+    dialogRef.afterClosed().subscribe((searchData: { phone?: string; idNumber?: string } | undefined) => {
+      if (searchData && (searchData.phone || searchData.idNumber)) {
+        this.searchCustomer(searchData.phone || '', searchData.idNumber || '');
+      }
+    });
+  }
+
+  private searchCustomer(phone: string, idNumber: string): void {
+    const headers = new HttpHeaders({
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
+      'Authorization': `Bearer ${this.authToken}`,
+      'Content-Type': 'application/json'
+    });
+
+    const requestBody: CustomerSearchRequest = {
+      phone: phone || '',
+      idNumber: idNumber || ''
+    };
+
+    this.http.post<CustomerSearchResponse>(this.apiUrl, requestBody, { headers }).pipe(
+      map(response => {
+        if (response.result === 'success' && response.data) {
+          this.populateCustomerData(response.data);
+          this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
+        } else {
+          this.notification.showError('Không có thông tin khách hàng!');
+        }
+      }),
+      catchError(error => {
+        console.error('Search error:', error);
+        this.notification.showError('Lỗi khi tìm kiếm khách hàng. Vui lòng thử lại.');
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+  private populateCustomerData(data: any): void {
+    const customerInfo = this.pledgeForm.get('customerInfo');
+    if (customerInfo) {
+      customerInfo.patchValue({
+        hoTen: data.fullName,
+        soDienThoai: data.phoneNumber,
+        ngaySinh: new Date(data.dateOfBirth),
+        soCCCD: data.identityNumber,
+        ngayCapCCCD: new Date(data.issueDate),
+        noiCapCCCD: data.issuePlace,
+        diaChi: data.permanentAddress
+      });
+    }
+  }
+
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
@@ -370,8 +457,59 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   private formatDate(date: any): string | null {
     return date ? this.datePipe.transform(date, 'yyyy-MM-dd') : null;
   }
+}
 
-  findCustomer(): void { this.notification.showInfo('Tìm kiếm khách hàng...'); }
+// Customer Search Dialog Component
+@Component({
+  selector: 'app-customer-search-dialog',
+  standalone: true,
+  imports: [
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule
+  ],
+  template: `
+    <mat-dialog-content>
+      <h2 mat-dialog-title>Tìm kiếm khách hàng</h2>
+      <form [formGroup]="searchForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Số điện thoại</mat-label>
+          <input matInput formControlName="phone" placeholder="0901234567">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Số CCCD/CMND</mat-label>
+          <input matInput formControlName="idNumber" placeholder="079123456789">
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Đóng</button>
+      <button mat-flat-button color="primary" [disabled]="searchForm.invalid" (click)="onSearch()">Tìm kiếm</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    .full-width { width: 100%; }
+    mat-form-field { margin-bottom: 16px; }
+  `]
+})
+export class CustomerSearchDialogComponent {
+  searchForm: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<CustomerSearchDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    this.searchForm = this.fb.group({
+      phone: [''],
+      idNumber: ['']
+    });
+  }
+
+  onSearch(): void {
+    if (this.searchForm.valid || (this.searchForm.value.phone || this.searchForm.value.idNumber)) {
+      this.dialogRef.close(this.searchForm.value);
+    }
+  }
 }
 
 // New Dialog Component for Adding Asset Type
