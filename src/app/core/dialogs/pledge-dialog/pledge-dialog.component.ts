@@ -332,29 +332,26 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   }
 
   findCustomer(): void {
-    console.log('sss')
     let phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value || '';
     let idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value || '';
 
     phone = phone.trim();
     idNumber = idNumber.trim();
-    console.log('sss2')
-    console.log('sss2'+phone+idNumber)
+
     if (!phone && !idNumber) {
-      console.log('sss3')
       this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
       return;
     }
-    console.log('sss4')
+
     console.log('Calling API with phone:', phone, 'idNumber:', idNumber); // Debug log
 
     this.customerService.searchCustomer({
       phoneNumber: phone,
       identityNumber: idNumber
     }).subscribe(
-      (data: CustomerSearchResponse | null) => {
+      (data: any | null) => {
         console.log('API Response:', data); // Debug log
-        if (data && data.data) {
+        if (data) {
           this.populateCustomerData(data);
           this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
         } else {
@@ -368,23 +365,23 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     );
   }
 
-  private populateCustomerData(data: CustomerSearchResponse): void {
+  private populateCustomerData(customerData: any): void {
     const customerInfo = this.pledgeForm.get('customerInfo');
     const customerExtraInfo = this.pledgeForm.get('customerExtraInfo');
     if (customerInfo) {
       customerInfo.patchValue({
-        hoTen: data.data?.fullName || '',
-        soDienThoai: data.data?.phoneNumber || '',
-        ngaySinh: data.data?.dateOfBirth ? new Date(data.data.dateOfBirth) : null,
-        soCCCD: data.data?.identityNumber || '',
-        ngayCapCCCD: data.data?.issueDate ? new Date(data.data.issueDate) : null,
-        noiCapCCCD: data.data?.issuePlace || '',
-        diaChi: data.data?.permanentAddress || ''
+        hoTen: customerData.fullName || '',
+        soDienThoai: customerData.phoneNumber || '',
+        ngaySinh: customerData.dateOfBirth ? new Date(customerData.dateOfBirth) : null,
+        soCCCD: customerData.identityNumber || '',
+        ngayCapCCCD: customerData.issueDate ? new Date(customerData.issueDate) : null,
+        noiCapCCCD: customerData.issuePlace || '',
+        diaChi: customerData.permanentAddress || ''
       });
     }
-    if (customerExtraInfo && data.data) {
+    if (customerExtraInfo && customerData.email) {
       customerExtraInfo.patchValue({
-        email: (data.data as any).email || ''
+        email: customerData.email
       });
     }
   }

@@ -20,6 +20,12 @@ export interface CustomerSearchResponse {
   message: string;
   errorCode: string;
   data?: {
+    createdBy: string;
+    createdDate: string;
+    lastUpdatedBy: string | null;
+    lastUpdatedDate: string;
+    idUrl: string | null;
+    id: number;
     fullName: string;
     phoneNumber: string;
     dateOfBirth: string;
@@ -27,6 +33,8 @@ export interface CustomerSearchResponse {
     issueDate: string;
     issuePlace: string;
     permanentAddress: string;
+    gender: string;
+    email: string;
   };
 }
 
