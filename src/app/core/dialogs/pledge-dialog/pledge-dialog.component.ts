@@ -213,16 +213,21 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+  /* ------------------- CONFIRM & POPULATE ------------------- */
   private showConfirmAndPopulate(customerData: any): void {
     const name = customerData.fullName || 'Khách hàng';
-    const phone = customerData.phoneNumber || '';
-    const message = `Tìm thấy khách hàng: <strong>${name}</strong> ${phone ? `(${phone})` : ''}.<br>Bạn có muốn sử dụng dữ liệu đã lưu không?`;
+    const phone = customerData.phoneNumber ? `(${customerData.phoneNumber})` : '';
+    const message = `
+      Tìm thấy khách hàng: <strong>${name}</strong> ${phone}.<br>
+      <small>Đã có dữ liệu: thông tin cá nhân, gia đình, thu nhập, nguồn...</small><br>
+      <strong>Bạn có muốn sử dụng dữ liệu đã lưu không?</strong>
+    `;
 
-    this.notification.showConfirm(message, 'Có', 'Không')
+    this.notification.showConfirm(message, 'Có', 'Không', 15000)
       .then(confirmed => {
         if (confirmed) {
           this.populateAllCustomerData(customerData);
-          this.notification.showSuccess('Đã điền thông tin khách hàng từ hệ thống!');
+          this.notification.showSuccess('Đã điền toàn bộ thông tin khách hàng!');
         }
       });
   }
@@ -233,7 +238,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const family = this.pledgeForm.get('familyInfo');
     const loanExtra = this.pledgeForm.get('loanExtraInfo');
 
-    // 1. Thông tin cơ bản
+    // === 1. THÔNG TIN CƠ BẢN ===
     if (cInfo) {
       cInfo.patchValue({
         hoTen: data.fullName || '',
@@ -246,44 +251,89 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    // 2. Thông tin khác
+    // === 2. THÔNG TIN NÂNG CAO ===
     if (cExtra) {
       cExtra.patchValue({
         maKhachHang: data.customerCode || '',
         ngheNghiep: data.occupation || '',
         noiLamViec: data.workplace || '',
-        hoKhau: data.householdAddress || '',
+        hoKhau: data.householdRegistration || '',
         email: data.email || '',
-        thuNhap: data.monthlyIncome || 0,
-        ghiChu: data.notes || '',
-        nguoiLienHe: data.emergencyContact?.name || '',
-        sdtNguoiLienHe: data.emergencyContact?.phone || ''
+        thuNhap: data.incomeVndPerMonth || 0,
+        ghiChu: data.note || '',
+        nguoiLienHe: data.contactPerson || '',
+        sdtNguoiLienHe: data.contactPhone || ''
       });
     }
 
-    // 3. Thành phần gia đình
-    if (family && data.familyMembers) {
-      const map = (m: any) => ({
-        hoTen: m.name || '',
-        soDienThoai: m.phone || '',
-        ngheNghiep: m.occupation || ''
-      });
+    // === 3. THÀNH PHẦN GIA ĐÌNH ===
+    if (family) {
       family.patchValue({
-        voChong: data.familyMembers.spouse ? map(data.familyMembers.spouse) : this.createFamilyMemberGroup().value,
-        bo: data.familyMembers.father ? map(data.familyMembers.father) : this.createFamilyMemberGroup().value,
-        me: data.familyMembers.mother ? map(data.familyMembers.mother) : this.createFamilyMemberGroup().value
+        voChong: {
+          hoTen: data.spouseName || '',
+          soDienThoai: data.spousePhone || '',
+          ngheNghiep: data.spouseOccupation || ''
+        },
+        bo: {
+          hoTen: data.fatherName || '',
+          soDienThoai: data.fatherPhone || '',
+          ngheNghiep: data.fatherOccupation || ''
+        },
+        me: {
+          hoTen: data.motherName || '',
+          soDienThoai: data.motherPhone || '',
+          ngheNghiep: data.motherOccupation || ''
+        }
       });
     }
 
-    // 4. Thông tin cho vay (nâng cao)
-    if (loanExtra && data.loanProfile) {
+    // === 4. THÔNG TIN CHO VAY ===
+    if (loanExtra) {
       loanExtra.patchValue({
-        tinhTrang: data.loanProfile.status || 'Binh Thuong',
-        loaiDoiTac: data.loanProfile.partnerType || 'khach_hang',
-        nguoiTheoDoi: data.loanProfile.follower || 'all',
-        nguonKhachHang: data.loanProfile.source || 'all'
+        tinhTrang: this.mapLoanStatus(data.loanStatus),
+        loaiDoiTac: this.mapPartnerType(data.partnerType),
+        nguoiTheoDoi: data.follower || 'all',
+        nguonKhachHang: this.mapCustomerSource(data.customerSource)
       });
     }
+
+    // === 5. ẢNH CHÂN DUNG ===
+    if (data.idUrl) {
+      this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(data.idUrl);
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  /* ------------------- MAPPING FUNCTIONS ------------------- */
+  private mapLoanStatus(status: string): string {
+    const map: { [key: string]: string } = {
+      'Chưa vay': 'Binh Thuong',
+      'Đang vay': 'Binh Thuong 2',
+      'Nợ xấu': 'No xau',
+      'Nợ rủi ro': 'No rui ro',
+      'Nợ R2': 'No R2',
+      'Nợ R3': 'No R3'
+    };
+    return map[status] || 'Binh Thuong';
+  }
+
+  private mapPartnerType(type: string): string {
+    const map: { [key: string]: string } = {
+      'Cá nhân': 'khach_hang',
+      'Chủ nợ': 'chu_no',
+      'Người theo dõi': 'nguoi_theo_doi',
+      'Tất cả': 'all'
+    };
+    return map[type] || 'khach_hang';
+  }
+
+  private mapCustomerSource(source: string): string {
+    const map: { [key: string]: string } = {
+      'Giới thiệu bạn bè': 'ctv',
+      'Tất cả': 'all'
+    };
+    return map[source] || 'all';
   }
 
   /* ------------------- TÌM KHÁCH HÀNG (nút) ------------------- */
