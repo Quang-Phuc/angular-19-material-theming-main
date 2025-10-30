@@ -19,14 +19,27 @@
 
         <!-- CỘT 1: ẢNH CHÂN DUNG -->
         <div class="portrait-capture-box">
-          <mat-icon>camera_alt</mat-icon>
-          <span>Chụp ảnh chân dung</span>
-          <button mat-stroked-button class="capture-btn" (click)="takePicture('portrait')">
-             Chụp
-          </button>
-          <button mat-stroked-button class="upload-btn" (click)="takePicture('upload')">
-            <mat-icon>cloud_upload</mat-icon> Tải lên
-          </button>
+          <ng-container *ngIf="pledgeForm.get('portraitInfo.imageUrl')?.value; else noImage">
+            <img [src]="pledgeForm.get('portraitInfo.imageUrl')?.value" alt="Portrait" class="portrait-preview" />
+            <button mat-stroked-button class="capture-btn" (click)="takePicture('portrait')">
+              Chụp lại
+            </button>
+            <button mat-stroked-button class="upload-btn" (click)="takePicture('upload')">
+              <mat-icon>cloud_upload</mat-icon> Tải lên khác
+            </button>
+          </ng-container>
+          <ng-template #noImage>
+            <mat-icon>camera_alt</mat-icon>
+            <span>Chụp ảnh chân dung</span>
+            <button mat-stroked-button class="capture-btn" (click)="takePicture('portrait')">
+              Chụp
+            </button>
+            <button mat-stroked-button class="upload-btn" (click)="takePicture('upload')">
+              <mat-icon>cloud_upload</mat-icon> Tải lên
+            </button>
+          </ng-template>
+          <!-- Hidden file input for selecting images -->
+          <input #fileInput type="file" accept="image/jpeg,image/jpg,image/png" (change)="onFileSelected($event)" style="display: none;" />
         </div>
 
         <!-- CỘT 2: THÔNG TIN CÁ NHÂN -->
@@ -83,6 +96,19 @@
       </div>
     </fieldset>
 
+    <!-- === WEBCAM MODAL === -->
+    <div class="webcam-modal" *ngIf="showWebcam">
+      <div class="webcam-modal-content">
+        <h3>Chụp ảnh chân dung</h3>
+        <video #videoElement autoplay playsinline class="webcam-video"></video>
+        <canvas #canvasElement style="display: none;"></canvas>
+        <div class="webcam-actions">
+          <button mat-stroked-button (click)="stopWebcam()">Hủy</button>
+          <button mat-flat-button color="primary" (click)="capturePhoto()">Chụp</button>
+        </div>
+      </div>
+    </div>
+
     <!-- === NÚT MỞ THÔNG TIN NÂNG CAO === -->
     <div class="advanced-toggle-wrapper">
       <button mat-stroked-button class="advanced-toggle-btn" (click)="showAdvancedInfo = !showAdvancedInfo">
@@ -110,8 +136,8 @@
             </div>
 
             <div class="form-grid-3-col">
-              <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="hoKhau"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Số điện thoại người liên hệ </mat-label><input matInput type="email" formControlName="email"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="nguoiLienHe"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Số điện thoại người liên hệ</mat-label><input matInput formControlName="sdtNguoiLienHe"></mat-form-field>
               <mat-form-field appearance="outline"><mat-label>Nơi cấp GTTT</mat-label><input matInput formControlName="noiLamViec"></mat-form-field>
             </div>
             <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú</mat-label><textarea matInput formControlName="ghiChu" rows="2"></textarea></mat-form-field>
@@ -200,7 +226,6 @@
     <fieldset class="form-section content-block" formGroupName="loanInfo">
       <legend>2. Thông tin cho vay</legend>
 
-      <!-- THAY ĐOẠN NÀY TRONG pledge-dialog.component.html -->
       <div class="form-grid-3-col">
         <mat-form-field appearance="outline">
           <mat-label>Tên Tài Sản *</mat-label>
@@ -217,7 +242,6 @@
           </mat-autocomplete>
         </mat-form-field>
 
-        <!-- NÚT MỚI: CÓ CHỮ "THÊM MỚI", NỀN XANH LÁ, CÙNG CHIỀU CAO -->
         <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()" matTooltip="Thêm loại tài sản mới">
           <mat-icon>add</mat-icon>
           <span>Thêm mới</span>
@@ -268,26 +292,22 @@
           </div>
         </div>
 
-
-      </div>
-      <div class="interest-group-grid">
         <div class="interest-item">
           <label class="interest-label">Số lần trả *</label>
           <div class="input-group">
-            <input matInput type="number" formControlName="kyDongLai_So" class="number-input" placeholder="1">
+            <input matInput type="number" formControlName="soLanTra" class="number-input" placeholder="1">
           </div>
         </div>
 
         <div class="interest-item">
           <label class="interest-label">Kiểu Thu Lãi *</label>
           <div class="input-group">
-            <mat-select formControlName="laiSuat_DonVi" class="unit-select">
-              <mat-option value="Lai/Trieu/Ngay">Thu trước</mat-option>
-              <mat-option value="Lai%/Thang">Thu sau</mat-option>
+            <mat-select formControlName="kieuThuLai" class="unit-select">
+              <mat-option value="Truoc">Thu trước</mat-option>
+              <mat-option value="Sau">Thu sau</mat-option>
             </mat-select>
           </div>
         </div>
-
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
@@ -323,7 +343,14 @@
           <mat-form-field appearance="outline"><mat-label>Số Máy</mat-label><input matInput formControlName="soMay"></mat-form-field>
         </div>
         <div class="form-grid-2-col">
-          <mat-form-field appearance="outline"><mat-label>Kho</mat-label><mat-select formControlName="kho">@for (option of (khoList$ | async); track option.id) {<mat-option [value]="option.id">{{option.name}}</mat-option>}</mat-select></mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Kho</mat-label>
+            <mat-select formControlName="kho">
+              @for (option of (khoList$ | async); track option.id) {
+                <mat-option [value]="option.id">{{option.name}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
           <mat-form-field appearance="outline"><mat-label>Mã Tài Sản</mat-label><input matInput formControlName="maTaiSan"></mat-form-field>
         </div>
         <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú (Tài sản)</mat-label><textarea matInput formControlName="ghiChuTaiSan" rows="2"></textarea></mat-form-field>

@@ -1,9 +1,9 @@
 // src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
 
-import { Component, OnInit, inject, Inject, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, Inject, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,10 +40,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   isEditMode = false;
   isLoading = false;
   showAdvancedInfo = false;
-  showWebcam = false; // Control webcam modal visibility
-  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
-  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  showWebcam = false;
+  @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   assetTypes$: Observable<string[]> = of(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
@@ -61,7 +61,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   private notification = inject(NotificationService);
   private pledgeService = inject(PledgeService);
   private datePipe = inject(DatePipe);
-  private stream: MediaStream | null = null; // Store webcam stream
+  private cdr = inject(ChangeDetectorRef); // Inject ChangeDetectorRef
+  private stream: MediaStream | null = null;
 
   constructor() {
     this.isEditMode = !!this.data;
@@ -128,7 +129,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.stopWebcam(); // Clean up webcam stream
+    this.stopWebcam();
   }
 
   patchFormData(contract: PledgeContract): void {
@@ -138,35 +139,54 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
 
   async takePicture(field: string): Promise<void> {
     if (field === 'portrait') {
-      try {
-        this.showWebcam = true;
-        this.notification.showInfo('Đang truy cập webcam...');
-        this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (this.videoElement) {
+      this.showWebcam = true;
+      this.notification.showInfo('Đang truy cập webcam...');
+      // Wait for DOM to update
+      setTimeout(async () => {
+        if (!this.videoElement || !this.videoElement.nativeElement) {
+          this.notification.showError('Không thể truy cập phần tử video. Vui lòng thử lại.');
+          this.showWebcam = false;
+          return;
+        }
+        try {
+          this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
           this.videoElement.nativeElement.srcObject = this.stream;
           this.videoElement.nativeElement.play();
+          this.cdr.detectChanges(); // Ensure DOM is updated
+        } catch (error) {
+          this.notification.showError('Không thể truy cập webcam. Vui lòng kiểm tra quyền hoặc thử tải ảnh lên.');
+          this.showWebcam = false;
+          console.error('Webcam access error:', error);
         }
-      } catch (error) {
-        this.notification.showError('Không thể truy cập webcam. Vui lòng kiểm tra quyền hoặc thử tải ảnh lên.');
-        this.showWebcam = false;
-        console.error('Webcam access error:', error);
-      }
+      }, 0);
     } else if (field === 'upload') {
-      this.fileInput.nativeElement.click();
+      if (this.fileInput && this.fileInput.nativeElement) {
+        this.fileInput.nativeElement.click();
+      } else {
+        this.notification.showError('Không thể truy cập input file. Vui lòng thử lại.');
+      }
     }
   }
 
   capturePhoto(): void {
-    if (!this.videoElement || !this.canvasElement) return;
+    if (!this.videoElement || !this.canvasElement) {
+      this.notification.showError('Không thể chụp ảnh do lỗi giao diện. Vui lòng thử lại.');
+      return;
+    }
 
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const context = canvas.getContext('2d');
+    if (!context) {
+      this.notification.showError('Không thể truy cập canvas context.');
+      return;
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8); // JPEG with 80% quality
-    if (imageDataUrl.length > 1024 * 1024) { // Check if image exceeds 1MB
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    if (imageDataUrl.length > 1024 * 1024) {
       this.notification.showError('Ảnh quá lớn. Vui lòng thử lại với ảnh nhỏ hơn 1MB.');
       return;
     }
@@ -184,7 +204,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         this.notification.showError('Vui lòng chọn file JPG, JPEG hoặc PNG.');
         return;
       }
-      if (file.size > 1024 * 1024) { // 1MB limit
+      if (file.size > 1024 * 1024) {
         this.notification.showError('File ảnh vượt quá 1MB. Vui lòng chọn file nhỏ hơn.');
         return;
       }
@@ -194,6 +214,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         const result = e.target?.result as string;
         this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(result);
         this.notification.showSuccess('Đã tải ảnh lên thành công!');
+        this.cdr.detectChanges(); // Update DOM to show preview
       };
       reader.onerror = () => {
         this.notification.showError('Lỗi khi đọc file ảnh. Vui lòng thử lại.');
@@ -208,6 +229,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
       this.stream = null;
     }
     this.showWebcam = false;
+    this.cdr.detectChanges();
   }
 
   onSave(): void {

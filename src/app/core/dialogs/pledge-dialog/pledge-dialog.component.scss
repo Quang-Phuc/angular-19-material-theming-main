@@ -126,6 +126,54 @@ mat-expansion-panel {
   .capture-btn { width: 100%; }
   .upload-btn { width: 100%; color: #555; ::ng-deep .mat-icon { font-size: 20px; width: 20px; height: 20px; color: inherit; } }
   &:hover { border-color: $color-focus; background-color: #fff; }
+  .portrait-preview {
+    max-width: 100%;
+    max-height: 140px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 8px;
+  }
+}
+
+/* === WEBCAM MODAL === */
+.webcam-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.webcam-modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  h3 {
+    margin: 0 0 16px;
+    color: $color-header-bg;
+    font-weight: 600;
+  }
+  .webcam-video {
+    width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    background: #000;
+  }
+  .webcam-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
 }
 
 /* === SUB TABS === */
@@ -144,16 +192,37 @@ hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 
 /* === ADD ASSET TYPE BUTTON === */
 .add-asset-type-btn {
-  height: 48px;
-  width: auto;
-  padding: 0 16px;
-  display: inline-flex;
+  height: 48px !important;
+  min-height: 48px !important;
+  line-height: 48px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  background-color: $color-green-success !important;
+  color: white !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+  transition: all 0.3s ease;
+  display: flex !important;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0 !important;
+  }
+  span { font-size: 0.95rem; }
+  &:hover {
+    background-color: #{darken($color-green-success, 8%)} !important;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+    transform: translateY(-1px);
+  }
+  &:active { transform: translateY(0); }
 }
 
-/* === INTEREST GROUP (KHÔNG LỆCH) === */
+/* === INTEREST GROUP === */
 .interest-group-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -276,48 +345,6 @@ mat-dialog-actions {
   }
 }
 
-/* === NÚT THÊM LOẠI TÀI SẢN - VUÔNG XANH LÁ === */
-/* DÁN VÀO pledge-dialog.component.scss */
-
-.add-asset-type-btn {
-  height: 48px !important;           /* Cùng chiều cao với mat-form-field */
-  min-height: 48px !important;
-  line-height: 48px !important;
-  padding: 0 16px !important;        /* Khoảng cách chữ */
-  border-radius: 8px !important;
-  background-color: $color-green-success !important; /* Xanh lá */
-  color: white !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
-  transition: all 0.3s ease;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin: 0 !important;
-  }
-
-  span {
-    font-size: 0.95rem;
-  }
-
-  &:hover {
-    background-color: #{darken($color-green-success, 8%)} !important;
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
   .form-grid-3-col, .form-grid-4-col { grid-template-columns: repeat(2, 1fr); }
@@ -329,4 +356,5 @@ mat-dialog-actions {
   .portrait-capture-box { height: auto; max-width: 300px; margin: 0 auto 16px auto; }
   .form-grid-2-col, .form-grid-3-col, .form-grid-4-col { grid-template-columns: 1fr; }
   .add-asset-type-btn { width: 100%; justify-content: center; }
+  .webcam-modal-content { width: 95%; }
 }
