@@ -38,3 +38,37 @@ html.dark {
 .snackbar-success .mat-simple-snackbar-action {
   color: white;
 }
+
+/* === Snackbar Confirm Style === */
+.snackbar-confirm {
+  .mat-mdc-snack-bar-container {
+    background: #e3f2fd !important;
+    color: #004d40 !important;
+    font-weight: 500;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .mat-mdc-snack-bar-action {
+    color: #1976d2 !important;
+    font-weight: 600;
+  }
+
+  .snack-cancel-btn {
+    background: transparent;
+    color: #d32f2f;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    margin-left: 12px;
+    font-size: 0.875rem;
+    padding: 0;
+  }
+}
+
+/* === Các kiểu snackbar khác (tùy chọn) === */
+.snackbar-success { .mat-mdc-snack-bar-container { background: #d4edda; color: #155724; } }
+.snackbar-error   { .mat-mdc-snack-bar-container { background: #f8d7da; color: #721c24; } }
+.snackbar-info    { .mat-mdc-snack-bar-container { background: #d1ecf1; color: #0c5460; } }
+.snackbar-warning { .mat-mdc-snack-bar-container { background: #fff3cd; color: #856404; } }

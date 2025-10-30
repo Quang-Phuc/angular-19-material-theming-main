@@ -1,5 +1,7 @@
+// src/app/core/services/notification.service.ts
+
 import { inject, Injectable } from '@angular/core';
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -8,15 +10,14 @@ export class NotificationService {
   private snackBar = inject(MatSnackBar);
 
   /**
-   * Hàm helper Cấu hình chung
-   * Lấy cấu hình chung và gán panelClass
+   * Hàm helper: Cấu hình chung cho snackbar
    */
   private getConfig(panelClass: string, duration = 5000): MatSnackBarConfig {
     return {
-      duration: duration,
+      duration,
       horizontalPosition: 'right',
       verticalPosition: 'top',
-      panelClass: [panelClass], // Key để custom màu trong styles.scss
+      panelClass: [panelClass],
     };
   }
 
@@ -30,11 +31,10 @@ export class NotificationService {
 
   /**
    * Hiển thị thông báo lỗi (màu đỏ)
-   * (Sử dụng logic phân tích lỗi của bạn)
    */
   showError(error: any): void {
     let errorMessage = 'Đã có lỗi xảy ra';
-    const config = this.getConfig('snackbar-error', 7000); // Lỗi hiển thị lâu hơn
+    const config = this.getConfig('snackbar-error', 7000);
 
     if (!error) {
       this.snackBar.open(errorMessage, 'Đóng', config);
@@ -42,17 +42,14 @@ export class NotificationService {
     }
 
     if (typeof error === 'string') {
-      // Nếu đầu vào là chuỗi, hiển thị trực tiếp
       this.snackBar.open(error, 'Đóng', config);
       return;
     }
 
-    // ✅ Lấy phần error gốc bên trong HttpErrorResponse
     const raw = error?.error ?? error?.message ?? error;
 
     try {
       if (typeof raw === 'string') {
-        // Nếu là chuỗi, thử parse JSON
         const parsed = JSON.parse(raw);
         errorMessage =
           parsed?.messages?.vn ||
@@ -60,7 +57,6 @@ export class NotificationService {
           parsed?.messages?.en ||
           raw;
       } else if (typeof raw === 'object') {
-        // Nếu là object JSON
         errorMessage =
           raw?.messages?.vn ||
           raw?.message ||
@@ -70,7 +66,6 @@ export class NotificationService {
         errorMessage = String(raw);
       }
     } catch {
-      // Nếu không parse được
       errorMessage =
         error?.error?.messages?.vn ||
         error?.error?.message ||
@@ -93,7 +88,69 @@ export class NotificationService {
    * Hiển thị thông báo cảnh báo (màu cam/vàng)
    */
   showWarning(message: string): void {
-    const config = this.getConfig('snackbar-warning', 5000); //
+    const config = this.getConfig('snackbar-warning', 5000);
     this.snackBar.open(message, 'Đóng', config);
+  }
+
+  /**
+   * Hiển thị thông báo xác nhận (có nút Có/Không)
+   * Trả về Promise<boolean>: true = nhấn "Có", false = nhấn "Không" hoặc hết thời gian
+   */
+  showConfirm(
+    message: string,
+    confirmText = 'Có',
+    cancelText = 'Không',
+    duration = 10000
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const config: MatSnackBarConfig = {
+        duration,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-confirm'],
+      };
+
+      const snackBarRef: MatSnackBarRef<TextOnlySnackBar> = this.snackBar.open(
+        message,
+        confirmText,
+        config
+      );
+
+      // Nhấn nút "Có"
+      snackBarRef.onAction().subscribe(() => {
+        resolve(true);
+        snackBarRef.dismiss();
+      });
+
+      // Hết thời gian hoặc nhấn "Đóng" hoặc "Không"
+      snackBarRef.afterDismissed().subscribe(() => {
+        resolve(false);
+      });
+
+      // Tự động thêm nút "Không" (vì MatSnackBar không hỗ trợ 2 action buttons)
+      setTimeout(() => {
+        const container = document.querySelector('.snackbar-confirm .mat-mdc-snack-bar-container');
+        if (container && !container.querySelector('.snack-cancel-btn')) {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.textContent = cancelText;
+          cancelBtn.className = 'snack-cancel-btn';
+          cancelBtn.style.cssText = `
+            background: transparent;
+            border: none;
+            color: #d32f2f;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 12px;
+            font-size: 0.875rem;
+          `;
+          cancelBtn.onclick = (e) => {
+            e.stopPropagation();
+            resolve(false);
+            snackBarRef.dismiss();
+          };
+          container.appendChild(cancelBtn);
+        }
+      }, 0);
+    });
   }
 }

@@ -1,9 +1,16 @@
 // src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
 
-import { Component, OnInit, inject, Inject, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component, OnInit, inject, Inject, ViewChild, ElementRef,
+  OnDestroy, ChangeDetectorRef, AfterViewInit
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,23 +25,14 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
-import { CustomerService, CustomerSearchResponse } from '../../services/customer.service';
+import { CustomerService } from '../../services/customer.service';
 import { PledgeService, PledgeContract } from '../../services/pledge.service';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
+import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface DropdownOption { id: string; name: string; }
-
-interface AssetTypeAttribute {
-  label: string;
-  value?: string;
-}
-
-interface AssetType {
-  maLoai: string;
-  tenLoai: string;
-  trangThai: string;
-  attributes: AssetTypeAttribute[];
-}
+interface AssetTypeAttribute { label: string; value?: string; }
+interface AssetType { maLoai: string; tenLoai: string; trangThai: string; attributes: AssetTypeAttribute[]; }
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -50,12 +48,13 @@ interface AssetType {
   styleUrl: './pledge-dialog.component.scss',
   providers: [DatePipe]
 })
-export class PledgeDialogComponent implements OnInit, OnDestroy {
+export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
   showAdvancedInfo = false;
   showWebcam = false;
+
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
@@ -63,14 +62,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   assetTypes$ = new BehaviorSubject<string[]>(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
-    { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' }, { id: 'nguoi_theo_doi', name: 'Người theo dõi' },
-    { id: 'all', name: 'Tất cả' }, { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' }
+    { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
+    { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' },
+    { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' }
   ]);
   nguoiTheoDoiList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'user_1', name: 'User 1' }]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
 
-  // Attachments
   uploadedFiles: { name: string; url: string }[] = [];
   isDragOver = false;
 
@@ -93,20 +92,25 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
       customerInfo: this.fb.group({
         hoTen: ['', Validators.required],
         ngaySinh: [null],
-        soCCCD: [''],
-        soDienThoai: ['', Validators.required],
+        soCCCD: ['', [Validators.minLength(9)]],
+        soDienThoai: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]],
         diaChi: [''],
         ngayCapCCCD: [null],
         noiCapCCCD: ['']
       }),
       customerExtraInfo: this.fb.group({
-        maKhachHang: [''], ngheNghiep: [''], noiLamViec: [''], hoKhau: [''], email: ['', [Validators.email]], thuNhap: [0], ghiChu: ['']
+        maKhachHang: [''], ngheNghiep: [''], noiLamViec: [''], hoKhau: [''],
+        email: ['', [Validators.email]], thuNhap: [0], ghiChu: [''],
+        nguoiLienHe: [''], sdtNguoiLienHe: ['']
       }),
       familyInfo: this.fb.group({
-        nguoiLienHe: [''], sdtNguoiLienHe: [''], voChong: this.createFamilyMemberGroup(), bo: this.createFamilyMemberGroup(), me: this.createFamilyMemberGroup()
+        voChong: this.createFamilyMemberGroup(),
+        bo: this.createFamilyMemberGroup(),
+        me: this.createFamilyMemberGroup()
       }),
       loanExtraInfo: this.fb.group({
-        tinhTrang: ['Binh Thuong'], loaiDoiTac: ['khach_hang'], nguoiTheoDoi: ['all'], nguonKhachHang: ['all']
+        tinhTrang: ['Binh Thuong'], loaiDoiTac: ['khach_hang'],
+        nguoiTheoDoi: ['all'], nguonKhachHang: ['all']
       }),
       loanInfo: this.fb.group({
         tenTaiSan: ['', Validators.required],
@@ -129,7 +133,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         phiQuanLi: this.createFeeGroup()
       }),
       collateralInfo: this.fb.group({
-        dinhGia: [0], bienKiemSoat: [''], soKhung: [''], soMay: [''], kho: ['kho_1'], maTaiSan: [''], ghiChuTaiSan: ['']
+        dinhGia: [0], bienKiemSoat: [''], soKhung: [''], soMay: [''],
+        kho: ['kho_1'], maTaiSan: [''], ghiChuTaiSan: ['']
       }),
       attachments: this.fb.group({})
     });
@@ -149,23 +154,175 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit(): void {
+    this.setupAutoSearchOnBlur();
+  }
+
   ngOnDestroy(): void {
     this.stopWebcam();
   }
 
+  /* ------------------- AUTO SEARCH ON BLUR ------------------- */
+  private setupAutoSearchOnBlur(): void {
+    setTimeout(() => {
+      const phoneInput = document.querySelector('input[formControlName="soDienThoai"]') as HTMLInputElement;
+      const cccdInput = document.querySelector('input[formControlName="soCCCD"]') as HTMLInputElement;
+
+      if (phoneInput) {
+        fromEvent(phoneInput, 'blur')
+          .pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            filter(() => this.isPhoneOrCccdValidForSearch())
+          )
+          .subscribe(() => this.triggerCustomerSearch());
+      }
+
+      if (cccdInput) {
+        fromEvent(cccdInput, 'blur')
+          .pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            filter(() => this.isPhoneOrCccdValidForSearch())
+          )
+          .subscribe(() => this.triggerCustomerSearch());
+      }
+    }, 100);
+  }
+
+  private isPhoneOrCccdValidForSearch(): boolean {
+    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
+    const cccd = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+    return (phone.length >= 10 || cccd.length >= 9) && (phone || cccd);
+  }
+
+  private triggerCustomerSearch(): void {
+    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+
+    if (!phone && !idNumber) return;
+
+    this.customerService.searchCustomer({ phoneNumber: phone, identityNumber: idNumber })
+      .subscribe({
+        next: (data: any) => {
+          if (data && data.fullName) {
+            this.showConfirmAndPopulate(data);
+          }
+        },
+        error: (err) => console.error('Auto search error:', err)
+      });
+  }
+
+  private showConfirmAndPopulate(customerData: any): void {
+    const name = customerData.fullName || 'Khách hàng';
+    const phone = customerData.phoneNumber || '';
+    const message = `Tìm thấy khách hàng: <strong>${name}</strong> ${phone ? `(${phone})` : ''}.<br>Bạn có muốn sử dụng dữ liệu đã lưu không?`;
+
+    this.notification.showConfirm(message, 'Có', 'Không')
+      .then(confirmed => {
+        if (confirmed) {
+          this.populateAllCustomerData(customerData);
+          this.notification.showSuccess('Đã điền thông tin khách hàng từ hệ thống!');
+        }
+      });
+  }
+
+  private populateAllCustomerData(data: any): void {
+    const cInfo = this.pledgeForm.get('customerInfo');
+    const cExtra = this.pledgeForm.get('customerExtraInfo');
+    const family = this.pledgeForm.get('familyInfo');
+    const loanExtra = this.pledgeForm.get('loanExtraInfo');
+
+    // 1. Thông tin cơ bản
+    if (cInfo) {
+      cInfo.patchValue({
+        hoTen: data.fullName || '',
+        soDienThoai: data.phoneNumber || '',
+        ngaySinh: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        soCCCD: data.identityNumber || '',
+        ngayCapCCCD: data.issueDate ? new Date(data.issueDate) : null,
+        noiCapCCCD: data.issuePlace || '',
+        diaChi: data.permanentAddress || ''
+      });
+    }
+
+    // 2. Thông tin khác
+    if (cExtra) {
+      cExtra.patchValue({
+        maKhachHang: data.customerCode || '',
+        ngheNghiep: data.occupation || '',
+        noiLamViec: data.workplace || '',
+        hoKhau: data.householdAddress || '',
+        email: data.email || '',
+        thuNhap: data.monthlyIncome || 0,
+        ghiChu: data.notes || '',
+        nguoiLienHe: data.emergencyContact?.name || '',
+        sdtNguoiLienHe: data.emergencyContact?.phone || ''
+      });
+    }
+
+    // 3. Thành phần gia đình
+    if (family && data.familyMembers) {
+      const map = (m: any) => ({
+        hoTen: m.name || '',
+        soDienThoai: m.phone || '',
+        ngheNghiep: m.occupation || ''
+      });
+      family.patchValue({
+        voChong: data.familyMembers.spouse ? map(data.familyMembers.spouse) : this.createFamilyMemberGroup().value,
+        bo: data.familyMembers.father ? map(data.familyMembers.father) : this.createFamilyMemberGroup().value,
+        me: data.familyMembers.mother ? map(data.familyMembers.mother) : this.createFamilyMemberGroup().value
+      });
+    }
+
+    // 4. Thông tin cho vay (nâng cao)
+    if (loanExtra && data.loanProfile) {
+      loanExtra.patchValue({
+        tinhTrang: data.loanProfile.status || 'Binh Thuong',
+        loaiDoiTac: data.loanProfile.partnerType || 'khach_hang',
+        nguoiTheoDoi: data.loanProfile.follower || 'all',
+        nguonKhachHang: data.loanProfile.source || 'all'
+      });
+    }
+  }
+
+  /* ------------------- TÌM KHÁCH HÀNG (nút) ------------------- */
+  findCustomer(): void {
+    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+
+    if (!phone && !idNumber) {
+      this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
+      return;
+    }
+
+    this.customerService.searchCustomer({ phoneNumber: phone, identityNumber: idNumber })
+      .subscribe({
+        next: (data: any) => {
+          if (data && data.fullName) {
+            this.showConfirmAndPopulate(data);
+          } else {
+            this.notification.showError('Không tìm thấy khách hàng.');
+          }
+        },
+        error: () => this.notification.showError('Lỗi khi tìm kiếm khách hàng.')
+      });
+  }
+
+  /* ------------------- PATCH DỮ LIỆU CHỈNH SỬA ------------------- */
   patchFormData(contract: PledgeContract): void {
     this.pledgeForm.patchValue({ /* ... */ });
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
 
+  /* ------------------- WEBCAM ------------------- */
   async takePicture(field: string): Promise<void> {
     if (field === 'portrait') {
       this.showWebcam = true;
       this.notification.showInfo('Đang truy cập webcam...');
-      // Wait for DOM to update
       setTimeout(async () => {
-        if (!this.videoElement || !this.videoElement.nativeElement) {
-          this.notification.showError('Không thể truy cập phần tử video. Vui lòng thử lại.');
+        if (!this.videoElement?.nativeElement) {
+          this.notification.showError('Không thể truy cập phần tử video.');
           this.showWebcam = false;
           return;
         }
@@ -173,244 +330,152 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
           this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
           this.videoElement.nativeElement.srcObject = this.stream;
           this.videoElement.nativeElement.play();
-          this.cdr.detectChanges(); // Ensure DOM is updated
-        } catch (error) {
-          this.notification.showError('Không thể truy cập webcam. Vui lòng kiểm tra quyền hoặc thử tải ảnh lên.');
+          this.cdr.detectChanges();
+        } catch (e) {
+          this.notification.showError('Không thể truy cập webcam.');
           this.showWebcam = false;
-          console.error('Webcam access error:', error);
         }
       }, 0);
     } else if (field === 'upload') {
-      if (this.fileInput && this.fileInput.nativeElement) {
-        this.fileInput.nativeElement.click();
-      } else {
-        this.notification.showError('Không thể truy cập input file. Vui lòng thử lại.');
-      }
+      this.fileInput?.nativeElement.click();
     }
   }
 
   capturePhoto(): void {
-    if (!this.videoElement || !this.canvasElement) {
-      this.notification.showError('Không thể chụp ảnh do lỗi giao diện. Vui lòng thử lại.');
-      return;
-    }
-
+    if (!this.videoElement || !this.canvasElement) return;
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    if (!context) {
-      this.notification.showError('Không thể truy cập canvas context.');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    if (dataUrl.length > 1024 * 1024) {
+      this.notification.showError('Ảnh quá lớn (>1MB).');
       return;
     }
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    if (imageDataUrl.length > 1024 * 1024) {
-      this.notification.showError('Ảnh quá lớn. Vui lòng thử lại với ảnh nhỏ hơn 1MB.');
-      return;
-    }
-
-    this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(imageDataUrl);
-    this.notification.showSuccess('Đã chụp ảnh thành công!');
+    this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(dataUrl);
+    this.notification.showSuccess('Chụp ảnh thành công!');
     this.stopWebcam();
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      if (!file.type.match('image/jpeg|image/png|image/jpg')) {
-        this.notification.showError('Vui lòng chọn file JPG, JPEG hoặc PNG.');
-        return;
-      }
-      if (file.size > 1024 * 1024) {
-        this.notification.showError('File ảnh vượt quá 1MB. Vui lòng chọn file nhỏ hơn.');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(result);
-        this.notification.showSuccess('Đã tải ảnh lên thành công!');
-        this.cdr.detectChanges(); // Update DOM to show preview
-      };
-      reader.onerror = () => {
-        this.notification.showError('Lỗi khi đọc file ảnh. Vui lòng thử lại.');
-      };
-      reader.readAsDataURL(file);
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.match('image/jpeg|image/png|image/jpg')) {
+      this.notification.showError('Chỉ chấp nhận JPG/JPEG/PNG.');
+      return;
     }
+    if (file.size > 1024 * 1024) {
+      this.notification.showError('File ảnh ≤ 1MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(e.target?.result as string);
+      this.notification.showSuccess('Tải ảnh thành công!');
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(file);
   }
 
   stopWebcam(): void {
     if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
+      this.stream.getTracks().forEach(t => t.stop());
       this.stream = null;
     }
     this.showWebcam = false;
     this.cdr.detectChanges();
   }
 
-  // Attachment handling
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragOver = true;
-  }
-
-  onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragOver = false;
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.isDragOver = false;
-    const files = event.dataTransfer?.files;
-    if (files) {
-      Array.from(files).forEach(file => this.handleFileUpload(file));
-    }
+  /* ------------------- ATTACHMENTS ------------------- */
+  onDragOver(e: DragEvent): void { e.preventDefault(); this.isDragOver = true; }
+  onDragLeave(e: DragEvent): void { e.preventDefault(); this.isDragOver = false; }
+  onDrop(e: DragEvent): void {
+    e.preventDefault(); this.isDragOver = false;
+    const files = e.dataTransfer?.files;
+    if (files) Array.from(files).forEach(f => this.handleFileUpload(f));
   }
 
   onAttachmentClick(): void {
-    // Trigger hidden file input for attachments if needed
-    // For now, use the same logic as portrait
-    const attachmentInput = document.createElement('input');
-    attachmentInput.type = 'file';
-    attachmentInput.multiple = true;
-    attachmentInput.accept = 'image/*,.pdf,.doc,.docx';
-    attachmentInput.onchange = (e: any) => {
-      if (e.target.files) {
-        Array.from(e.target.files as FileList).forEach((file: File) => this.handleFileUpload(file));
-      }
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'image/*,.pdf,.doc,.docx';
+    input.onchange = (ev: any) => {
+      Array.from(ev.target.files as FileList).forEach(f => this.handleFileUpload(f));
     };
-    attachmentInput.click();
+    input.click();
   }
 
   private handleFileUpload(file: File): void {
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit for attachments
-      this.notification.showError(`File ${file.name} vượt quá 5MB.`);
+    if (file.size > 5 * 1024 * 1024) {
+      this.notification.showError(`File ${file.name} > 5MB.`);
       return;
     }
-
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       const url = e.target?.result as string;
       this.uploadedFiles.push({ name: file.name, url });
       this.pledgeForm.get('attachments')?.patchValue(this.uploadedFiles);
-      this.notification.showSuccess(`Đã tải ${file.name} thành công!`);
+      this.notification.showSuccess(`Đã tải ${file.name}`);
       this.cdr.detectChanges();
-    };
-    reader.onerror = () => {
-      this.notification.showError(`Lỗi khi đọc file ${file.name}.`);
     };
     reader.readAsDataURL(file);
   }
 
-  removeAttachment(index: number): void {
-    this.uploadedFiles.splice(index, 1);
+  removeAttachment(i: number): void {
+    this.uploadedFiles.splice(i, 1);
     this.pledgeForm.get('attachments')?.patchValue(this.uploadedFiles);
     this.cdr.detectChanges();
   }
 
-  // Asset type addition
+  /* ------------------- ASSET TYPE ------------------- */
   addNewAssetType(): void {
     const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
       width: '500px',
       data: { assetTypes: this.assetTypes$.value }
     });
-
-    dialogRef.afterClosed().subscribe((result: AssetType | undefined) => {
-      if (result) {
-        const currentTypes = this.assetTypes$.value;
-        currentTypes.push(result.tenLoai);
-        this.assetTypes$.next(currentTypes);
+    dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
+      if (res) {
+        const cur = this.assetTypes$.value;
+        cur.push(res.tenLoai);
+        this.assetTypes$.next(cur);
         this.notification.showSuccess('Thêm loại tài sản thành công!');
       }
     });
   }
 
-  findCustomer(): void {
-    let phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value || '';
-    let idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value || '';
-
-    phone = phone.trim();
-    idNumber = idNumber.trim();
-
-    if (!phone && !idNumber) {
-      this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
-      return;
-    }
-
-    console.log('Calling API with phone:', phone, 'idNumber:', idNumber); // Debug log
-
-    this.customerService.searchCustomer({
-      phoneNumber: phone,
-      identityNumber: idNumber
-    }).subscribe(
-      (data: any | null) => {
-        console.log('API Response:', data); // Debug log
-        if (data && data.fullName) { // Check if data has fullName to ensure it's valid customer data
-          this.populateCustomerData(data);
-          this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
-        } else {
-          this.notification.showError('Không tìm thấy thông tin khách hàng!');
-        }
-      },
-      (error) => {
-        console.error('Search error:', error);
-        this.notification.showError('Lỗi khi tìm kiếm khách hàng. Vui lòng thử lại.');
-      }
-    );
-  }
-
-  private populateCustomerData(customerData: any): void {
-    const customerInfo = this.pledgeForm.get('customerInfo');
-    const customerExtraInfo = this.pledgeForm.get('customerExtraInfo');
-    if (customerInfo) {
-      customerInfo.patchValue({
-        hoTen: customerData.fullName || '',
-        soDienThoai: customerData.phoneNumber || '',
-        ngaySinh: customerData.dateOfBirth ? new Date(customerData.dateOfBirth) : null,
-        soCCCD: customerData.identityNumber || '',
-        ngayCapCCCD: customerData.issueDate ? new Date(customerData.issueDate) : null,
-        noiCapCCCD: customerData.issuePlace || '',
-        diaChi: customerData.permanentAddress || ''
-      });
-    }
-    if (customerExtraInfo && customerData.email) {
-      customerExtraInfo.patchValue({
-        email: customerData.email
-      });
-    }
-    console.log('Populated form with:', customerData); // Debug log for populate
-  }
-
+  /* ------------------- SAVE / CANCEL ------------------- */
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
       this.pledgeForm.markAllAsTouched();
       return;
     }
-
     this.isLoading = true;
-    const formData = this.pledgeForm.getRawValue();
+    const raw = this.pledgeForm.getRawValue();
 
     const payload: any = {
       id: this.isEditMode ? this.data?.id : undefined,
-      portrait: formData.portraitInfo,
-      customer: { ...formData.customerInfo, ...formData.customerExtraInfo,
-        ngaySinh: this.formatDate(formData.customerInfo.ngaySinh),
-        ngayCapCCCD: this.formatDate(formData.customerInfo.ngayCapCCCD)
+      portrait: raw.portraitInfo,
+      customer: {
+        ...raw.customerInfo,
+        ...raw.customerExtraInfo,
+        ngaySinh: this.formatDate(raw.customerInfo.ngaySinh),
+        ngayCapCCCD: this.formatDate(raw.customerInfo.ngayCapCCCD)
       },
-      family: formData.familyInfo,
-      loan: { ...formData.loanInfo, ...formData.loanExtraInfo,
-        ngayVay: this.formatDate(formData.loanInfo.ngayVay)!
+      family: raw.familyInfo,
+      loan: {
+        ...raw.loanInfo,
+        ...raw.loanExtraInfo,
+        ngayVay: this.formatDate(raw.loanInfo.ngayVay)!
       },
-      fees: formData.feesInfo,
-      collateral: formData.collateralInfo,
-      attachments: formData.attachments
+      fees: raw.feesInfo,
+      collateral: raw.collateralInfo,
+      attachments: raw.attachments
     };
 
     setTimeout(() => {
@@ -430,7 +495,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   }
 }
 
-// New Dialog Component for Adding Asset Type
+/* ------------------- DIALOG THÊM LOẠI TÀI SẢN ------------------- */
 @Component({
   selector: 'app-add-asset-type-dialog',
   standalone: true,
@@ -444,7 +509,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
       <h2 mat-dialog-title>Thêm mới loại tài sản</h2>
 
       <form [formGroup]="assetTypeForm">
-        <!-- Thông tin chung -->
         <div class="info-section">
           <h3>Thông tin chung</h3>
           <div class="form-grid-2-col">
@@ -472,13 +536,12 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
           </div>
         </div>
 
-        <!-- Cấu hình thuộc tính hàng hóa -->
         <div class="info-section">
           <h3>Cấu hình thuộc tính hàng hóa</h3>
           <div formArrayName="attributes">
-            <div *ngFor="let attrGroup of attributesArray.controls; let i = index" [formGroupName]="i" class="attribute-row">
+            <div *ngFor="let ctrl of attributesArray.controls; let i=index" [formGroupName]="i" class="attribute-row">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Thuộc tính {{ i + 1 }} (VD: Biển số xe)</mat-label>
+                <mat-label>Thuộc tính {{i+1}} (VD: Biển số xe)</mat-label>
                 <input matInput formControlName="label" placeholder="VD: Biển số xe">
                 <button mat-icon-button matSuffix (click)="removeAttribute(i)" type="button">
                   <mat-icon>delete</mat-icon>
@@ -503,13 +566,13 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     .info-section h3 { font-weight: 600; color: #004d40; margin-bottom: 16px; }
     .attribute-row { margin-bottom: 16px; }
     .add-attribute-btn { margin-top: 8px; }
-    .form-grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: center; }
+    .form-grid-2-col { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
     .full-width { width: 100%; }
   `]
 })
 export class AddAssetTypeDialogComponent {
   assetTypeForm: FormGroup;
-  attributesArray: any;
+  get attributesArray() { return this.assetTypeForm.get('attributes') as FormArray; }
 
   constructor(
     private fb: FormBuilder,
@@ -520,35 +583,25 @@ export class AddAssetTypeDialogComponent {
       maLoai: ['', Validators.required],
       tenLoai: ['', Validators.required],
       trangThai: ['Bình thường'],
-      attributes: this.fb.array([
-        this.fb.group({ label: [''] })
-      ])
+      attributes: this.fb.array([this.fb.group({ label: [''] })])
     });
-    this.attributesArray = this.assetTypeForm.get('attributes') as any;
   }
 
-  addAttribute(): void {
-    this.attributesArray.push(this.fb.group({ label: [''] }));
-  }
-
-  removeAttribute(index: number): void {
-    this.attributesArray.removeAt(index);
-  }
+  addAttribute(): void { this.attributesArray.push(this.fb.group({ label: [''] })); }
+  removeAttribute(i: number): void { this.attributesArray.removeAt(i); }
 
   onSave(): void {
     if (this.assetTypeForm.valid) {
-      const formValue = this.assetTypeForm.value;
-      const newAssetType: AssetType = {
-        maLoai: formValue.maLoai,
-        tenLoai: formValue.tenLoai,
-        trangThai: formValue.trangThai,
-        attributes: formValue.attributes
+      const v = this.assetTypeForm.value;
+      const newAsset: AssetType = {
+        maLoai: v.maLoai,
+        tenLoai: v.tenLoai,
+        trangThai: v.trangThai,
+        attributes: v.attributes
       };
-      this.dialogRef.close(newAssetType);
+      this.dialogRef.close(newAsset);
     }
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
+  onCancel(): void { this.dialogRef.close(); }
 }
