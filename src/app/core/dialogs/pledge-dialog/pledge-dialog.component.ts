@@ -351,7 +351,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
     }).subscribe(
       (data: any | null) => {
         console.log('API Response:', data); // Debug log
-        if (data) {
+        if (data && data.fullName) { // Check if data has fullName to ensure it's valid customer data
           this.populateCustomerData(data);
           this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
         } else {
@@ -384,6 +384,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         email: customerData.email
       });
     }
+    console.log('Populated form with:', customerData); // Debug log for populate
   }
 
   onSave(): void {
