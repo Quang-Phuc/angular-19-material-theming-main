@@ -332,32 +332,45 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
   }
 
   findCustomer(): void {
-    const dialogRef = this.matDialog.open(CustomerSearchDialogComponent, {
-      width: '400px',
-      data: {}
-    });
+    console.log('sss')
+    let phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value || '';
+    let idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value || '';
 
-    dialogRef.afterClosed().subscribe((searchData: { phone?: string; idNumber?: string } | undefined) => {
-      if (searchData && (searchData.phone || searchData.idNumber)) {
-        this.customerService.searchCustomer({
-          phoneNumber: searchData.phone || '',
-          identityNumber: searchData.idNumber || ''
-        }).subscribe(
-          (data: CustomerSearchResponse | null) => {
-            if (data) {
-              this.populateCustomerData(data);
-              this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
-            } else {
-              this.notification.showError('Không có thông tin khách hàng!');
-            }
-          }
-        );
+    phone = phone.trim();
+    idNumber = idNumber.trim();
+    console.log('sss2')
+    console.log('sss2'+phone+idNumber)
+    if (!phone && !idNumber) {
+      console.log('sss3')
+      this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
+      return;
+    }
+    console.log('sss4')
+    console.log('Calling API with phone:', phone, 'idNumber:', idNumber); // Debug log
+
+    this.customerService.searchCustomer({
+      phoneNumber: phone,
+      identityNumber: idNumber
+    }).subscribe(
+      (data: CustomerSearchResponse | null) => {
+        console.log('API Response:', data); // Debug log
+        if (data && data.data) {
+          this.populateCustomerData(data);
+          this.notification.showSuccess('Tìm thấy thông tin khách hàng và đã điền vào form!');
+        } else {
+          this.notification.showError('Không tìm thấy thông tin khách hàng!');
+        }
+      },
+      (error) => {
+        console.error('Search error:', error);
+        this.notification.showError('Lỗi khi tìm kiếm khách hàng. Vui lòng thử lại.');
       }
-    });
+    );
   }
 
   private populateCustomerData(data: CustomerSearchResponse): void {
     const customerInfo = this.pledgeForm.get('customerInfo');
+    const customerExtraInfo = this.pledgeForm.get('customerExtraInfo');
     if (customerInfo) {
       customerInfo.patchValue({
         hoTen: data.data?.fullName || '',
@@ -367,6 +380,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
         ngayCapCCCD: data.data?.issueDate ? new Date(data.data.issueDate) : null,
         noiCapCCCD: data.data?.issuePlace || '',
         diaChi: data.data?.permanentAddress || ''
+      });
+    }
+    if (customerExtraInfo && data.data) {
+      customerExtraInfo.patchValue({
+        email: (data.data as any).email || ''
       });
     }
   }
@@ -411,63 +429,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy {
 
   private formatDate(date: any): string | null {
     return date ? this.datePipe.transform(date, 'yyyy-MM-dd') : null;
-  }
-}
-
-// Customer Search Dialog Component
-@Component({
-  selector: 'app-customer-search-dialog',
-  standalone: true,
-  imports: [
-    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
-    MatInputModule, MatButtonModule
-  ],
-  template: `
-    <mat-dialog-content>
-      <h2 mat-dialog-title>Tìm kiếm khách hàng</h2>
-      <form [formGroup]="searchForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Số điện thoại</mat-label>
-          <input matInput formControlName="phone" placeholder="0901234567">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Số CCCD/CMND</mat-label>
-          <input matInput formControlName="idNumber" placeholder="079123456789">
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Đóng</button>
-      <button mat-flat-button color="primary" (click)="onSearch()">Tìm kiếm</button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    .full-width { width: 100%; }
-    mat-form-field { margin-bottom: 16px; }
-  `]
-})
-export class CustomerSearchDialogComponent {
-  searchForm: FormGroup;
-
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<CustomerSearchDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-    this.searchForm = this.fb.group({
-      phone: [''],
-      idNumber: ['']
-    });
-  }
-
-  onSearch(): void {
-    if (this.searchForm.value.phone || this.searchForm.value.idNumber) {
-      this.dialogRef.close(this.searchForm.value);
-    } else {
-      // Optional: show error if no input
-      console.warn('No search criteria provided.');
-      this.dialogRef.close();
-    }
   }
 }
 

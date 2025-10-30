@@ -60,6 +60,7 @@ export class CustomerService {
    */
   searchCustomer(request: CustomerSearchRequest): Observable<CustomerSearchResponse | null> {
     // Xây dựng query params
+    console.log('sss2')
     let params = new HttpParams();
     if (request.phoneNumber && request.phoneNumber.trim()) {
       params = params.set('phoneNumber', request.phoneNumber.trim());
@@ -75,6 +76,8 @@ export class CustomerService {
     }
 
     // Gọi API GET với params
+    console.log('sss5')
+    console.log('a'+this.apiUrl)
     return this.apiService.get<ApiResponse<CustomerSearchResponse>>(this.apiUrl, params).pipe(
       map(response => {
         if (response.result === 'success' && response.data) {

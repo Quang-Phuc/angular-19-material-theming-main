@@ -41,6 +41,12 @@ export class NotificationService {
       return;
     }
 
+    if (typeof error === 'string') {
+      // Nếu đầu vào là chuỗi, hiển thị trực tiếp
+      this.snackBar.open(error, 'Đóng', config);
+      return;
+    }
+
     // ✅ Lấy phần error gốc bên trong HttpErrorResponse
     const raw = error?.error ?? error?.message ?? error;
 
