@@ -43,7 +43,11 @@ interface AssetTypeItem {
   id: number; name: string; description: string; idUrl?: string; createdBy?: string;
   createdDate?: string; lastUpdatedBy?: string; lastUpdatedDate?: string;
 }
-
+interface UserStore {
+  id: number;
+  fullName: string;
+  phone: string;
+}
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -78,7 +82,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' },
     { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' }
   ]);
-  nguoiTheoDoiList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'user_1', name: 'User 1' }]);
+  // *** THAY ĐỔI 1: Chuyển nguoiTheoDoiList$ thành BehaviorSubject và load từ API ***
+  nguoiTheoDoiList$ = new BehaviorSubject<DropdownOption[]>([]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
 
@@ -175,6 +180,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.loadAssetTypes();
+    // *** THÊM MỚI 2: Load danh sách người theo dõi từ API ***
+    this.loadNguoiTheoDoiList();
 
     // *** THAY ĐỔI 4: Kiểm tra storeId và patch data ***
     if (!this.activeStoreId) {
@@ -186,6 +193,37 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.isEditMode && this.dialogData.contract) {
       this.patchFormData(this.dialogData.contract);
     }
+  }
+
+  // *** THÊM MỚI 3: Method load danh sách người theo dõi từ API ***
+  private loadNguoiTheoDoiList(): void {
+    if (!this.activeStoreId) {
+      console.error('No storeId available for loading users.');
+      this.nguoiTheoDoiList$.next([{ id: 'all', name: 'Tất cả' }]);
+      return;
+    }
+
+    this.apiService.get<ApiResponse<UserStore[]>>(`/users-stores/store/${this.activeStoreId}`).pipe(
+      map(response => {
+        if (response.result === 'success' && response.data) {
+          const allOption: DropdownOption = { id: 'all', name: 'Tất cả' };
+          const userOptions: DropdownOption[] = response.data.map(user => ({
+            id: user.id.toString(),
+            name: `${user.fullName} - ${user.phone}`
+          }));
+          return [allOption, ...userOptions];
+        }
+        return [{ id: 'all', name: 'Tất cả' }];
+      }),
+      tap(options => {
+        this.nguoiTheoDoiList$.next(options);
+      }),
+      catchError(err => {
+        console.error('Load nguoi theo doi list error:', err);
+        this.notification.showError('Lỗi tải danh sách người theo dõi. Sử dụng dữ liệu mặc định.');
+        return of([{ id: 'all', name: 'Tất cả' }]);
+      })
+    ).subscribe();
   }
 
   // (Các hàm loadAssetTypes, ngAfterViewInit, ngOnDestroy, ... giữ nguyên)
