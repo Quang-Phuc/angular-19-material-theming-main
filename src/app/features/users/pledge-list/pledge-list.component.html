@@ -15,6 +15,18 @@
     </div>
   </div>
 
+  <!-- THÊM MỚI: Phần chọn cửa hàng chính, tách riêng lên trên -->
+  <div class="store-selector-container">
+    <mat-form-field appearance="outline" class="store-select-field">
+      <mat-label>Cửa hàng chính</mat-label>
+      <mat-select [(ngModel)]="selectedStoreId" (selectionChange)="onStoreChange()">
+        @for (store of (storeList$ | async); track store.storeId) {
+          <mat-option [value]="store.storeId">{{ store.storeName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
   <mat-toolbar class="filter-toolbar" [formGroup]="filterForm">
 
     <mat-form-field appearance="outline" class="filter-field search-field">

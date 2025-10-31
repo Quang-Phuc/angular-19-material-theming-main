@@ -1,5 +1,6 @@
+// pledge-list.component.ts (ĐÃ CẬP NHẬT - FIX XỬ LÝ API STORE RESPONSE)
 import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -16,22 +17,35 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { merge, Subject, of, Observable } from 'rxjs';
-// *** THÊM 'delay' VÀO IMPORT ***
-import { catchError, map, startWith, switchMap, delay } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms'; // THÊM MỚI: Cho ngModel
+import { merge, Subject, of, Observable, take } from 'rxjs';
+import { catchError, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 import { NotificationService } from '../../../core/services/notification.service';
 
-// *** THAY ĐỔI 1: Import Service và Dialog mới ***
 import { PledgeService, PledgeContract, PagedResponse } from '../../../core/services/pledge.service';
 import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
 
-// (Xóa MOCK_DATA ở đây vì nó đã được chuyển vào service để giả lập)
+// *** THÊM MỚI 1: Import StoreService ***
+import { StoreService } from '../../../core/services/store.service';
+// (Giả sử đường dẫn này đúng, nếu pledge-list và store-list ở thư mục khác nhau, hãy điều chỉnh)
+
+// *** THÊM MỚI: Interface cho Store từ API ***
+interface ApiStore {
+  id: number;
+  name: string;
+  address: string;
+}
+
+interface MappedStore {
+  storeId: string;
+  storeName: string;
+}
 
 @Component({
   selector: 'app-pledge-list',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
+    CommonModule, NgFor, FormsModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
     MatSortModule, MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatDialogModule, MatSelectModule, MatToolbarModule,
     MatProgressBarModule, MatMenuModule, MatTooltipModule, MatBadgeModule,
@@ -46,7 +60,6 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
     'stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay',
     'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'
   ];
-  // *** THAY ĐỔI 2: Sử dụng interface PledgeContract ***
   dataSource = new MatTableDataSource<PledgeContract>();
 
   totalElements = 0;
@@ -55,86 +68,140 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   filterForm: FormGroup;
   private refreshTrigger = new Subject<void>();
 
+  // *** THAY ĐỔI 2: Biến chứa danh sách cửa hàng và storeId được chọn ***
+  storeList$: Observable<MappedStore[]> = of([]);  // *** SỬA: Type MappedStore[] ***
+  selectedStoreId: string | null = null; // THÊM MỚI: Biến riêng cho storeId
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
-
-  // *** THAY ĐỔI 3: Inject PledgeService ***
   private pledgeService = inject(PledgeService);
+
+  // *** THÊM MỚI 3: Inject StoreService ***
+  private storeService = inject(StoreService);
 
   constructor() {
     this.filterForm = this.fb.group({
+      // *** THAY ĐỔI 4: XÓA storeId khỏi form ***
       keyword: [''],
-      loanStatus: ['dang_vay'], // 'Đang vay'
-      pledgeState: ['tat_ca'], // 'Tất cả'
+      loanStatus: ['dang_vay'],
+      pledgeState: ['tat_ca'],
       timeRange: [null]
     });
   }
 
   ngOnInit(): void {
-    // Logic khởi tạo nếu cần
+    // *** THAY ĐỔI 5: Tải danh sách cửa hàng và chọn mặc định đầu tiên ***
+    this.loadStoreDropdown();
+  }
+
+  /**
+   * *** THAY ĐỔI 6: Hàm tải danh sách cửa hàng và chọn store đầu tiên làm mặc định ***
+   * (Sửa: Map API response.data thành MappedStore[] để match HTML template)
+   */
+  loadStoreDropdown(): void {
+    this.storeList$ = this.storeService.getStoreDropdownList().pipe(
+      map((response: any) => {  // *** THÊM MỚI: Map response.data ***
+        console.log('Raw store API response:', response); // THÊM: Log raw response để debug
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data.map((store: ApiStore) => ({
+            storeId: store.id.toString(),  // *** THÊM: Convert id to string ***
+            storeName: store.name
+          })) as MappedStore[];
+        }
+        return [];
+      }),
+      catchError(err => {
+        console.error('Lỗi tải store list:', err); // THÊM: Log error để debug
+        this.notification.showError('Lỗi tải danh sách cửa hàng.');
+        return of([]);
+      })
+    );
+
+    // *** THÊM MỚI: Subscribe riêng để set default selectedStoreId sau khi emit
+    this.storeList$.pipe(take(1)).subscribe(stores => {
+      console.log('Mapped store list loaded:', stores); // THÊM: Log mapped data để debug
+      if (stores && stores.length > 0 && !this.selectedStoreId) {
+        this.selectedStoreId = stores[0].storeId;
+        console.log('Default store selected:', this.selectedStoreId); // THÊM: Log selection
+        // Trigger load pledges ngay nếu có default store
+        if (this.paginator) {
+          this.loadPledges();
+        }
+      }
+    });
+  }
+
+  /**
+   * *** THÊM MỚI 7: Xử lý thay đổi store ***
+   */
+  onStoreChange(): void {
+    console.log('Store changed to:', this.selectedStoreId); // THÊM: Log để debug
+    // Reset về trang đầu và refresh data khi thay đổi store
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.refreshTrigger.next();
   }
 
   ngAfterViewInit(): void {
-    // Gán sort cho dataSource
     this.dataSource.sort = this.sort;
 
-    // Lắng nghe các sự kiện Paginator, Sort, hoặc Refresh
     merge(this.sort.sortChange, this.paginator.page, this.refreshTrigger)
       .pipe(
         startWith({}),
-        // *** SỬA LỖI: Thêm delay(0) để tránh lỗi NG0100 ***
         delay(0),
-        // *** THAY ĐỔI 4: Gọi service thay vì mock data ***
         switchMap(() => {
           this.isLoading = true;
+          // *** THAY ĐỔI 8: Tạo object filter riêng, thêm storeId vào ***
+          const filters = {
+            ...this.filterForm.value,
+            storeId: this.selectedStoreId // Luôn truyền storeId (bắt buộc)
+          };
+          console.log('Calling API with filters:', filters); // THÊM: Log filters để debug
           return this.pledgeService.getPledges(
             this.paginator.pageIndex,
             this.paginator.pageSize,
-            this.filterForm.value
+            filters
           ).pipe(
             catchError((error: Error) => {
+              console.error('API error:', error); // THÊM: Log error
               this.isLoading = false;
               this.notification.showError(error.message || 'Lỗi khi tải hợp đồng');
-              return of(null); // Trả về null nếu lỗi
+              return of(null);
             })
           );
         }),
         map(data => {
           this.isLoading = false;
           if (data === null) {
-            return []; // Mảng rỗng nếu có lỗi
+            return [];
           }
           this.totalElements = data.totalElements;
           return data.content;
         })
       ).subscribe(data => {
+      console.log('Pledges loaded:', data); // THÊM: Log data để debug
       this.dataSource.data = data;
     });
   }
 
-  /**
-   * (Đã được thay thế bằng logic trong ngAfterViewInit)
-   */
   loadPledges(): void {
-    // Hàm này giờ không cần thiết vì logic đã ở trong switchMap
-    // nhưng nếu muốn gọi thủ công, có thể dùng refreshTrigger
     this.refreshTrigger.next();
   }
 
-  /**
-   * Áp dụng bộ lọc
-   */
   applyFilters(): void {
-    this.paginator.pageIndex = 0;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
     this.refreshTrigger.next();
   }
 
   /**
-   * Reset bộ lọc
+   * *** THAY ĐỔI 9: Cập nhật hàm reset (không reset storeId) ***
    */
   resetFilters(): void {
     this.filterForm.reset({
@@ -147,28 +214,37 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   }
 
   /**
-   * Mở dialog thêm mới/chỉnh sửa
+   * *** THAY ĐỔI 10: Cập nhật hàm mở dialog (sử dụng selectedStoreId) ***
    */
   openPledgeDialog(row?: PledgeContract): void {
-    // *** THAY ĐỔI 5: Mở PledgeDialogComponent ***
+    // *** THAY ĐỔI: Luôn có selectedStoreId vì store là bắt buộc ***
+    if (!this.selectedStoreId) {
+      this.notification.showError('Vui lòng chọn một cửa hàng trước khi thêm mới.');
+      return;
+    }
+
     const dialogRef = this.dialog.open(PledgeDialogComponent, {
-      width: '90%', // Tăng độ rộng cho dialog
+      width: '90%',
       maxWidth: '1200px',
-      data: row, // Truyền 'row' vào dialog (sẽ là null nếu Thêm mới)
+      // Truyền một object chứa contract và storeId
+      data: {
+        contract: row, // Dữ liệu hợp đồng (null nếu thêm mới)
+        // Nếu là sửa (row có data), dùng storeId của row (nếu khác).
+        // Nếu là thêm mới (row là null), dùng selectedStoreId.
+        storeId: row ? row.storeId : this.selectedStoreId
+      },
       disableClose: true
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      // Nếu dialog trả về 'true' (lưu thành công)
       if (result === true) {
-        this.refreshTrigger.next(); // Tải lại danh sách
+        this.refreshTrigger.next();
       }
     });
   }
 
   // === CÁC HÀNH ĐỘNG TRÊN ROW ===
   onEdit(row: PledgeContract): void {
-    // Truyền dữ liệu 'row' vào dialog để Sửa
     this.openPledgeDialog(row);
   }
 
@@ -181,9 +257,7 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   }
 
   onDelete(row: PledgeContract): void {
-    // TODO: Thêm dialog xác nhận trước khi xóa
     this.notification.showWarning(`Bạn có chắc muốn xóa HĐ ${row.id}? (Chưa thực thi)`);
-    // this.pledgeService.deletePledge(row.id!).subscribe(...)
   }
 
   openLiquidationAssets(): void {

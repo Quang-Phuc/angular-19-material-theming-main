@@ -38,8 +38,22 @@ $color-teal-dark: #004d40; // Màu xanh đậm như header (cho nút Tìm kiếm
   }
 }
 
+/* THÊM MỚI: Container cho selector cửa hàng chính */
+.store-selector-container {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-start;
 
-/* Toolbar Filter (Giống các file .scss khác) */
+  .store-select-field {
+    width: 300px; // Rộng hơn để nổi bật là phần chính
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+    ::ng-deep .mat-mdc-form-field-flex {
+      height: 50px !important;
+    }
+  }
+}
+
+/* Toolbar Filter (Giống các file .scss khác, đã xóa store select) */
 .filter-toolbar {
   background-color: #ffffff;
   padding: 16px; // Giảm padding

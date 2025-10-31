@@ -1,5 +1,4 @@
-// src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
-
+// pledge-dialog.component.ts (ĐÃ CẬP NHẬT)
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
   OnDestroy, ChangeDetectorRef, AfterViewInit
@@ -11,6 +10,7 @@ import {
 import {
   MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog
 } from '@angular/material/dialog';
+// (Các import khác giữ nguyên)
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,29 +31,19 @@ import { ApiService } from '../../services/api.service';
 import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
 import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
+// (Các interface DropdownOption, AssetTypeAttribute, ... giữ nguyên)
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; }
 interface AssetType { maLoai: string; tenLoai: string; trangThai: string; attributes: AssetTypeAttribute[]; }
-
 interface ApiResponse<T> {
-  timeStamp: string;
-  securityVersion: string;
-  result: string;
-  message: string;
-  errorCode: string;
-  data?: T;
+  timeStamp: string; securityVersion: string; result: string;
+  message: string; errorCode: string; data?: T;
+}
+interface AssetTypeItem {
+  id: number; name: string; description: string; idUrl?: string; createdBy?: string;
+  createdDate?: string; lastUpdatedBy?: string; lastUpdatedDate?: string;
 }
 
-interface AssetTypeItem {
-  id: number;
-  name: string;
-  description: string;
-  idUrl?: string;
-  createdBy?: string;
-  createdDate?: string;
-  lastUpdatedBy?: string;
-  lastUpdatedDate?: string;
-}
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -81,6 +71,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   assetTypes$ = new BehaviorSubject<string[]>([]);
+  // (Các Observable $ khác giữ nguyên)
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
@@ -94,9 +85,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   uploadedFiles: { name: string; url: string }[] = [];
   isDragOver = false;
 
+  // *** THÊM MỚI 1: Biến lưu storeId ***
+  private activeStoreId: string | null = null;
+
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
-  @Inject(MAT_DIALOG_DATA) public data: PledgeContract | null = inject(MAT_DIALOG_DATA);
+
+  // *** THAY ĐỔI 2: Cập nhật cách inject data ***
+  @Inject(MAT_DIALOG_DATA) public dialogData: { contract: PledgeContract | null, storeId: string | null } = inject(MAT_DIALOG_DATA);
+
   private notification = inject(NotificationService);
   private customerService = inject(CustomerService);
   private pledgeService = inject(PledgeService);
@@ -107,8 +104,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private stream: MediaStream | null = null;
 
   constructor() {
-    this.isEditMode = !!this.data;
+    // *** THAY ĐỔI 3: Cập nhật logic constructor ***
+    this.isEditMode = !!this.dialogData.contract;
 
+    // Nếu là Sửa (edit), lấy storeId từ contract.
+    // Nếu là Thêm (add), lấy storeId được truyền vào từ list.
+    this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
+
+    // (Phần khởi tạo pledgeForm giữ nguyên)
     this.pledgeForm = this.fb.group({
       portraitInfo: this.fb.group({ imageUrl: [null] }),
       customerInfo: this.fb.group({
@@ -172,11 +175,20 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.loadAssetTypes();
-    if (this.isEditMode && this.data) {
-      this.patchFormData(this.data);
+
+    // *** THAY ĐỔI 4: Kiểm tra storeId và patch data ***
+    if (!this.activeStoreId) {
+      this.notification.showError('Lỗi: Không xác định được cửa hàng. Vui lòng đóng và thử lại.');
+      this.dialogRef.close(false);
+      return;
+    }
+
+    if (this.isEditMode && this.dialogData.contract) {
+      this.patchFormData(this.dialogData.contract);
     }
   }
 
+  // (Các hàm loadAssetTypes, ngAfterViewInit, ngOnDestroy, ... giữ nguyên)
   private loadAssetTypes(): void {
     this.apiService.get<ApiResponse<AssetTypeItem[]>>('/asset-types').pipe(
       map(response => {
@@ -204,7 +216,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.stopWebcam();
   }
 
-  /* ------------------- AUTO SEARCH ON BLUR ------------------- */
+  // (Các hàm setupAutoSearchOnBlur, isPhoneOrCccdValidForSearch, triggerCustomerSearch, ... giữ nguyên)
   private setupAutoSearchOnBlur(): void {
     setTimeout(() => {
       const phoneInput = document.querySelector('input[formControlName="soDienThoai"]') as HTMLInputElement;
@@ -231,13 +243,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }, 100);
   }
-
   private isPhoneOrCccdValidForSearch(): boolean {
     const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
     const cccd = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
     return (phone.length >= 10 || cccd.length >= 9) && (phone || cccd);
   }
-
   private triggerCustomerSearch(): void {
     const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
     const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
@@ -254,8 +264,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         error: (err) => console.error('Auto search error:', err)
       });
   }
-
-  /* ------------------- CONFIRM & POPULATE ------------------- */
   private showConfirmAndPopulate(customerData: any): void {
     const name = customerData.fullName || 'Khách hàng';
     const phone = customerData.phoneNumber ? `(${customerData.phoneNumber})` : '';
@@ -273,14 +281,13 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
-
   private populateAllCustomerData(data: any): void {
+    // (Logic populate giữ nguyên)
     const cInfo = this.pledgeForm.get('customerInfo');
     const cExtra = this.pledgeForm.get('customerExtraInfo');
     const family = this.pledgeForm.get('familyInfo');
     const loanExtra = this.pledgeForm.get('loanExtraInfo');
 
-    // === 1. THÔNG TIN CƠ BẢN ===
     if (cInfo) {
       cInfo.patchValue({
         hoTen: data.fullName || '',
@@ -292,8 +299,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         diaChi: data.permanentAddress || ''
       });
     }
-
-    // === 2. THÔNG TIN NÂNG CAO ===
     if (cExtra) {
       cExtra.patchValue({
         maKhachHang: data.customerCode || '',
@@ -307,29 +312,22 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         sdtNguoiLienHe: data.contactPhone || ''
       });
     }
-
-    // === 3. THÀNH PHẦN GIA ĐÌNH ===
     if (family) {
       family.patchValue({
         voChong: {
-          hoTen: data.spouseName || '',
-          soDienThoai: data.spousePhone || '',
+          hoTen: data.spouseName || '', soDienThoai: data.spousePhone || '',
           ngheNghiep: data.spouseOccupation || ''
         },
         bo: {
-          hoTen: data.fatherName || '',
-          soDienThoai: data.fatherPhone || '',
+          hoTen: data.fatherName || '', soDienThoai: data.fatherPhone || '',
           ngheNghiep: data.fatherOccupation || ''
         },
         me: {
-          hoTen: data.motherName || '',
-          soDienThoai: data.motherPhone || '',
+          hoTen: data.motherName || '', soDienThoai: data.motherPhone || '',
           ngheNghiep: data.motherOccupation || ''
         }
       });
     }
-
-    // === 4. THÔNG TIN CHO VAY ===
     if (loanExtra) {
       loanExtra.patchValue({
         tinhTrang: this.mapLoanStatus(data.loanStatus),
@@ -338,76 +336,55 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         nguonKhachHang: this.mapCustomerSource(data.customerSource)
       });
     }
-
-    // === 5. ẢNH CHÂN DUNG ===
     if (data.idUrl) {
       this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(data.idUrl);
     }
 
     this.cdr.detectChanges();
   }
-
-  /* ------------------- MAPPING FUNCTIONS ------------------- */
   private mapLoanStatus(status: string): string {
     const map: { [key: string]: string } = {
-      'Chưa vay': 'Binh Thuong',
-      'Đang vay': 'Binh Thuong 2',
-      'Nợ xấu': 'No xau',
-      'Nợ rủi ro': 'No rui ro',
-      'Nợ R2': 'No R2',
-      'Nợ R3': 'No R3'
+      'Chưa vay': 'Binh Thuong', 'Đang vay': 'Binh Thuong 2', 'Nợ xấu': 'No xau',
+      'Nợ rủi ro': 'No rui ro', 'Nợ R2': 'No R2', 'Nợ R3': 'No R3'
     };
     return map[status] || 'Binh Thuong';
   }
-
   private mapPartnerType(type: string): string {
     const map: { [key: string]: string } = {
-      'Cá nhân': 'khach_hang',
-      'Chủ nợ': 'chu_no',
-      'Người theo dõi': 'nguoi_theo_doi',
-      'Tất cả': 'all'
+      'Cá nhân': 'khach_hang', 'Chủ nợ': 'chu_no',
+      'Người theo dõi': 'nguoi_theo_doi', 'Tất cả': 'all'
     };
     return map[type] || 'khach_hang';
   }
-
   private mapCustomerSource(source: string): string {
     const map: { [key: string]: string } = {
-      'Giới thiệu bạn bè': 'ctv',
-      'Tất cả': 'all'
+      'Giới thiệu bạn bè': 'ctv', 'Tất cả': 'all'
     };
     return map[source] || 'all';
   }
-
-  /* ------------------- TÌM KHÁCH HÀNG (nút) ------------------- */
   findCustomer(): void {
     const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
     const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
-
     if (!phone && !idNumber) {
       this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
       return;
     }
-
     this.customerService.searchCustomer({ phoneNumber: phone, identityNumber: idNumber })
       .subscribe({
         next: (data: any) => {
-          if (data && data.fullName) {
-            this.showConfirmAndPopulate(data);
-          } else {
-            this.notification.showError('Không tìm thấy khách hàng.');
-          }
+          if (data && data.fullName) { this.showConfirmAndPopulate(data); }
+          else { this.notification.showError('Không tìm thấy khách hàng.'); }
         },
         error: () => this.notification.showError('Lỗi khi tìm kiếm khách hàng.')
       });
   }
-
-  /* ------------------- PATCH DỮ LIỆU CHỈNH SỬA ------------------- */
   patchFormData(contract: PledgeContract): void {
+    // (Logic patchFormData giữ nguyên, không cần patch storeId vào form)
     this.pledgeForm.patchValue({ /* ... */ });
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
 
-  /* ------------------- WEBCAM ------------------- */
+  // (Các hàm Webcam, Attachments, Asset Type giữ nguyên)
   async takePicture(field: string): Promise<void> {
     if (field === 'portrait') {
       this.showWebcam = true;
@@ -415,8 +392,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       setTimeout(async () => {
         if (!this.videoElement?.nativeElement) {
           this.notification.showError('Không thể truy cập phần tử video.');
-          this.showWebcam = false;
-          return;
+          this.showWebcam = false; return;
         }
         try {
           this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -432,37 +408,31 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.fileInput?.nativeElement.click();
     }
   }
-
   capturePhoto(): void {
     if (!this.videoElement || !this.canvasElement) return;
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
     if (dataUrl.length > 1024 * 1024) {
-      this.notification.showError('Ảnh quá lớn (>1MB).');
-      return;
+      this.notification.showError('Ảnh quá lớn (>1MB).'); return;
     }
     this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(dataUrl);
     this.notification.showSuccess('Chụp ảnh thành công!');
     this.stopWebcam();
   }
-
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     if (!file.type.match('image/jpeg|image/png|image/jpg')) {
-      this.notification.showError('Chỉ chấp nhận JPG/JPEG/PNG.');
-      return;
+      this.notification.showError('Chỉ chấp nhận JPG/JPEG/PNG.'); return;
     }
     if (file.size > 1024 * 1024) {
-      this.notification.showError('File ảnh ≤ 1MB.');
-      return;
+      this.notification.showError('File ảnh ≤ 1MB.'); return;
     }
     const reader = new FileReader();
     reader.onload = e => {
@@ -472,17 +442,13 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     reader.readAsDataURL(file);
   }
-
   stopWebcam(): void {
     if (this.stream) {
       this.stream.getTracks().forEach(t => t.stop());
       this.stream = null;
     }
-    this.showWebcam = false;
-    this.cdr.detectChanges();
+    this.showWebcam = false; this.cdr.detectChanges();
   }
-
-  /* ------------------- ATTACHMENTS ------------------- */
   onDragOver(e: DragEvent): void { e.preventDefault(); this.isDragOver = true; }
   onDragLeave(e: DragEvent): void { e.preventDefault(); this.isDragOver = false; }
   onDrop(e: DragEvent): void {
@@ -490,22 +456,18 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const files = e.dataTransfer?.files;
     if (files) Array.from(files).forEach(f => this.handleFileUpload(f));
   }
-
   onAttachmentClick(): void {
     const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
+    input.type = 'file'; input.multiple = true;
     input.accept = 'image/*,.pdf,.doc,.docx';
     input.onchange = (ev: any) => {
       Array.from(ev.target.files as FileList).forEach(f => this.handleFileUpload(f));
     };
     input.click();
   }
-
   private handleFileUpload(file: File): void {
     if (file.size > 5 * 1024 * 1024) {
-      this.notification.showError(`File ${file.name} > 5MB.`);
-      return;
+      this.notification.showError(`File ${file.name} > 5MB.`); return;
     }
     const reader = new FileReader();
     reader.onload = e => {
@@ -517,14 +479,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     reader.readAsDataURL(file);
   }
-
   removeAttachment(i: number): void {
     this.uploadedFiles.splice(i, 1);
     this.pledgeForm.get('attachments')?.patchValue(this.uploadedFiles);
     this.cdr.detectChanges();
   }
-
-  /* ------------------- ASSET TYPE ------------------- */
   addNewAssetType(): void {
     const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
       width: '500px',
@@ -540,6 +499,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+
   /* ------------------- SAVE / CANCEL ------------------- */
   onSave(): void {
     if (this.pledgeForm.invalid) {
@@ -550,8 +510,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoading = true;
     const raw = this.pledgeForm.getRawValue();
 
+    // *** THAY ĐỔI 5: Thêm storeId vào payload ***
     const payload: any = {
-      id: this.isEditMode ? this.data?.id : undefined,
+      id: this.isEditMode ? this.dialogData.contract?.id : undefined,
+      storeId: this.activeStoreId, // <-- THÊM STOREID VÀO ĐÂY
       portrait: raw.portraitInfo,
       customer: {
         ...raw.customerInfo,
@@ -570,7 +532,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       attachments: raw.attachments
     };
 
+    // (Giả lập lưu)
+    // TODO: Thay thế bằng service call thật
+    // const saveObservable = this.isEditMode
+    //   ? this.pledgeService.updatePledge(payload.id, payload)
+    //   : this.pledgeService.createPledge(payload);
+    // saveObservable.subscribe(...)
+
     setTimeout(() => {
+      console.log('Payload to save:', payload); // Log để kiểm tra
       this.notification.showSuccess(this.isEditMode ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
       this.isLoading = false;
       this.dialogRef.close(true);
@@ -587,7 +557,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 }
 
-/* ------------------- DIALOG THÊM LOẠI TÀI SẢN ------------------- */
+// (Component AddAssetTypeDialogComponent giữ nguyên)
 @Component({
   selector: 'app-add-asset-type-dialog',
   standalone: true,
@@ -599,7 +569,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   template: `
     <mat-dialog-content>
       <h2 mat-dialog-title>Thêm mới loại tài sản</h2>
-
       <form [formGroup]="assetTypeForm">
         <div class="info-section">
           <h3>Thông tin chung</h3>
@@ -627,7 +596,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
             </mat-form-field>
           </div>
         </div>
-
         <div class="info-section">
           <h3>Cấu hình thuộc tính hàng hóa</h3>
           <div formArrayName="attributes">
@@ -647,7 +615,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         </div>
       </form>
     </mat-dialog-content>
-
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancel()">Đóng</button>
       <button mat-flat-button color="primary" [disabled]="assetTypeForm.invalid" (click)="onSave()">Thêm mới</button>
