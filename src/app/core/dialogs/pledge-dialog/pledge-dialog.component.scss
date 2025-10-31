@@ -159,7 +159,7 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
 /* ADD ASSET TYPE BUTTON */
 .add-asset-type-btn {
   height:48px !important; min-height:48px !important; line-height:48px !important;
-  padding:0 16px !important; border-radius:8px !important;
+  padding:0 16px !important; border-radius: CMC 8px !important;
   background-color:$color-green-success !important; color:#fff !important;
   font-weight:500 !important; text-transform:none !important;
   box-shadow:0 2px 5px rgba(40,167,69,.3); transition:all .3s ease;
@@ -260,4 +260,25 @@ mat-dialog-actions {
     background: transparent; color: #d32f2f; border: none; font-weight: 500;
     cursor: pointer; margin-left: 12px;
   }
+}
+
+/* === KHO DROPDOWN - THÊM KHO MỚI === */
+::ng-deep .add-warehouse-btn {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 500;
+  color: #004d40 !important;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+  }
+}
+
+::ng-deep .add-new-option {
+  padding: 0 !important;
+  border-top: 1px solid #eee;
+  background: #f8f9fa;
 }

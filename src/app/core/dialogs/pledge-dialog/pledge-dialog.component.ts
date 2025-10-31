@@ -1,4 +1,4 @@
-// pledge-dialog.component.ts (ĐÃ CẬP NHẬT)
+// src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
   OnDestroy, ChangeDetectorRef, AfterViewInit
@@ -10,7 +10,6 @@ import {
 import {
   MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog
 } from '@angular/material/dialog';
-// (Các import khác giữ nguyên)
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,8 +29,8 @@ import { PledgeService, PledgeContract } from '../../services/pledge.service';
 import { ApiService } from '../../services/api.service';
 import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
 import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { AddWarehouseDialogComponent } from './add-warehouse-dialog.component';
 
-// (Các interface DropdownOption, AssetTypeAttribute, ... giữ nguyên)
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; }
 interface AssetType { maLoai: string; tenLoai: string; trangThai: string; attributes: AssetTypeAttribute[]; }
@@ -57,7 +56,8 @@ interface UserStore {
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
     MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
-    MatListModule
+    MatListModule,
+    AddWarehouseDialogComponent
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
@@ -84,7 +84,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   // *** THAY ĐỔI 1: Chuyển nguoiTheoDoiList$ thành BehaviorSubject và load từ API ***
   nguoiTheoDoiList$ = new BehaviorSubject<DropdownOption[]>([]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
-  khoList$: Observable<DropdownOption[]> = of([{ id: 'kho_1', name: 'Kho 1' }, { id: 'kho_2', name: 'Kho 2' }]);
+  khoList$ = new BehaviorSubject<DropdownOption[]>([]);
 
   uploadedFiles: { name: string; url: string }[] = [];
   isDragOver = false;
@@ -163,7 +163,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
       collateralInfo: this.fb.group({
         dinhGia: [0], bienKiemSoat: [''], soKhung: [''], soMay: [''],
-        kho: ['kho_1'], maTaiSan: [''], ghiChuTaiSan: ['']
+        kho: [''], maTaiSan: [''], ghiChuTaiSan: ['']
       }),
       attachments: this.fb.group({})
     });
@@ -181,6 +181,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadAssetTypes();
     // *** THÊM MỚI 2: Load danh sách người theo dõi từ API ***
     this.loadNguoiTheoDoiList();
+    this.loadKhoList();
 
     // *** THAY ĐỔI 4: Kiểm tra storeId và patch data ***
     if (!this.activeStoreId) {
@@ -194,7 +195,62 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // *** THÊM MỚI 3: Method load danh sách người theo dõi từ API ***
+  private loadKhoList(): void {
+    if (!this.activeStoreId) {
+      this.khoList$.next([]);
+      return;
+    }
+
+    this.apiService.get<ApiResponse<{ id: number; name: string; address: string; description?: string }[]>>(`/warehouses/store/${this.activeStoreId}`).pipe(
+      map(response => response.result === 'success' && response.data ? response.data.map(k => ({ id: k.id.toString(), name: k.name })) : []),
+      tap(options => this.khoList$.next(options)),
+      catchError(err => {
+        console.error('Load kho list error:', err);
+        this.notification.showError('Lỗi tải danh sách kho.');
+        return of([]);
+      })
+    ).subscribe();
+  }
+  addNewWarehouse(): void {
+    const dialogRef = this.matDialog.open(AddWarehouseDialogComponent, {
+      width: '500px',
+      data: { storeId: this.activeStoreId }
+    });
+
+    dialogRef.afterClosed().subscribe((result: { name: string; address: string; description: string } | undefined) => {
+      if (!result) return;
+
+      const payload = {
+        name: result.name,
+        address: result.address,
+        description: result.description
+      };
+
+      this.apiService.post<ApiResponse<{ id: number }>>(`/warehouses/${this.activeStoreId}`, payload).subscribe({
+        next: (response) => {
+          if (response.result === 'success' && response.data?.id) {
+            const newKho: DropdownOption = {
+              id: response.data.id.toString(),
+              name: result.name
+            };
+
+            const current = this.khoList$.value;
+            this.khoList$.next([...current, newKho]);
+
+            // Tự động chọn kho vừa thêm
+            this.pledgeForm.get('collateralInfo.kho')?.setValue(newKho.id);
+
+            this.notification.showSuccess(`Đã thêm kho: ${result.name}`);
+          }
+        },
+        error: (err) => {
+          console.error('Add warehouse error:', err);
+          this.notification.showError('Lỗi khi thêm kho mới.');
+        }
+      });
+    });
+  }
+
   private loadNguoiTheoDoiList(): void {
     if (!this.activeStoreId) {
       console.error('No storeId available for loading users.');
