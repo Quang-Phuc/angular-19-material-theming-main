@@ -1,7 +1,8 @@
 // src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
-  OnDestroy, ChangeDetectorRef, AfterViewInit
+  OnDestroy, ChangeDetectorRef, AfterViewInit,
+  QueryList, ViewChildren // <-- THÊM MỚI
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
@@ -17,10 +18,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion'; // <-- THÊM MỚI
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabsModule, MatTabGroup } from '@angular/material/tabs'; // <-- THÊM MỚI
 import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
@@ -73,6 +74,12 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
+
+  // === THÊM MỚI ĐỂ FOCUS ===
+  @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
+  @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
+  private el: ElementRef = inject(ElementRef);
+  // ==========================
 
   assetTypes$ = new BehaviorSubject<string[]>([]);
   // (Các Observable $ khác giữ nguyên)
@@ -594,12 +601,17 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   /* ------------------- SAVE / CANCEL ------------------- */
+
   onSave(): void {
+    // === CẬP NHẬT LOGIC onSave ===
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
-      this.pledgeForm.markAllAsTouched();
-      return;
+      this.pledgeForm.markAllAsTouched(); // Hiển thị lỗi
+      this.findAndFocusFirstInvalidField(); // Tìm và focus
+      return; // Dừng lại
     }
+    // ============================
+
     this.isLoading = true;
     const raw = this.pledgeForm.getRawValue();
 
@@ -639,6 +651,65 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.dialogRef.close(true);
     }, 800);
   }
+
+  // === HÀM MỚI ĐỂ FOCUS LỖI ===
+  /**
+   * Tìm control invalid đầu tiên, đảm bảo các panel/tab cha được mở,
+   * và focus vào control đó.
+   */
+  private findAndFocusFirstInvalidField(): void {
+    try {
+      // 1. Tìm control invalid đầu tiên trong DOM
+      // (Bao gồm input, textarea, và mat-select)
+      const invalidControlEl = this.el.nativeElement.querySelector(
+        'input.ng-invalid[formControlName], ' +
+        'textarea.ng-invalid[formControlName], ' +
+        'mat-select.ng-invalid[formControlName]'
+      );
+
+      if (!invalidControlEl) return; // Không tìm thấy
+
+      // 2. Mở "Thông tin nâng cao" nếu control nằm trong đó
+      const advancedInfoSection = invalidControlEl.closest('.sub-tabs');
+      if (advancedInfoSection && !this.showAdvancedInfo) {
+        this.showAdvancedInfo = true;
+        this.cdr.detectChanges(); // Chờ view cập nhật
+      }
+
+      // 3. Chuyển Tab (trong Thông tin nâng cao) nếu control nằm trong tab bị ẩn
+      const parentTabBody = invalidControlEl.closest('mat-tab-body');
+      if (parentTabBody && this.tabGroup) {
+        // ID của tab body có dạng 'mat-tab-content-X-Y'
+        // Chúng ta cần lấy số Y (index của tab)
+        const tabIndex = parseInt(parentTabBody.id.split('-').pop() || '0', 10);
+        if (!isNaN(tabIndex) && this.tabGroup.selectedIndex !== tabIndex) {
+          this.tabGroup.selectedIndex = tabIndex; // Chuyển sang tab đó
+          this.cdr.detectChanges();
+        }
+      }
+
+      // 4. Mở Expansion Panel nếu control nằm trong panel bị đóng
+      const parentPanelEl = invalidControlEl.closest('mat-expansion-panel');
+      if (parentPanelEl && this.panels) {
+        // Tìm component panel tương ứng với element DOM
+        const panelComponent = this.panels.find(p => (p as any)._elementRef.nativeElement === parentPanelEl);
+        if (panelComponent && !panelComponent.expanded) {
+          panelComponent.open(); // Mở panel
+          this.cdr.detectChanges();
+        }
+      }
+
+      // 5. Delay một chút để chờ UI mở ra, sau đó focus và cuộn tới
+      setTimeout(() => {
+        invalidControlEl.focus();
+        invalidControlEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150); // 150ms delay
+
+    } catch (error) {
+      console.error("Lỗi khi focus vào trường invalid:", error);
+    }
+  }
+  // ===============================
 
   onCancel(): void {
     this.stopWebcam();

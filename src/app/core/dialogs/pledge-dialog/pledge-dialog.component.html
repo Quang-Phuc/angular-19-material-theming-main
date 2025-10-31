@@ -397,8 +397,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-stroked-button class="cancel-button" (click)="onCancel()" [disabled]="isLoading">Hủy</button>
-  <button mat-flat-button class="save-button" (click)="onSave()" [disabled]="isLoading || pledgeForm.invalid">
+  <button mat-stroked-button color="warn" (click)="onCancel()" [disabled]="isLoading">
+    <mat-icon>close</mat-icon> Hủy
+  </button>
+  <button mat-flat-button class="save-button" (click)="onSave()" [disabled]="isLoading">
     <mat-icon>save</mat-icon> {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
   </button>
 </mat-dialog-actions>
