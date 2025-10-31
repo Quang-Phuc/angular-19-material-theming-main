@@ -79,8 +79,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
-    { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' },
-    { id: 'huebntest', name: 'huebntest' }, { id: 'hue_2', name: 'Huệ 2' }
+    { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' }
   ]);
   // *** THAY ĐỔI 1: Chuyển nguoiTheoDoiList$ thành BehaviorSubject và load từ API ***
   nguoiTheoDoiList$ = new BehaviorSubject<DropdownOption[]>([]);
