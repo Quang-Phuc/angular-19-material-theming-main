@@ -27,12 +27,33 @@ import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
 import { CustomerService } from '../../services/customer.service';
 import { PledgeService, PledgeContract } from '../../services/pledge.service';
+import { ApiService } from '../../services/api.service';
 import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
-import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; }
 interface AssetType { maLoai: string; tenLoai: string; trangThai: string; attributes: AssetTypeAttribute[]; }
+
+interface ApiResponse<T> {
+  timeStamp: string;
+  securityVersion: string;
+  result: string;
+  message: string;
+  errorCode: string;
+  data?: T;
+}
+
+interface AssetTypeItem {
+  id: number;
+  name: string;
+  description: string;
+  idUrl?: string;
+  createdBy?: string;
+  createdDate?: string;
+  lastUpdatedBy?: string;
+  lastUpdatedDate?: string;
+}
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -59,7 +80,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  assetTypes$ = new BehaviorSubject<string[]>(['Xe Máy', 'Ô tô', 'Điện thoại', 'Laptop', 'Vàng/Trang sức']);
+  assetTypes$ = new BehaviorSubject<string[]>([]);
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
@@ -79,6 +100,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private notification = inject(NotificationService);
   private customerService = inject(CustomerService);
   private pledgeService = inject(PledgeService);
+  private apiService = inject(ApiService);
   private datePipe = inject(DatePipe);
   private cdr = inject(ChangeDetectorRef);
   private matDialog = inject(MatDialog);
@@ -149,9 +171,29 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.loadAssetTypes();
     if (this.isEditMode && this.data) {
       this.patchFormData(this.data);
     }
+  }
+
+  private loadAssetTypes(): void {
+    this.apiService.get<ApiResponse<AssetTypeItem[]>>('/asset-types').pipe(
+      map(response => {
+        if (response.result === 'success' && response.data) {
+          return response.data.map(item => item.name);
+        }
+        return [];
+      }),
+      tap(types => {
+        this.assetTypes$.next(types);
+      }),
+      catchError(err => {
+        console.error('Load asset types error:', err);
+        this.notification.showError('Lỗi tải loại tài sản. Sử dụng dữ liệu mặc định.');
+        return of([]);
+      })
+    ).subscribe();
   }
 
   ngAfterViewInit(): void {
