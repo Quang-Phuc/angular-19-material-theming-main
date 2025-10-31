@@ -282,3 +282,54 @@ mat-dialog-actions {
   border-top: 1px solid #eee;
   background: #f8f9fa;
 }
+.kho-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+
+  .flex-grow {
+    flex: 1;
+  }
+
+  .add-warehouse-btn {
+    height: 56px; // khớp chiều cao form-field
+    min-width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.kho-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .flex-grow {
+    flex: 1;
+  }
+
+  .add-warehouse-mini-btn {
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(25, 118, 210, 0.4);
+    transition: all 0.25s ease;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    min-width: unset;
+
+    &:hover {
+      background: linear-gradient(135deg, #1565c0, #64b5f6);
+      box-shadow: 0 4px 10px rgba(25, 118, 210, 0.5);
+      transform: translateY(-1px);
+    }
+
+    mat-icon {
+      font-size: 22px;
+    }
+  }
+}
+
+

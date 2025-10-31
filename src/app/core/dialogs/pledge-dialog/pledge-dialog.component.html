@@ -339,22 +339,27 @@
           <mat-form-field appearance="outline"><mat-label>Số Máy</mat-label><input matInput formControlName="soMay"></mat-form-field>
         </div>
         <div class="form-grid-2-col">
-          <!-- KHO - ĐÃ THAY ĐỔI -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Kho</mat-label>
-            <mat-select formControlName="kho">
-              @for (opt of (khoList$ | async); track opt.id) {
-                <mat-option [value]="opt.id">{{opt.name}}</mat-option>
-              }
-              <mat-option [value]="null" disabled class="add-new-option">
-                <button mat-button color="primary" (click)="addNewWarehouse()" class="add-warehouse-btn">
-                  <mat-icon>add</mat-icon> Thêm kho mới
-                </button>
-              </mat-option>
-            </mat-select>
+          <div class="kho-row">
+            <mat-form-field appearance="outline" class="flex-grow">
+              <mat-label>Kho</mat-label>
+              <mat-select formControlName="kho">
+                @for (opt of (khoList$ | async); track opt.id) {
+                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-mini-fab color="primary" class="add-warehouse-mini-btn" (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Mã Tài Sản</mat-label>
+            <input matInput formControlName="maTaiSan">
           </mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Mã Tài Sản</mat-label><input matInput formControlName="maTaiSan"></mat-form-field>
         </div>
+
         <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú (Tài sản)</mat-label><textarea matInput formControlName="ghiChuTaiSan" rows="2"></textarea></mat-form-field>
       </mat-expansion-panel>
 
