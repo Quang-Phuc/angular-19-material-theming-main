@@ -39,14 +39,14 @@ h2[mat-dialog-title].dialog-title {
   color: white;
   margin: -24px -24px 16px -24px;
   padding: 16px 24px;
-  /* Bỏ border-radius vì dialog đã có rồi */
+  text-align: center; // <-- THÊM DÒNG NÀY
 }
 
 .progress-bar-placeholder { height: 4px; }
 
 mat-dialog-content {
-  padding: 8px 2px; // Giảm padding 2 bên
-  background-color: $color-dialog-bg; // Dùng màu nền
+  padding: 8px 2px;
+  background-color: $color-dialog-bg;
   max-height: 75vh;
   overflow-y: auto;
 }
@@ -104,12 +104,10 @@ mat-expansion-panel {
     color: $color-header-bg;
   }
 
-  // Thêm padding cho nội dung bên trong panel
   .mat-expansion-panel-body {
     padding: 16px 24px 24px 24px;
   }
 
-  // Bỏ shadow khi panel lồng nhau (như panel Phí)
   mat-expansion-panel {
     box-shadow: none !important;
     border: 1px solid #eee;
@@ -118,7 +116,7 @@ mat-expansion-panel {
 }
 
 
-/* CUSTOMER INFO BOX (Giữ nguyên, chỉ đổi tên selector) */
+/* CUSTOMER INFO BOX (Giữ nguyên) */
 .customer-main-grid {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -143,6 +141,14 @@ mat-expansion-panel {
   .capture-btn, .upload-btn { width: 100%; }
   &:hover { border-color: $color-focus; background-color: #fff; }
   .portrait-preview { max-width: 100%; max-height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 8px; }
+
+  /* === THAY ĐỔI 2: THU NHỎ ICON UPLOAD === */
+  .upload-btn mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+  }
 }
 
 /* WEBCAM MODAL (Giữ nguyên) */
@@ -177,15 +183,15 @@ mat-expansion-panel {
 .full-width { width:100%; }
 hr { border:none; border-top:1px solid #eee; margin:16px 0; }
 
-/* === CLASS GRID MỚI ĐỂ CĂN NÚT === */
+/* === CLASS GRID NÚT (Giữ nguyên) === */
 .form-grid-asset-with-button {
   display: grid;
-  grid-template-columns: 1fr 1fr auto; // Cột auto cho nút
+  grid-template-columns: 1fr 1fr auto;
   gap: 20px;
-  align-items: center; // Center để căn nút vào giữa form field
+  align-items: center; // Đã fix lỗi thụt nút
 }
 
-/* ADD ASSET TYPE BUTTON (Chỉnh lại 1 chút) */
+/* ADD ASSET TYPE BUTTON (Giữ nguyên) */
 .add-asset-type-btn {
   height: 56px !important; // CĂN BẰNG CHIỀU CAO MỚI CỦA FORM FIELD
   min-height: 56px !important; //
@@ -203,11 +209,16 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
   &:active { transform:translateY(0); }
 }
 
-/* INTEREST GROUP (Giữ nguyên) */
+/* === THAY ĐỔI 4: CĂN CHỈNH LƯỚI LÃI SUẤT === */
 .interest-group-grid {
-  display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:16px; margin:16px 0; align-items:end;
-  @media (max-width:1024px) { grid-template-columns:1fr 1fr; }
-  @media (max-width:768px) { grid-template-columns:1fr; }
+  display:grid;
+  grid-template-columns: 1fr 1fr; // <-- Sửa thành 2 cột
+  gap: 20px; // <-- Tăng khoảng cách
+  margin: 16px 0;
+  align-items: end;
+  @media (max-width:768px) {
+    grid-template-columns:1fr; // Giữ 1 cột cho mobile
+  }
 }
 .interest-item { display:flex; flex-direction:column; gap:6px;
   .interest-label { font-weight:500; color:$color-header-bg; font-size:.9rem; }
@@ -230,7 +241,12 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
 
 /* FEE GRID (Giữ nguyên) */
 .fee-grid {
-  display:grid; grid-template-columns:1fr 180px 200px; gap:16px; align-items:center; margin-bottom:8px;
+  display:grid;
+  // [Label] [Input] [Radios]
+  grid-template-columns: 1fr 200px 180px; // <-- Đổi thứ tự
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 8px;
   label { font-weight:500; }
   mat-form-field {
     ::ng-deep .mat-mdc-form-field-flex { height:44px !important; }
@@ -270,10 +286,15 @@ mat-dialog-actions {
   }
 }
 
-/* RESPONSIVE (Cập nhật cho grid mới) */
+/* RESPONSIVE (Cập nhật) */
 @media (max-width: 1024px) {
   .form-grid-3-col, .form-grid-4-col { grid-template-columns:repeat(2,1fr); }
-  .fee-grid { grid-template-columns:1fr; gap:8px; mat-form-field, mat-radio-group { margin-top:-8px; } }
+
+  .fee-grid {
+    grid-template-columns:1fr; // <-- Sửa lại cho responsive
+    gap: 8px;
+    mat-form-field, mat-radio-group { margin-top:-8px; }
+  }
 
   .form-grid-asset-with-button {
     grid-template-columns: 1fr 1fr; // Nút sẽ rớt xuống
@@ -286,8 +307,9 @@ mat-dialog-actions {
   .customer-main-grid { grid-template-columns:1fr; }
   .portrait-capture-box { height:auto; max-width:300px; margin:0 auto 16px auto; }
   .form-grid-2-col, .form-grid-3-col, .form-grid-4-col,
-  .form-grid-asset-with-button {
-    grid-template-columns: 1fr; // Tất cả 1 cột
+  .form-grid-asset-with-button,
+  .interest-group-grid { // <-- Thêm
+    grid-template-columns: 1fr;
   }
   .add-asset-type-btn { width:100%; justify-content:center; margin-top:0 !important; }
   .webcam-modal-content { width:95%; }
@@ -326,27 +348,9 @@ mat-dialog-actions {
 }
 .kho-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 4px;
-
-  .flex-grow {
-    flex: 1;
-  }
-
-  .add-warehouse-btn {
-    height: 56px; // khớp chiều cao form-field
-    min-width: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.kho-row {
-  display: flex;
-  align-items: center;
+  align-items: flex-start; // <-- Sửa từ 'center' thành 'flex-start'
   gap: 8px;
+  padding-top: 4px; // Thêm chút padding để thẳng hàng với text
 
   .flex-grow {
     flex: 1;
