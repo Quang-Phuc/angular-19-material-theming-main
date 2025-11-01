@@ -235,19 +235,13 @@
             </button>
           </div>
 
-          <div class="form-grid-3-col">
+          <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
               <mat-label>Ngày Vay *</mat-label>
               <input matInput [matDatepicker]="dpVay" formControlName="ngayVay">
               <mat-datepicker-toggle matIconSuffix [for]="dpVay"></mat-datepicker-toggle>
               <mat-datepicker #dpVay></mat-datepicker>
             </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Mã Hợp Đồng</mat-label>
-              <input matInput formControlName="maHopDong" placeholder="Tự động sinh" [disabled]="isEditMode">
-            </mat-form-field>
-
             <mat-form-field appearance="outline">
               <mat-label>Tổng Tiền Vay *</mat-label>
               <input matInput type="number" formControlName="tongTienVay" placeholder="0">

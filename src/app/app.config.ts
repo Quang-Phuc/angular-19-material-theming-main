@@ -11,6 +11,10 @@ import { importProvidersFrom } from '@angular/core';
 // *** PHẢI IMPORT INTERCEPTOR ***
 import { errorInterceptor } from './core/interceptors/error.interceptor'; // Kiểm tra lại đường dẫn này
 
+// *** THÊM IMPORT NÀY VÀO ***
+import { provideNativeDateAdapter } from '@angular/material/core';
+
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
@@ -19,6 +23,9 @@ export const appConfig: ApplicationConfig = {
     // *** DÒNG NÀY PHẢI GIỐNG HỆT NHƯ VẦY ***
     provideHttpClient(withInterceptors([errorInterceptor])),
 
-    importProvidersFrom(MatSnackBarModule)
+    importProvidersFrom(MatSnackBarModule),
+
+    // *** THÊM DÒNG NÀY VÀO MẢNG PROVIDERS ***s
+    provideNativeDateAdapter()
   ]
 };
