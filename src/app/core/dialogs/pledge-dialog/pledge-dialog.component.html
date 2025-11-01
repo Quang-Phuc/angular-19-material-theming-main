@@ -283,7 +283,20 @@
             </mat-select>
           </div>
         </div>
+      </div>
+      <div class="interest-group-grid">
 
+        <div class="interest-item">
+          <label class="interest-label">Hình thức cho vay *</label>
+          <div class="input-group">
+            <mat-select formControlName="kieuThuLai" class="unit-select">
+              <mat-option value="Truoc">Trả lãi định kỳ – Chuộc gốc cuối kỳ</mat-option>
+              <mat-option value="Sau">Trả góp gốc + lãi hằng kỳ</mat-option>
+              <mat-option value="Sau">Trả cuối kỳ (cả gốc + lãi 1 lần)</mat-option>
+              <mat-option value="Sau">Gia hạn hợp đồng (đáo hạn)</mat-option>
+            </mat-select>
+          </div>
+        </div>
         <div class="interest-item">
           <label class="interest-label">Số lần trả *</label>
           <div class="input-group">
@@ -291,15 +304,7 @@
           </div>
         </div>
 
-        <div class="interest-item">
-          <label class="interest-label">Kiểu Thu Lãi *</label>
-          <div class="input-group">
-            <mat-select formControlName="kieuThuLai" class="unit-select">
-              <mat-option value="Truoc">Thu trước</mat-option>
-              <mat-option value="Sau">Thu sau</mat-option>
-            </mat-select>
-          </div>
-        </div>
+
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
