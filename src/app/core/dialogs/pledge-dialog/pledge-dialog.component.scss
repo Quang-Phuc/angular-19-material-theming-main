@@ -1,6 +1,6 @@
 /* src/app/core/dialogs/pledge-dialog/pledge-dialog.component.scss */
 
-/* === BIẾN MÀU === */
+/* === BIẾN MÀU (Giữ nguyên) === */
 $color-header-bg: #004d40;
 $color-customer-bg: #e8f5e9;
 $color-customer-border: #c8e6c9;
@@ -9,12 +9,12 @@ $color-dropzone-border: #dee2e6;
 $color-portrait-border: #cde4e2;
 $color-focus: $color-header-bg;
 $color-block-border: #e9ecef;
-$color-dialog-bg: #f4f6f9;
+$color-dialog-bg: #f4f6f9; // Sẽ dùng màu này làm nền
 $color-green-success: #28a745;
 $color-gray-cancel: #6c757d;
 $color-loan-bg: #e3f2fd;
 
-/* === HIỆU ỨNG === */
+/* === HIỆU ỨNG (Giữ nguyên) === */
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -23,46 +23,41 @@ $color-loan-bg: #e3f2fd;
 /* === CƠ BẢN === */
 :host { display: block; }
 
-mat-form-field {
+/* === QUAN TRỌNG: BỎ CHIỀU CAO CỐ ĐỊNH ===
+  Bỏ dòng này đi. Hãy để Angular Material dùng chiều cao mặc định (56px)
+  cho 'appearance="outline"'. Điều này sẽ làm form thoáng và
+  căn chỉnh chuẩn hơn.
+*/
+/* mat-form-field {
   ::ng-deep .mat-mdc-form-field-flex { height: 48px; }
 }
+*/
 
-.dialog-title {
+/* Sửa lại mat-dialog-title để dùng thẻ chuẩn mat-dialog-title */
+h2[mat-dialog-title].dialog-title {
   background-color: $color-header-bg;
   color: white;
   margin: -24px -24px 16px -24px;
   padding: 16px 24px;
-  border-radius: 8px 8px 0 0;
+  /* Bỏ border-radius vì dialog đã có rồi */
 }
 
 .progress-bar-placeholder { height: 4px; }
 
 mat-dialog-content {
-  padding: 16px 8px;
-  background-color: $color-dialog-bg;
+  padding: 8px 2px; // Giảm padding 2 bên
+  background-color: $color-dialog-bg; // Dùng màu nền
   max-height: 75vh;
   overflow-y: auto;
 }
 
-/* CONTENT BLOCK */
-.content-block {
-  margin-bottom: 20px !important;
-  border: 1px solid $color-block-border;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  transition: box-shadow .3s ease;
-  padding: 20px;
-  &:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
-}
+/* BỎ HOÀN TOÀN .content-block VÀ CÁC CLASS TƯƠNG TỰ */
+/* .content-block { ... } */
+/* .loan-info-section { ... } */
+/* .customer-info-box { ... } */
 
-/* LOAN INFO SECTION */
-.loan-info-section {
-  background-color: $color-loan-bg !important;
-  legend { font-weight: bold !important; font-size: 1.2rem !important; color: $color-header-bg !important; }
-}
 
-/* FORM FIELD FOCUS & HOVER */
+/* === FORM FIELD FOCUS & HOVER (Giữ nguyên, rất tốt) === */
 mat-form-field {
   transition: all .3s ease;
   &:hover {
@@ -81,34 +76,55 @@ mat-form-field {
   }
 }
 
-/* EXPANSION PANEL */
-mat-accordion.content-block { padding: 0; }
+/* === STYLING CHO BỐ CỤC PANEL MỚI === */
+mat-accordion {
+  // Bỏ shadow mặc định của accordion
+  box-shadow: none !important;
+  background: transparent;
+  padding: 8px 16px; // Thêm padding cho nội dung
+}
+
 mat-expansion-panel {
-  transition: box-shadow .3s ease;
-  box-shadow: none;
-  margin-bottom: 0 !important;
-  &:first-of-type { border-top-left-radius: 8px; border-top-right-radius: 8px; }
-  &:last-of-type { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
-  mat-expansion-panel-header { font-weight: 500; }
+  margin-bottom: 20px !important; // Khoảng cách giữa các panel
+  border-radius: 8px !important; // Bo góc
+  background-color: #fff; // Nền trắng
+
+  // Áp dụng shadow đẹp của bạn vào đây
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+  transition: box-shadow .3s ease !important;
+
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07) !important;
+  }
+
+  // Tùy chỉnh Header
+  mat-expansion-panel-header {
+    font-weight: 600; // In đậm tiêu đề
+    font-size: 1.1rem;
+    color: $color-header-bg;
+  }
+
+  // Thêm padding cho nội dung bên trong panel
+  .mat-expansion-panel-body {
+    padding: 16px 24px 24px 24px;
+  }
+
+  // Bỏ shadow khi panel lồng nhau (như panel Phí)
+  mat-expansion-panel {
+    box-shadow: none !important;
+    border: 1px solid #eee;
+    margin-top: 16px;
+  }
 }
 
-/* CUSTOMER INFO BOX */
-.customer-info-box {
-  background-color: $color-customer-bg;
-  border: 1px solid $color-customer-border;
-  padding: 16px 24px;
-  margin-bottom: 0;
-  border-radius: 8px;
-  legend { font-weight: 600; font-size: 1.15rem; padding: 0 8px; color: $color-header-bg; }
-}
 
+/* CUSTOMER INFO BOX (Giữ nguyên, chỉ đổi tên selector) */
 .customer-main-grid {
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 24px;
   align-items: flex-start;
 }
-
 .portrait-capture-box {
   border: 2px dashed $color-portrait-border;
   background-color: #f0f7f7;
@@ -129,7 +145,7 @@ mat-expansion-panel {
   .portrait-preview { max-width: 100%; max-height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 8px; }
 }
 
-/* WEBCAM MODAL */
+/* WEBCAM MODAL (Giữ nguyên) */
 .webcam-modal {
   position: fixed; top:0; left:0; right:0; bottom:0;
   background: rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000;
@@ -142,24 +158,40 @@ mat-expansion-panel {
   .webcam-actions { margin-top:16px; display:flex; justify-content:flex-end; gap:8px; }
 }
 
-/* SUB TABS */
+/* SUB TABS (Giữ nguyên) */
 .sub-tabs {
   animation: fadeInDown .5s ease;
   ::ng-deep .mat-mdc-tab-header { border-bottom:none; }
   .tab-content { padding:20px 16px; border:1px solid #e0e0e0; border-top:none; border-radius:0 0 8px 8px; }
 }
 
-/* GRID */
-.form-grid-2-col { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; align-items:center; }
-.form-grid-3-col { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; align-items:center; }
-.form-grid-4-col { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:center; }
+/* === TINH CHỈNH GRID === */
+.form-grid-2-col, .form-grid-3-col, .form-grid-4-col {
+  display: grid;
+  gap: 20px; // Tăng khoảng cách
+  align-items: start; // Căn chỉnh theo đầu, trông đẹp hơn là center
+}
+.form-grid-2-col { grid-template-columns:repeat(2,1fr); }
+.form-grid-3-col { grid-template-columns:repeat(3,1fr); }
+.form-grid-4-col { grid-template-columns:repeat(4,1fr); }
 .full-width { width:100%; }
 hr { border:none; border-top:1px solid #eee; margin:16px 0; }
 
-/* ADD ASSET TYPE BUTTON */
+/* === CLASS GRID MỚI ĐỂ CĂN NÚT === */
+.form-grid-asset-with-button {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto; // Cột auto cho nút
+  gap: 20px;
+  align-items: center; // Center để căn nút vào giữa form field
+}
+
+/* ADD ASSET TYPE BUTTON (Chỉnh lại 1 chút) */
 .add-asset-type-btn {
-  height:48px !important; min-height:48px !important; line-height:48px !important;
-  padding:0 16px !important; border-radius: CMC 8px !important;
+  height: 56px !important; // CĂN BẰNG CHIỀU CAO MỚI CỦA FORM FIELD
+  min-height: 56px !important; //
+  line-height: 56px !important; //
+  padding: 0 20px !important; // Tăng padding
+  border-radius: 8px !important;
   background-color:$color-green-success !important; color:#fff !important;
   font-weight:500 !important; text-transform:none !important;
   box-shadow:0 2px 5px rgba(40,167,69,.3); transition:all .3s ease;
@@ -171,7 +203,7 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
   &:active { transform:translateY(0); }
 }
 
-/* INTEREST GROUP */
+/* INTEREST GROUP (Giữ nguyên) */
 .interest-group-grid {
   display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:16px; margin:16px 0; align-items:end;
   @media (max-width:1024px) { grid-template-columns:1fr 1fr; }
@@ -196,7 +228,7 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
   ::ng-deep .mat-mdc-text-field-wrapper { padding:0 8px; }
 }
 
-/* FEE GRID */
+/* FEE GRID (Giữ nguyên) */
 .fee-grid {
   display:grid; grid-template-columns:1fr 180px 200px; gap:16px; align-items:center; margin-bottom:8px;
   label { font-weight:500; }
@@ -207,7 +239,7 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
   mat-radio-group { display:flex; gap:16px; }
 }
 
-/* FILE DROPZONE */
+/* FILE DROPZONE (Giữ nguyên) */
 .file-dropzone {
   border:2px dashed $color-dropzone-border; background:$color-dropzone-bg;
   border-radius:8px; padding:24px; display:flex; flex-direction:column;
@@ -226,7 +258,7 @@ hr { border:none; border-top:1px solid #eee; margin:16px 0; }
 }}
 .uploaded-files-list { margin-top:16px; max-height:200px; overflow-y:auto; }
 
-/* DIALOG ACTIONS */
+/* DIALOG ACTIONS (GiVới nguyên) */
 mat-dialog-actions {
   padding:16px 24px; border-top:1px solid #eee;
   margin:16px -24px -24px -24px; background:#fdfdfd;
@@ -238,20 +270,30 @@ mat-dialog-actions {
   }
 }
 
-/* RESPONSIVE */
-@media (max-width:1024px) {
+/* RESPONSIVE (Cập nhật cho grid mới) */
+@media (max-width: 1024px) {
   .form-grid-3-col, .form-grid-4-col { grid-template-columns:repeat(2,1fr); }
   .fee-grid { grid-template-columns:1fr; gap:8px; mat-form-field, mat-radio-group { margin-top:-8px; } }
+
+  .form-grid-asset-with-button {
+    grid-template-columns: 1fr 1fr; // Nút sẽ rớt xuống
+    .add-asset-type-btn {
+      grid-column: 1 / -1; // Chiếm cả hàng
+    }
+  }
 }
-@media (max-width:768px) {
+@media (max-width: 768px) {
   .customer-main-grid { grid-template-columns:1fr; }
   .portrait-capture-box { height:auto; max-width:300px; margin:0 auto 16px auto; }
-  .form-grid-2-col, .form-grid-3-col, .form-grid-4-col { grid-template-columns:1fr; }
+  .form-grid-2-col, .form-grid-3-col, .form-grid-4-col,
+  .form-grid-asset-with-button {
+    grid-template-columns: 1fr; // Tất cả 1 cột
+  }
   .add-asset-type-btn { width:100%; justify-content:center; margin-top:0 !important; }
   .webcam-modal-content { width:95%; }
 }
 
-/* CONFIRM SNACKBAR */
+/* (Các style khác giữ nguyên) */
 .confirm-snackbar {
   .mat-snack-bar-container {
     background: #e3f2fd; color: #004d40; font-weight: 500; max-width: 500px;
@@ -331,5 +373,3 @@ mat-dialog-actions {
     }
   }
 }
-
-

@@ -68,7 +68,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showAdvancedInfo = false;
+  showAdvancedInfo = false; // Biến này không còn dùng để ẩn/hiện tab, nhưng logic focus lỗi có thể vẫn dùng
   showWebcam = false;
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
@@ -669,12 +669,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (!invalidControlEl) return; // Không tìm thấy
 
-      // 2. Mở "Thông tin nâng cao" nếu control nằm trong đó
-      const advancedInfoSection = invalidControlEl.closest('.sub-tabs');
-      if (advancedInfoSection && !this.showAdvancedInfo) {
-        this.showAdvancedInfo = true;
-        this.cdr.detectChanges(); // Chờ view cập nhật
-      }
+      // 2. Mở "Thông tin nâng cao" (nếu có) - Giờ là Panel
+      // (Phần này đã được xử lý chung ở bước 4)
 
       // 3. Chuyển Tab (trong Thông tin nâng cao) nếu control nằm trong tab bị ẩn
       const parentTabBody = invalidControlEl.closest('mat-tab-body');
