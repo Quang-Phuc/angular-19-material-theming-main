@@ -2,7 +2,7 @@
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
   OnDestroy, ChangeDetectorRef, AfterViewInit,
-  QueryList, ViewChildren // <-- THÊM MỚI
+  QueryList, ViewChildren
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
@@ -18,10 +18,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion'; // <-- THÊM MỚI
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule, MatTabGroup } from '@angular/material/tabs'; // <-- THÊM MỚI
+import { MatTabsModule, MatTabGroup } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
 import { NotificationService } from '../../services/notification.service';
@@ -68,27 +68,23 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   pledgeForm: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showAdvancedInfo = false; // Biến này không còn dùng để ẩn/hiện tab, nhưng logic focus lỗi có thể vẫn dùng
+  showAdvancedInfo = false;
   showWebcam = false;
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  // === THÊM MỚI ĐỂ FOCUS ===
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
   private el: ElementRef = inject(ElementRef);
-  // ==========================
 
   assetTypes$ = new BehaviorSubject<string[]>([]);
-  // (Các Observable $ khác giữ nguyên)
   tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   doiTacList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
     { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' }
   ]);
-  // *** THAY ĐỔI 1: Chuyển nguoiTheoDoiList$ thành BehaviorSubject và load từ API ***
   nguoiTheoDoiList$ = new BehaviorSubject<DropdownOption[]>([]);
   nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
   khoList$ = new BehaviorSubject<DropdownOption[]>([]);
@@ -96,13 +92,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   uploadedFiles: { name: string; url: string }[] = [];
   isDragOver = false;
 
-  // *** THÊM MỚI 1: Biến lưu storeId ***
   private activeStoreId: string | null = null;
-
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
 
-  // *** THAY ĐỔI 2: Cập nhật cách inject data ***
   @Inject(MAT_DIALOG_DATA) public dialogData: { contract: PledgeContract | null, storeId: string | null } = inject(MAT_DIALOG_DATA);
 
   private notification = inject(NotificationService);
@@ -115,39 +108,53 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private stream: MediaStream | null = null;
 
   constructor() {
-    // *** THAY ĐỔI 3: Cập nhật logic constructor ***
     this.isEditMode = !!this.dialogData.contract;
-
-    // Nếu là Sửa (edit), lấy storeId từ contract.
-    // Nếu là Thêm (add), lấy storeId được truyền vào từ list.
     this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
 
-    // (Phần khởi tạo pledgeForm giữ nguyên)
+    // === THAY ĐỔI: SỬ DỤNG TÊN TRƯỜNG CỦA API ===
     this.pledgeForm = this.fb.group({
-      portraitInfo: this.fb.group({ imageUrl: [null] }),
+      portraitInfo: this.fb.group({
+        idUrl: [null] // <-- Đổi tên
+      }),
       customerInfo: this.fb.group({
-        hoTen: ['', Validators.required],
-        ngaySinh: [null],
-        soCCCD: ['', [Validators.minLength(9)]],
-        soDienThoai: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]],
-        diaChi: [''],
-        ngayCapCCCD: [null],
-        noiCapCCCD: ['']
+        fullName: ['', Validators.required], // hoTen -> fullName
+        dateOfBirth: [null], // ngaySinh -> dateOfBirth
+        identityNumber: ['', [Validators.minLength(9)]], // soCCCD -> identityNumber
+        phoneNumber: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]], // soDienThoai -> phoneNumber
+        permanentAddress: [''], // diaChi -> permanentAddress
+        issueDate: [null], // ngayCapCCCD -> issueDate
+        issuePlace: [''] // noiCapCCCD -> issuePlace
       }),
       customerExtraInfo: this.fb.group({
-        maKhachHang: [''], ngheNghiep: [''], noiLamViec: [''], hoKhau: [''],
-        email: ['', [Validators.email]], thuNhap: [0], ghiChu: [''],
-        nguoiLienHe: [''], sdtNguoiLienHe: ['']
+        customerCode: [''], // maKhachHang -> customerCode
+        occupation: [''], // ngheNghiep -> occupation
+        workplace: [''], // noiLamViec -> workplace
+        householdRegistration: [''], // hoKhau -> householdRegistration
+        email: ['', [Validators.email]],
+        incomeVndPerMonth: [0], // thuNhap -> incomeVndPerMonth
+        note: [''], // ghiChu -> note
+        contactPerson: [''], // nguoiLienHe -> contactPerson
+        contactPhone: [''] // sdtNguoiLienHe -> contactPhone
       }),
+      // === THAY ĐỔI: GỘP PHẲNG familyInfo, BỎ 'voChong', 'bo', 'me' ===
       familyInfo: this.fb.group({
-        voChong: this.createFamilyMemberGroup(),
-        bo: this.createFamilyMemberGroup(),
-        me: this.createFamilyMemberGroup()
+        spouseName: [''],
+        spousePhone: [''],
+        spouseOccupation: [''],
+        fatherName: [''],
+        fatherPhone: [''],
+        fatherOccupation: [''],
+        motherName: [''],
+        motherPhone: [''],
+        motherOccupation: ['']
       }),
       loanExtraInfo: this.fb.group({
-        tinhTrang: ['Binh Thuong'], loaiDoiTac: ['khach_hang'],
-        nguoiTheoDoi: ['all'], nguonKhachHang: ['all']
+        loanStatus: ['Binh Thuong'], // tinhTrang -> loanStatus
+        partnerType: ['khach_hang'], // loaiDoiTac -> partnerType
+        follower: ['all'], // nguoiTheoDoi -> follower
+        customerSource: ['all'] // nguonKhachHang -> customerSource
       }),
+      // (Các form group này giữ nguyên vì không có API mapping)
       loanInfo: this.fb.group({
         tenTaiSan: ['', Validators.required],
         loaiTaiSan: ['', Validators.required],
@@ -176,9 +183,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private createFamilyMemberGroup(): FormGroup {
-    return this.fb.group({ hoTen: [''], soDienThoai: [''], ngheNghiep: [''] });
-  }
+  // === THAY ĐỔI: BỎ `createFamilyMemberGroup` (không cần nữa) ===
 
   private createFeeGroup(): FormGroup {
     return this.fb.group({ type: ['NhapTien'], value: [0] });
@@ -186,11 +191,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.loadAssetTypes();
-    // *** THÊM MỚI 2: Load danh sách người theo dõi từ API ***
     this.loadNguoiTheoDoiList();
     this.loadKhoList();
 
-    // *** THAY ĐỔI 4: Kiểm tra storeId và patch data ***
     if (!this.activeStoreId) {
       this.notification.showError('Lỗi: Không xác định được cửa hàng. Vui lòng đóng và thử lại.');
       this.dialogRef.close(false);
@@ -202,6 +205,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // (Các hàm loadKhoList, addNewWarehouse, loadNguoiTheoDoiList, loadAssetTypes, ngAfterViewInit, ngOnDestroy giữ nguyên)
   private loadKhoList(): void {
     if (!this.activeStoreId) {
       this.khoList$.next([]);
@@ -257,7 +261,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
   }
-
   private loadNguoiTheoDoiList(): void {
     if (!this.activeStoreId) {
       console.error('No storeId available for loading users.');
@@ -287,8 +290,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe();
   }
-
-  // (Các hàm loadAssetTypes, ngAfterViewInit, ngOnDestroy, ... giữ nguyên)
   private loadAssetTypes(): void {
     this.apiService.get<ApiResponse<AssetTypeItem[]>>('/asset-types').pipe(
       map(response => {
@@ -307,20 +308,17 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe();
   }
-
   ngAfterViewInit(): void {
     this.setupAutoSearchOnBlur();
   }
-
   ngOnDestroy(): void {
     this.stopWebcam();
   }
-
-  // (Các hàm setupAutoSearchOnBlur, isPhoneOrCccdValidForSearch, triggerCustomerSearch, ... giữ nguyên)
   private setupAutoSearchOnBlur(): void {
     setTimeout(() => {
-      const phoneInput = document.querySelector('input[formControlName="soDienThoai"]') as HTMLInputElement;
-      const cccdInput = document.querySelector('input[formControlName="soCCCD"]') as HTMLInputElement;
+      // === THAY ĐỔI: Cập nhật querySelector
+      const phoneInput = document.querySelector('input[formControlName="phoneNumber"]') as HTMLInputElement;
+      const cccdInput = document.querySelector('input[formControlName="identityNumber"]') as HTMLInputElement;
 
       if (phoneInput) {
         fromEvent(phoneInput, 'blur')
@@ -344,13 +342,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 100);
   }
   private isPhoneOrCccdValidForSearch(): boolean {
-    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
-    const cccd = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+    // === THAY ĐỔI: Cập nhật get
+    const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
+    const cccd = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
     return (phone.length >= 10 || cccd.length >= 9) && (phone || cccd);
   }
   private triggerCustomerSearch(): void {
-    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
-    const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+    // === THAY ĐỔI: Cập nhật get
+    const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
 
     if (!phone && !idNumber) return;
 
@@ -381,67 +381,42 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
+
+  // === THAY ĐỔI: HÀM NÀY GIỜ ĐƠN GIẢN HƠN RẤT NHIỀU ===
   private populateAllCustomerData(data: any): void {
-    // (Logic populate giữ nguyên)
     const cInfo = this.pledgeForm.get('customerInfo');
     const cExtra = this.pledgeForm.get('customerExtraInfo');
     const family = this.pledgeForm.get('familyInfo');
     const loanExtra = this.pledgeForm.get('loanExtraInfo');
 
-    if (cInfo) {
-      cInfo.patchValue({
-        hoTen: data.fullName || '',
-        soDienThoai: data.phoneNumber || '',
-        ngaySinh: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        soCCCD: data.identityNumber || '',
-        ngayCapCCCD: data.issueDate ? new Date(data.issueDate) : null,
-        noiCapCCCD: data.issuePlace || '',
-        diaChi: data.permanentAddress || ''
-      });
+    // 1. Patch trực tiếp, vì tên đã khớp
+    if (cInfo) { cInfo.patchValue(data); }
+    if (cExtra) { cExtra.patchValue(data); }
+    if (family) { family.patchValue(data); }
+
+    // 2. Xử lý các trường hợp đặc biệt (Ngày tháng)
+    if (data.dateOfBirth) { cInfo?.get('dateOfBirth')?.setValue(new Date(data.dateOfBirth)); }
+    if (data.issueDate) { cInfo?.get('issueDate')?.setValue(new Date(data.issueDate)); }
+
+    // 3. Xử lý ảnh
+    if (data.idUrl) {
+      this.pledgeForm.get('portraitInfo.idUrl')?.setValue(data.idUrl);
     }
-    if (cExtra) {
-      cExtra.patchValue({
-        maKhachHang: data.customerCode || '',
-        ngheNghiep: data.occupation || '',
-        noiLamViec: data.workplace || '',
-        hoKhau: data.householdRegistration || '',
-        email: data.email || '',
-        thuNhap: data.incomeVndPerMonth || 0,
-        ghiChu: data.note || '',
-        nguoiLienHe: data.contactPerson || '',
-        sdtNguoiLienHe: data.contactPhone || ''
-      });
-    }
-    if (family) {
-      family.patchValue({
-        voChong: {
-          hoTen: data.spouseName || '', soDienThoai: data.spousePhone || '',
-          ngheNghiep: data.spouseOccupation || ''
-        },
-        bo: {
-          hoTen: data.fatherName || '', soDienThoai: data.fatherPhone || '',
-          ngheNghiep: data.fatherOccupation || ''
-        },
-        me: {
-          hoTen: data.motherName || '', soDienThoai: data.motherPhone || '',
-          ngheNghiep: data.motherOccupation || ''
-        }
-      });
-    }
+
+    // 4. Xử lý các trường cần map GIÁ TRỊ (Value)
     if (loanExtra) {
       loanExtra.patchValue({
-        tinhTrang: this.mapLoanStatus(data.loanStatus),
-        loaiDoiTac: this.mapPartnerType(data.partnerType),
-        nguoiTheoDoi: data.follower || 'all',
-        nguonKhachHang: this.mapCustomerSource(data.customerSource)
+        loanStatus: this.mapLoanStatus(data.loanStatus),
+        partnerType: this.mapPartnerType(data.partnerType),
+        follower: data.follower || 'all',
+        customerSource: this.mapCustomerSource(data.customerSource)
       });
-    }
-    if (data.idUrl) {
-      this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(data.idUrl);
     }
 
     this.cdr.detectChanges();
   }
+
+  // (Các hàm map... giữ nguyên vì chúng map GIÁ TRỊ, không phải KEY)
   private mapLoanStatus(status: string): string {
     const map: { [key: string]: string } = {
       'Chưa vay': 'Binh Thuong', 'Đang vay': 'Binh Thuong 2', 'Nợ xấu': 'No xau',
@@ -462,9 +437,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     return map[source] || 'all';
   }
+
   findCustomer(): void {
-    const phone = this.pledgeForm.get('customerInfo.soDienThoai')?.value?.trim() || '';
-    const idNumber = this.pledgeForm.get('customerInfo.soCCCD')?.value?.trim() || '';
+    // === THAY ĐỔI: Cập nhật get
+    const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
     if (!phone && !idNumber) {
       this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
       return;
@@ -478,9 +455,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         error: () => this.notification.showError('Lỗi khi tìm kiếm khách hàng.')
       });
   }
+
   patchFormData(contract: PledgeContract): void {
     // (Logic patchFormData giữ nguyên, không cần patch storeId vào form)
-    this.pledgeForm.patchValue({ /* ... */ });
+    // TODO: Hàm này cũng cần được cập nhật để map từ contract -> form (nếu tên khác nhau)
+    // Giả sử tên contract cũng đã được chuẩn hóa:
+    this.pledgeForm.patchValue(contract as any);
+    // ... hoặc bạn cần viết lại logic patch chi tiết ở đây
+
     this.pledgeForm.get('loanInfo.maHopDong')?.disable();
   }
 
@@ -520,7 +502,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (dataUrl.length > 1024 * 1024) {
       this.notification.showError('Ảnh quá lớn (>1MB).'); return;
     }
-    this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(dataUrl);
+    // === THAY ĐỔI: Cập nhật set
+    this.pledgeForm.get('portraitInfo.idUrl')?.setValue(dataUrl);
     this.notification.showSuccess('Chụp ảnh thành công!');
     this.stopWebcam();
   }
@@ -536,7 +519,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const reader = new FileReader();
     reader.onload = e => {
-      this.pledgeForm.get('portraitInfo.imageUrl')?.setValue(e.target?.result as string);
+      // === THAY ĐỔI: Cập nhật set
+      this.pledgeForm.get('portraitInfo.idUrl')?.setValue(e.target?.result as string);
       this.notification.showSuccess('Tải ảnh thành công!');
       this.cdr.detectChanges();
     };
@@ -602,110 +586,112 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /* ------------------- SAVE / CANCEL ------------------- */
 
+  // === THAY ĐỔI: CẬP NHẬT HÀM ONSAVE ===
   onSave(): void {
-    // === CẬP NHẬT LOGIC onSave ===
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
-      this.pledgeForm.markAllAsTouched(); // Hiển thị lỗi
-      this.findAndFocusFirstInvalidField(); // Tìm và focus
-      return; // Dừng lại
+      this.pledgeForm.markAllAsTouched();
+      this.findAndFocusFirstInvalidField();
+      return;
     }
-    // ============================
 
     this.isLoading = true;
     const raw = this.pledgeForm.getRawValue();
 
-    // *** THAY ĐỔI 5: Thêm storeId vào payload ***
+    // Tái cấu trúc payload để gộp các form group lại
     const payload: any = {
       id: this.isEditMode ? this.dialogData.contract?.id : undefined,
-      storeId: this.activeStoreId, // <-- THÊM STOREID VÀO ĐÂY
-      portrait: raw.portraitInfo,
+      storeId: this.activeStoreId,
+
+      // Gộp portrait, customer, extra, family vào một object 'customer'
       customer: {
         ...raw.customerInfo,
         ...raw.customerExtraInfo,
-        ngaySinh: this.formatDate(raw.customerInfo.ngaySinh),
-        ngayCapCCCD: this.formatDate(raw.customerInfo.ngayCapCCCD)
+        ...raw.familyInfo,
+        idUrl: raw.portraitInfo.idUrl, // Lấy idUrl từ portraitInfo
+
+        // Chuyển đổi ngày tháng
+        dateOfBirth: this.formatDate(raw.customerInfo.dateOfBirth),
+        issueDate: this.formatDate(raw.customerInfo.issueDate)
       },
-      family: raw.familyInfo,
+
+      // Gộp loan và extra loan
       loan: {
         ...raw.loanInfo,
         ...raw.loanExtraInfo,
         ngayVay: this.formatDate(raw.loanInfo.ngayVay)!
       },
+
+      // Các mục còn lại giữ nguyên cấu trúc
       fees: raw.feesInfo,
       collateral: raw.collateralInfo,
       attachments: raw.attachments
     };
 
-    // (Giả lập lưu)
+    // (Bỏ phần giả lập setTimeout)
+    this.isLoading = false;
+
+    // *** GHI CHÚ QUAN TRỌNG ***
+    // Log này sẽ CHẠY NGAY LẬP TỨC.
+    // Nếu bạn không thấy nó, 99% là do form của bạn bị INVALID
+    // và hàm onSave() đã `return` ở dòng `if (this.pledgeForm.invalid)`.
+    console.log('Payload to save:', payload);
+
+    if (!payload.storeId) {
+      this.notification.showError('Lỗi nghiêm trọng: Mất storeId. Không thể lưu.');
+      this.isLoading = false;
+      return;
+    }
+
     // TODO: Thay thế bằng service call thật
     // const saveObservable = this.isEditMode
     //   ? this.pledgeService.updatePledge(payload.id, payload)
     //   : this.pledgeService.createPledge(payload);
     // saveObservable.subscribe(...)
 
-    setTimeout(() => {
-      console.log('Payload to save:', payload); // Log để kiểm tra
-      this.notification.showSuccess(this.isEditMode ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
-      this.isLoading = false;
-      this.dialogRef.close(true);
-    }, 800);
+    // Giả lập lưu thành công để test
+    this.notification.showSuccess(this.isEditMode ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
+    this.dialogRef.close(true);
   }
 
-  // === HÀM MỚI ĐỂ FOCUS LỖI ===
-  /**
-   * Tìm control invalid đầu tiên, đảm bảo các panel/tab cha được mở,
-   * và focus vào control đó.
-   */
+  // === HÀM FOCUS LỖI (Giữ nguyên, vẫn hoạt động) ===
   private findAndFocusFirstInvalidField(): void {
     try {
-      // 1. Tìm control invalid đầu tiên trong DOM
-      // (Bao gồm input, textarea, và mat-select)
       const invalidControlEl = this.el.nativeElement.querySelector(
         'input.ng-invalid[formControlName], ' +
         'textarea.ng-invalid[formControlName], ' +
         'mat-select.ng-invalid[formControlName]'
       );
 
-      if (!invalidControlEl) return; // Không tìm thấy
+      if (!invalidControlEl) return;
 
-      // 2. Mở "Thông tin nâng cao" (nếu có) - Giờ là Panel
-      // (Phần này đã được xử lý chung ở bước 4)
-
-      // 3. Chuyển Tab (trong Thông tin nâng cao) nếu control nằm trong tab bị ẩn
       const parentTabBody = invalidControlEl.closest('mat-tab-body');
       if (parentTabBody && this.tabGroup) {
-        // ID của tab body có dạng 'mat-tab-content-X-Y'
-        // Chúng ta cần lấy số Y (index của tab)
         const tabIndex = parseInt(parentTabBody.id.split('-').pop() || '0', 10);
         if (!isNaN(tabIndex) && this.tabGroup.selectedIndex !== tabIndex) {
-          this.tabGroup.selectedIndex = tabIndex; // Chuyển sang tab đó
+          this.tabGroup.selectedIndex = tabIndex;
           this.cdr.detectChanges();
         }
       }
 
-      // 4. Mở Expansion Panel nếu control nằm trong panel bị đóng
       const parentPanelEl = invalidControlEl.closest('mat-expansion-panel');
       if (parentPanelEl && this.panels) {
-        // Tìm component panel tương ứng với element DOM
         const panelComponent = this.panels.find(p => (p as any)._elementRef.nativeElement === parentPanelEl);
         if (panelComponent && !panelComponent.expanded) {
-          panelComponent.open(); // Mở panel
+          panelComponent.open();
           this.cdr.detectChanges();
         }
       }
 
-      // 5. Delay một chút để chờ UI mở ra, sau đó focus và cuộn tới
       setTimeout(() => {
         invalidControlEl.focus();
         invalidControlEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 150); // 150ms delay
+      }, 150);
 
     } catch (error) {
       console.error("Lỗi khi focus vào trường invalid:", error);
     }
   }
-  // ===============================
 
   onCancel(): void {
     this.stopWebcam();
