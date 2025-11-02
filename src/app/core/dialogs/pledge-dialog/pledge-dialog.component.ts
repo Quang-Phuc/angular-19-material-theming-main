@@ -176,8 +176,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         phiQuanLi: this.createFeeGroup()
       }),
       collateralInfo: this.fb.group({
-        dinhGia: [0], bienKiemSoat: [''], soKhung: [''], soMay: [''],
-        kho: [''], maTaiSan: [''], ghiChuTaiSan: ['']
+        valuation: [0], licensePlate: [''], chassisNumber: [''], engineNumber: [''],
+        kho: [''], assetCode: [''], assetNote: ['']
       }),
       attachments: this.fb.group({})
     });

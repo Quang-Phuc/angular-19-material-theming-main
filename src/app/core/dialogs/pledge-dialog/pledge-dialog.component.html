@@ -321,10 +321,10 @@
       <mat-expansion-panel formGroupName="collateralInfo">
         <mat-expansion-panel-header><mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
         <div class="form-grid-4-col">
-          <mat-form-field appearance="outline"><mat-label>Định Giá Tài Sản</mat-label><input matInput type="number" formControlName="dinhGia"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Biển Kiểm Soát</mat-label><input matInput formControlName="bienKiemSoat"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số Khung</mat-label><input matInput formControlName="soKhung"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số Máy</mat-label><input matInput formControlName="soMay"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Định Giá Tài Sản</mat-label><input matInput type="number" formControlName="valuation"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Biển Kiểm Soát</mat-label><input matInput formControlName="licensePlate"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Số Khung</mat-label><input matInput formControlName="chassisNumber"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Số Máy</mat-label><input matInput formControlName="engineNumber"></mat-form-field>
         </div>
         <div class="form-grid-2-col">
           <div class="kho-row">
@@ -344,11 +344,11 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Mã Tài Sản</mat-label>
-            <input matInput formControlName="maTaiSan">
+            <input matInput formControlName="assetCode">
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú (Tài sản)</mat-label><textarea matInput formControlName="ghiChuTaiSan" rows="2"></textarea></mat-form-field>
+        <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú (Tài sản)</mat-label><textarea matInput formControlName="assetNote" rows="2"></textarea></mat-form-field>
       </mat-expansion-panel>
 
       <mat-expansion-panel formGroupName="attachments">
