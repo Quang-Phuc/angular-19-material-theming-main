@@ -395,17 +395,48 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.cdr.detectChanges();
   }
-  private mapLoanStatus(status: string): string {
-    const map: { [key: string]: string } = { 'Chưa vay': 'Binh Thuong', 'Đang vay': 'Binh Thuong 2', 'Nợ xấu': 'No xau', 'Nợ rủi ro': 'No rui ro', 'Nợ R2': 'No R2', 'Nợ R3': 'No R3' };
-    return map[status] || 'Binh Thuong';
+  private mapLoanStatus(description: string): string {
+    // Sử dụng các giá trị Enum (BINH_THUONG, NO_XAU,...) làm key
+    const map: { [key: string]: string } = {
+      'BINH_THUONG': 'Binh Thuong',
+      'BINH_THUONG_2': 'Binh Thuong 2',
+      'NO_XAU': 'No xau',
+      'NO_RUI_RO': 'No rui ro',
+      'NO_R2': 'No R2',
+      'NO_R3': 'No R3'
+    };
+
+    // Tuy nhiên, khi gọi hàm bạn phải truyền vào giá trị Enum (ví dụ: mapLoanStatus('BINH_THUONG'))
+    return map[description] || 'Binh Thuong';
   }
+  /**
+   * Ánh xạ (map) loại đối tác từ chuỗi hiển thị (tiếng Việt) sang giá trị Enum chuẩn hóa (UPPERCASE).
+   * Tương ứng với Enum PartnerType trong Java.
+   */
   private mapPartnerType(type: string): string {
-    const map: { [key: string]: string } = { 'Cá nhân': 'khach_hang', 'Chủ nợ': 'chu_no', 'Người theo dõi': 'nguoi_theo_doi', 'Tất cả': 'all' };
-    return map[type] || 'khach_hang';
+    // Key: Giá trị hiển thị trên UI (Tiếng Việt)
+    // Value: Giá trị Enum chuẩn hóa (dùng để gửi lên Server)
+    const map: { [key: string]: string } = {
+      'Cá nhân': 'CUSTOMER',        // Trước đây là 'khach_hang'
+      'Chủ nợ': 'CREDITOR',         // Trước đây là 'chu_no'
+      'Người theo dõi': 'FOLLOWER', // Trước đây là 'nguoi_theo_doi'
+      'Tất cả': 'ALL'              // Trước đây là 'all'
+    };
+    return map[type] || 'CUSTOMER'; // Giá trị mặc định là 'CUSTOMER'
   }
+
+  /**
+   * Ánh xạ nguồn khách hàng từ chuỗi hiển thị (tiếng Việt) sang giá trị Enum chuẩn hóa (UPPERCASE).
+   * Tương ứng với Enum CustomerSource trong Java.
+   */
   private mapCustomerSource(source: string): string {
-    const map: { [key: string]: string } = { 'Giới thiệu bạn bè': 'ctv', 'Tất cả': 'all' };
-    return map[source] || 'all';
+    // Key: Giá trị hiển thị trên UI (Tiếng Việt)
+    // Value: Giá trị Enum chuẩn hóa (dùng để gửi lên Server)
+    const map: { [key: string]: string } = {
+      'Giới thiệu bạn bè': 'COLLABORATOR', // Trước đây là 'ctv'
+      'Tất cả': 'ALL'                      // Trước đây là 'all'
+    };
+    return map[source] || 'ALL'; // Giá trị mặc định là 'ALL'
   }
   findCustomer(): void {
     const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';

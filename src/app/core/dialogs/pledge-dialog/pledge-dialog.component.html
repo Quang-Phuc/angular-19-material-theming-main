@@ -288,17 +288,41 @@
         <hr>
         <mat-expansion-panel>
           <mat-expansion-panel-header><mat-panel-title>Các loại phí hàng kỳ</mat-panel-title></mat-expansion-panel-header>
-          <div class="fee-grid" formGroupName="storageFee"> <label>Phí lưu kho</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
-            <mat-radio-group formControlName="type"><mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button><mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button></mat-radio-group>
+
+          <div class="fee-grid" formGroupName="storageFee">
+            <label>Phí lưu kho</label>
+            <mat-form-field appearance="outline">
+              <mat-label>Giá trị</mat-label>
+              <input matInput type="number" formControlName="value">
+            </mat-form-field>
+            <mat-radio-group formControlName="type">
+              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
+              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
+            </mat-radio-group>
           </div>
-          <div class="fee-grid" formGroupName="riskFee"> <label>Phí rủi ro</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
-            <mat-radio-group formControlName="type"><mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button><mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button></mat-radio-group>
+
+          <div class="fee-grid" formGroupName="riskFee">
+            <label>Phí rủi ro</label>
+            <mat-form-field appearance="outline">
+              <mat-label>Giá trị</mat-label>
+              <input matInput type="number" formControlName="value">
+            </mat-form-field>
+            <mat-radio-group formControlName="type">
+              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
+              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
+            </mat-radio-group>
           </div>
-          <div class="fee-grid" formGroupName="managementFee"> <label>Phí quản lí</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
-            <mat-radio-group formControlName="type"><mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button><mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button></mat-radio-group>
+
+          <div class="fee-grid" formGroupName="managementFee">
+            <label>Phí quản lí</label>
+            <mat-form-field appearance="outline">
+              <mat-label>Giá trị</mat-label>
+              <input matInput type="number" formControlName="value">
+            </mat-form-field>
+            <mat-radio-group formControlName="type">
+              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
+              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
+            </mat-radio-group>
           </div>
         </mat-expansion-panel>
       </mat-expansion-panel>
