@@ -254,10 +254,11 @@
             <div class="interest-item">
               <label class="interest-label">Hình thức cho vay *</label>
               <div class="input-group">
-                <mat-select formControlName="interestPaymentType" class="unit-select"> <mat-option value="Truoc">Trả lãi định kỳ – Chuộc gốc cuối kỳ</mat-option>
-                  <mat-option value="Sau">Trả góp gốc + lãi hằng kỳ</mat-option>
-                  <mat-option value="Sau">Trả cuối kỳ (cả gốc + lãi 1 lần)</mat-option>
-                  <mat-option value="Sau">Gia hạn hợp đồng (đáo hạn)</mat-option>
+                <mat-select formControlName="interestPaymentType" class="unit-select">
+                  <mat-option value="PERIODIC_INTEREST">Trả lãi định kỳ – Chuộc gốc cuối kỳ</mat-option>
+                  <mat-option value="INSTALLMENT">Trả góp gốc + lãi hằng kỳ</mat-option>
+                  <mat-option value="LUMP_SUM_END">Trả cuối kỳ (cả gốc + lãi 1 lần)</mat-option>
+                  <mat-option value="RENEWAL">Gia hạn hợp đồng (đáo hạn)</mat-option>
                 </mat-select>
               </div>
             </div>
