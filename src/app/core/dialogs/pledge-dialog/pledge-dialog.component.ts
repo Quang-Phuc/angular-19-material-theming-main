@@ -34,7 +34,13 @@ import { AddWarehouseDialogComponent } from './add-warehouse-dialog.component';
 
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; }
-interface AssetType { maLoai: string; tenLoai: string; trangThai: string; attributes: AssetTypeAttribute[]; }
+// === THAY ĐỔI: Interface AssetType ===
+interface AssetType {
+  typeCode: string; // maLoai
+  typeName: string; // tenLoai
+  status: string; // trangThai
+  attributes: AssetTypeAttribute[];
+}
 interface ApiResponse<T> {
   timeStamp: string; securityVersion: string; result: string;
   message: string; errorCode: string; data?: T;
@@ -80,14 +86,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private el: ElementRef = inject(ElementRef);
 
   assetTypes$ = new BehaviorSubject<string[]>([]);
-  tinhTrangList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
-  doiTacList$: Observable<DropdownOption[]> = of([
+  // === THAY ĐỔI: Tên biến Observable ===
+  statusList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']); // tinhTrangList$
+  partnerTypeList$: Observable<DropdownOption[]> = of([ // doiTacList$
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
     { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' }
   ]);
-  nguoiTheoDoiList$ = new BehaviorSubject<DropdownOption[]>([]);
-  nguonKhachHangList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
-  khoList$ = new BehaviorSubject<DropdownOption[]>([]);
+  followerList$ = new BehaviorSubject<DropdownOption[]>([]); // nguoiTheoDoiList$
+  customerSourceList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]); // nguonKhachHangList$
+  warehouseList$ = new BehaviorSubject<DropdownOption[]>([]); // khoList$
 
   uploadedFiles: { name: string; url: string }[] = [];
   isDragOver = false;
@@ -111,32 +118,31 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isEditMode = !!this.dialogData.contract;
     this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
 
-    // === THAY ĐỔI: SỬ DỤNG TÊN TRƯỜNG CỦA API ===
+    // === THAY ĐỔI: Tên trường trong 'loanInfo', 'feesInfo', 'collateralInfo' ===
     this.pledgeForm = this.fb.group({
       portraitInfo: this.fb.group({
-        idUrl: [null] // <-- Đổi tên
+        idUrl: [null]
       }),
       customerInfo: this.fb.group({
-        fullName: ['', Validators.required], // hoTen -> fullName
-        dateOfBirth: [null], // ngaySinh -> dateOfBirth
-        identityNumber: ['', [Validators.minLength(9)]], // soCCCD -> identityNumber
-        phoneNumber: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]], // soDienThoai -> phoneNumber
-        permanentAddress: [''], // diaChi -> permanentAddress
-        issueDate: [null], // ngayCapCCCD -> issueDate
-        issuePlace: [''] // noiCapCCCD -> issuePlace
+        fullName: ['', Validators.required],
+        dateOfBirth: [null],
+        identityNumber: ['', [Validators.minLength(9)]],
+        phoneNumber: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]],
+        permanentAddress: [''],
+        issueDate: [null],
+        issuePlace: ['']
       }),
       customerExtraInfo: this.fb.group({
-        customerCode: [''], // maKhachHang -> customerCode
-        occupation: [''], // ngheNghiep -> occupation
-        workplace: [''], // noiLamViec -> workplace
-        householdRegistration: [''], // hoKhau -> householdRegistration
+        customerCode: [''],
+        occupation: [''],
+        workplace: [''],
+        householdRegistration: [''],
         email: ['', [Validators.email]],
-        incomeVndPerMonth: [0], // thuNhap -> incomeVndPerMonth
-        note: [''], // ghiChu -> note
-        contactPerson: [''], // nguoiLienHe -> contactPerson
-        contactPhone: [''] // sdtNguoiLienHe -> contactPhone
+        incomeVndPerMonth: [0],
+        note: [''],
+        contactPerson: [''],
+        contactPhone: ['']
       }),
-      // === THAY ĐỔI: GỘP PHẲNG familyInfo, BỎ 'voChong', 'bo', 'me' ===
       familyInfo: this.fb.group({
         spouseName: [''],
         spousePhone: [''],
@@ -149,41 +155,46 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         motherOccupation: ['']
       }),
       loanExtraInfo: this.fb.group({
-        loanStatus: ['Binh Thuong'], // tinhTrang -> loanStatus
-        partnerType: ['khach_hang'], // loaiDoiTac -> partnerType
-        follower: ['all'], // nguoiTheoDoi -> follower
-        customerSource: ['all'] // nguonKhachHang -> customerSource
+        loanStatus: ['Binh Thuong'],
+        partnerType: ['khach_hang'],
+        follower: ['all'],
+        customerSource: ['all']
       }),
-      // (Các form group này giữ nguyên vì không có API mapping)
+      // === THAY ĐỔI: loanInfo ===
       loanInfo: this.fb.group({
-        tenTaiSan: ['', Validators.required],
-        loaiTaiSan: ['', Validators.required],
-        ngayVay: [new Date(), Validators.required],
-        maHopDong: [''],
-        tongTienVay: [0, [Validators.required, Validators.min(1000)]],
-        kyDongLai_So: [1, Validators.required],
-        kyDongLai_DonVi: ['Thang', Validators.required],
-        laiSuat_So: [0, Validators.required],
-        laiSuat_DonVi: ['Lai/Trieu/Ngay', Validators.required],
-        soLanTra: [1, Validators.required],
-        kieuThuLai: ['Truoc', Validators.required],
-        ghiChu: ['']
+        assetName: ['', Validators.required], // tenTaiSan
+        assetType: ['', Validators.required], // loaiTaiSan
+        loanDate: [new Date(), Validators.required], // ngayVay
+        contractCode: [''], // maHopDong
+        loanAmount: [0, [Validators.required, Validators.min(1000)]], // tongTienVay
+        interestTermValue: [1, Validators.required], // kyDongLai_So
+        interestTermUnit: ['Thang', Validators.required], // kyDongLai_DonVi
+        interestRateValue: [0, Validators.required], // laiSuat_So
+        interestRateUnit: ['Lai/Trieu/Ngay', Validators.required], // laiSuat_DonVi
+        paymentCount: [1, Validators.required], // soLanTra
+        interestPaymentType: ['Truoc', Validators.required], // kieuThuLai
+        note: [''] // ghiChu
       }),
+      // === THAY ĐỔI: feesInfo ===
       feesInfo: this.fb.group({
-        phiKho: this.createFeeGroup(),
-        phiLuuKho: this.createFeeGroup(),
-        phiRuiRo: this.createFeeGroup(),
-        phiQuanLi: this.createFeeGroup()
+        warehouseFee: this.createFeeGroup(), // phiKho
+        storageFee: this.createFeeGroup(), // phiLuuKho
+        riskFee: this.createFeeGroup(), // phiRuiRo
+        managementFee: this.createFeeGroup() // phiQuanLi
       }),
+      // === THAY ĐỔI: collateralInfo ===
       collateralInfo: this.fb.group({
-        valuation: [0], licensePlate: [''], chassisNumber: [''], engineNumber: [''],
-        kho: [''], assetCode: [''], assetNote: ['']
+        valuation: [0],
+        licensePlate: [''],
+        chassisNumber: [''],
+        engineNumber: [''],
+        warehouseId: [''], // kho
+        assetCode: [''],
+        assetNote: ['']
       }),
       attachments: this.fb.group({})
     });
   }
-
-  // === THAY ĐỔI: BỎ `createFamilyMemberGroup` (không cần nữa) ===
 
   private createFeeGroup(): FormGroup {
     return this.fb.group({ type: ['NhapTien'], value: [0] });
@@ -191,8 +202,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.loadAssetTypes();
-    this.loadNguoiTheoDoiList();
-    this.loadKhoList();
+    this.loadFollowerList(); // <-- THAY ĐỔI
+    this.loadWarehouseList(); // <-- THAY ĐỔI
 
     if (!this.activeStoreId) {
       this.notification.showError('Lỗi: Không xác định được cửa hàng. Vui lòng đóng và thử lại.');
@@ -205,18 +216,18 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // (Các hàm loadKhoList, addNewWarehouse, loadNguoiTheoDoiList, loadAssetTypes, ngAfterViewInit, ngOnDestroy giữ nguyên)
-  private loadKhoList(): void {
+  // === THAY ĐỔI: Tên hàm và biến ===
+  private loadWarehouseList(): void { // loadKhoList
     if (!this.activeStoreId) {
-      this.khoList$.next([]);
+      this.warehouseList$.next([]); // khoList$
       return;
     }
 
     this.apiService.get<ApiResponse<{ id: number; name: string; address: string; description?: string }[]>>(`/warehouses/store/${this.activeStoreId}`).pipe(
-      map(response => response.result === 'success' && response.data ? response.data.map(k => ({ id: k.id.toString(), name: k.name })) : []),
-      tap(options => this.khoList$.next(options)),
+      map(response => response.result === 'success' && response.data ? response.data.map(w => ({ id: w.id.toString(), name: w.name })) : []),
+      tap(options => this.warehouseList$.next(options)), // khoList$
       catchError(err => {
-        console.error('Load kho list error:', err);
+        console.error('Load warehouse list error:', err);
         this.notification.showError('Lỗi tải danh sách kho.');
         return of([]);
       })
@@ -240,16 +251,16 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.apiService.post<ApiResponse<{ id: number }>>(`/warehouses/${this.activeStoreId}`, payload).subscribe({
         next: (response) => {
           if (response.result === 'success' && response.data?.id) {
-            const newKho: DropdownOption = {
+            const newWarehouse: DropdownOption = { // newKho
               id: response.data.id.toString(),
               name: result.name
             };
 
-            const current = this.khoList$.value;
-            this.khoList$.next([...current, newKho]);
+            const current = this.warehouseList$.value; // khoList$
+            this.warehouseList$.next([...current, newWarehouse]); // khoList$
 
             // Tự động chọn kho vừa thêm
-            this.pledgeForm.get('collateralInfo.kho')?.setValue(newKho.id);
+            this.pledgeForm.get('collateralInfo.warehouseId')?.setValue(newWarehouse.id); // <-- THAY ĐỔI
 
             this.notification.showSuccess(`Đã thêm kho: ${result.name}`);
           }
@@ -261,10 +272,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
   }
-  private loadNguoiTheoDoiList(): void {
+  // === THAY ĐỔI: Tên hàm và biến ===
+  private loadFollowerList(): void { // loadNguoiTheoDoiList
     if (!this.activeStoreId) {
       console.error('No storeId available for loading users.');
-      this.nguoiTheoDoiList$.next([{ id: 'all', name: 'Tất cả' }]);
+      this.followerList$.next([{ id: 'all', name: 'Tất cả' }]); // nguoiTheoDoiList$
       return;
     }
 
@@ -281,10 +293,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         return [{ id: 'all', name: 'Tất cả' }];
       }),
       tap(options => {
-        this.nguoiTheoDoiList$.next(options);
+        this.followerList$.next(options); // nguoiTheoDoiList$
       }),
       catchError(err => {
-        console.error('Load nguoi theo doi list error:', err);
+        console.error('Load follower list error:', err);
         this.notification.showError('Lỗi tải danh sách người theo dõi. Sử dụng dữ liệu mặc định.');
         return of([{ id: 'all', name: 'Tất cả' }]);
       })
@@ -316,7 +328,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   private setupAutoSearchOnBlur(): void {
     setTimeout(() => {
-      // === THAY ĐỔI: Cập nhật querySelector
+      // (Tên formControlName đã là tiếng Anh)
       const phoneInput = document.querySelector('input[formControlName="phoneNumber"]') as HTMLInputElement;
       const cccdInput = document.querySelector('input[formControlName="identityNumber"]') as HTMLInputElement;
 
@@ -342,13 +354,13 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 100);
   }
   private isPhoneOrCccdValidForSearch(): boolean {
-    // === THAY ĐỔI: Cập nhật get
+    // (Tên formControlName đã là tiếng Anh)
     const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
     const cccd = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
     return (phone.length >= 10 || cccd.length >= 9) && (phone || cccd);
   }
   private triggerCustomerSearch(): void {
-    // === THAY ĐỔI: Cập nhật get
+    // (Tên formControlName đã là tiếng Anh)
     const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
     const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
 
@@ -382,7 +394,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  // === THAY ĐỔI: HÀM NÀY GIỜ ĐƠN GIẢN HƠN RẤT NHIỀU ===
   private populateAllCustomerData(data: any): void {
     const cInfo = this.pledgeForm.get('customerInfo');
     const cExtra = this.pledgeForm.get('customerExtraInfo');
@@ -416,7 +427,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  // (Các hàm map... giữ nguyên vì chúng map GIÁ TRỊ, không phải KEY)
+  // (Các hàm map... giữ nguyên)
   private mapLoanStatus(status: string): string {
     const map: { [key: string]: string } = {
       'Chưa vay': 'Binh Thuong', 'Đang vay': 'Binh Thuong 2', 'Nợ xấu': 'No xau',
@@ -439,7 +450,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   findCustomer(): void {
-    // === THAY ĐỔI: Cập nhật get
+    // (Tên formControlName đã là tiếng Anh)
     const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
     const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
     if (!phone && !idNumber) {
@@ -457,16 +468,19 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   patchFormData(contract: PledgeContract): void {
-    // (Logic patchFormData giữ nguyên, không cần patch storeId vào form)
-    // TODO: Hàm này cũng cần được cập nhật để map từ contract -> form (nếu tên khác nhau)
-    // Giả sử tên contract cũng đã được chuẩn hóa:
+    // TODO: Cập nhật hàm này để map chính xác từ contract -> form
+    // (Giả sử contract cũng dùng tên tiếng Anh)
     this.pledgeForm.patchValue(contract as any);
-    // ... hoặc bạn cần viết lại logic patch chi tiết ở đây
 
-    this.pledgeForm.get('loanInfo.maHopDong')?.disable();
+    // Ví dụ patch chi tiết nếu tên khác nhau:
+    // this.pledgeForm.get('loanInfo.assetName')?.setValue(contract.tenTaiSan);
+    // this.pledgeForm.get('loanInfo.loanAmount')?.setValue(contract.tongTienVay);
+    // ...
+
+    this.pledgeForm.get('loanInfo.contractCode')?.disable(); // <-- THAY ĐỔI
   }
 
-  // (Các hàm Webcam, Attachments, Asset Type giữ nguyên)
+  // (Các hàm Webcam, Attachments giữ nguyên)
   async takePicture(field: string): Promise<void> {
     if (field === 'portrait') {
       this.showWebcam = true;
@@ -502,7 +516,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (dataUrl.length > 1024 * 1024) {
       this.notification.showError('Ảnh quá lớn (>1MB).'); return;
     }
-    // === THAY ĐỔI: Cập nhật set
     this.pledgeForm.get('portraitInfo.idUrl')?.setValue(dataUrl);
     this.notification.showSuccess('Chụp ảnh thành công!');
     this.stopWebcam();
@@ -519,7 +532,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const reader = new FileReader();
     reader.onload = e => {
-      // === THAY ĐỔI: Cập nhật set
       this.pledgeForm.get('portraitInfo.idUrl')?.setValue(e.target?.result as string);
       this.notification.showSuccess('Tải ảnh thành công!');
       this.cdr.detectChanges();
@@ -576,7 +588,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
       if (res) {
         const cur = this.assetTypes$.value;
-        cur.push(res.tenLoai);
+        cur.push(res.typeName); // <-- THAY ĐỔI
         this.assetTypes$.next(cur);
         this.notification.showSuccess('Thêm loại tài sản thành công!');
       }
@@ -586,7 +598,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /* ------------------- SAVE / CANCEL ------------------- */
 
-  // === THAY ĐỔI: CẬP NHẬT HÀM ONSAVE ===
   onSave(): void {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc (*).');
@@ -619,10 +630,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       loan: {
         ...raw.loanInfo,
         ...raw.loanExtraInfo,
-        ngayVay: this.formatDate(raw.loanInfo.ngayVay)!
+        loanDate: this.formatDate(raw.loanInfo.loanDate)! // <-- THAY ĐỔI
       },
 
-      // Các mục còn lại giữ nguyên cấu trúc
+      // Các mục còn lại giữ nguyên cấu trúc (tên đã được đổi)
       fees: raw.feesInfo,
       collateral: raw.collateralInfo,
       attachments: raw.attachments
@@ -631,10 +642,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     // (Bỏ phần giả lập setTimeout)
     this.isLoading = false;
 
-    // *** GHI CHÚ QUAN TRỌNG ***
-    // Log này sẽ CHẠY NGAY LẬP TỨC.
-    // Nếu bạn không thấy nó, 99% là do form của bạn bị INVALID
-    // và hàm onSave() đã `return` ở dòng `if (this.pledgeForm.invalid)`.
     console.log('Payload to save:', payload);
 
     if (!payload.storeId) {
@@ -654,7 +661,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dialogRef.close(true);
   }
 
-  // === HÀM FOCUS LỖI (Giữ nguyên, vẫn hoạt động) ===
+  // === HÀM FOCUS LỖI (Giữ nguyên) ===
   private findAndFocusFirstInvalidField(): void {
     try {
       const invalidControlEl = this.el.nativeElement.querySelector(
@@ -703,7 +710,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 }
 
-// (Component AddAssetTypeDialogComponent giữ nguyên)
+// === THAY ĐỔI: Component AddAssetTypeDialogComponent ===
 @Component({
   selector: 'app-add-asset-type-dialog',
   standalone: true,
@@ -725,17 +732,17 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Mã loại tài sản (*)</mat-label>
-              <input matInput formControlName="maLoai" placeholder="VD: XM, ĐT">
+              <input matInput formControlName="typeCode" placeholder="VD: XM, ĐT">
             </mat-form-field>
           </div>
           <div class="form-grid-2-col">
             <mat-form-field appearance="outline">
               <mat-label>Tên loại tài sản (*)</mat-label>
-              <input matInput formControlName="tenLoai" placeholder="Xe máy">
+              <input matInput formControlName="typeName" placeholder="Xe máy">
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Trạng thái</mat-label>
-              <mat-select formControlName="trangThai">
+              <mat-select formControlName="status">
                 <mat-option value="Bình thường">Bình thường</mat-option>
                 <mat-option value="Không hoạt động">Không hoạt động</mat-option>
               </mat-select>
@@ -785,9 +792,9 @@ export class AddAssetTypeDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
   ) {
     this.assetTypeForm = this.fb.group({
-      maLoai: ['', Validators.required],
-      tenLoai: ['', Validators.required],
-      trangThai: ['Bình thường'],
+      typeCode: ['', Validators.required], // maLoai
+      typeName: ['', Validators.required], // tenLoai
+      status: ['Bình thường'], // trangThai
       attributes: this.fb.array([this.fb.group({ label: [''] })])
     });
   }
@@ -799,9 +806,9 @@ export class AddAssetTypeDialogComponent {
     if (this.assetTypeForm.valid) {
       const v = this.assetTypeForm.value;
       const newAsset: AssetType = {
-        maLoai: v.maLoai,
-        tenLoai: v.tenLoai,
-        trangThai: v.trangThai,
+        typeCode: v.typeCode, // maLoai
+        typeName: v.typeName, // tenLoai
+        status: v.status, // trangThai
         attributes: v.attributes
       };
       this.dialogRef.close(newAsset);
