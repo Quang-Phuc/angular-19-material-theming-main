@@ -233,11 +233,13 @@
             <div class="interest-item">
               <label class="interest-label">Kỳ Đóng Lãi *</label>
               <div class="input-group">
-                <input matInput type="number" formControlName="interestTermValue" class="number-input" placeholder="1"> <mat-select formControlName="interestTermUnit" class="unit-select"> <mat-option value="Ngay">Ngày</mat-option>
-                <mat-option value="Tuan">Tuần</mat-option>
-                <mat-option value="ThangDinhKy">Tháng định kỳ</mat-option>
-                <mat-option value="Thang">Tháng</mat-option>
-              </mat-select>
+                <input matInput type="number" formControlName="interestTermValue" class="number-input" placeholder="1">
+                <mat-select formControlName="interestTermUnit" class="unit-select">
+                  <mat-option value="DAY">Ngày</mat-option>
+                  <mat-option value="WEEK">Tuần</mat-option>
+                  <mat-option value="PERIODIC_MONTH">Tháng định kỳ</mat-option>
+                  <mat-option value="MONTH">Tháng</mat-option>
+                </mat-select>
               </div>
             </div>
 
