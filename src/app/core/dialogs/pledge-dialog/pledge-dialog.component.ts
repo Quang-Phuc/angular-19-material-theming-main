@@ -55,6 +55,11 @@ interface UserStore {
   phone: string;
 }
 
+interface AssetTypeOption {
+  id: number;
+  name: string;
+}
+
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -86,7 +91,20 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
   private el: ElementRef = inject(ElementRef);
 
-  assetTypes$ = new BehaviorSubject<string[]>([]);
+  assetTypes$ = new BehaviorSubject<AssetTypeOption[]>([]);
+  interestRateUnits$: Observable<DropdownOption[]> = of([
+    { id: 'INTEREST_PER_MILLION_PER_DAY', name: 'Lãi/Triệu/Ngày' },
+    { id: 'INTEREST_PERCENT_PER_MONTH', name: 'Lãi%/Tháng' },
+    { id: 'INTEREST_PER_DAY', name: 'Lãi/Ngày' }
+  ]);
+  loanStatuses$: Observable<DropdownOption[]> = of([
+    { id: 'NORMAL', name: 'Bình Thường' },
+    { id: 'NORMAL_2', name: 'Bình Thường 2' },
+    { id: 'RISKY', name: 'Nợ rủi ro' },
+    { id: 'BAD_DEBT_R2', name: 'Nợ R2' },
+    { id: 'BAD_DEBT_R3', name: 'Nợ R3' },
+    { id: 'BAD_DEBT', name: 'Nợ xấu' }
+  ]);
   statusList$: Observable<string[]> = of(['Bình Thường', 'Bình Thường 2', 'Nợ rủi ro', 'Nợ R2', 'Nợ R3', 'Nợ xấu']);
   partnerTypeList$: Observable<DropdownOption[]> = of([
     { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
@@ -159,7 +177,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         motherOccupation: ['']
       }),
       loanExtraInfo: this.fb.group({
-        loanStatus: ['Binh Thuong'],
+        loanStatus: ['NORMAL'],
         partnerType: ['khach_hang'],
         follower: ['all'],
         customerSource: ['all']
@@ -173,7 +191,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         interestTermValue: [1, Validators.required],
         interestTermUnit: ['Thang', Validators.required],
         interestRateValue: [0, Validators.required],
-        interestRateUnit: ['Lai/Trieu/Ngay', Validators.required],
+        interestRateUnit: ['INTEREST_PER_MILLION_PER_DAY', Validators.required],
         paymentCount: [1, Validators.required],
         interestPaymentType: ['Truoc', Validators.required],
         note: ['']
@@ -303,7 +321,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.apiService.get<ApiResponse<AssetTypeItem[]>>('/asset-types').pipe(
       map(response => {
         if (response.result === 'success' && response.data) {
-          return response.data.map(item => item.name);
+          return response.data.map(item => ({
+            id: item.id,
+            name: item.name
+          }));
         }
         return [];
       }),
@@ -567,14 +588,26 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   addNewAssetType(): void {
     const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
       width: '500px',
-      data: { assetTypes: this.assetTypes$.value }
+      data: { assetTypes: this.assetTypes$.value.map(t => t.name) }
     });
-    dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
-      if (res) {
-        const cur = this.assetTypes$.value;
-        cur.push(res.typeName);
-        this.assetTypes$.next(cur);
-        this.notification.showSuccess('Thêm loại tài sản thành công!');
+
+    dialogRef.afterClosed().subscribe((res: { typeName: string, id?: number } | undefined) => {
+      if (res && res.typeName) {
+        // Gọi API tạo mới và nhận id
+        this.apiService.post<ApiResponse<{ id: number }>>('/asset-types', {
+          typeName: res.typeName,
+          // ...other fields
+        }).subscribe({
+          next: (resp) => {
+            if (resp.result === 'success' && resp.data?.id) {
+              const newType: AssetTypeOption = { id: resp.data.id, name: res.typeName };
+              this.assetTypes$.next([...this.assetTypes$.value, newType]);
+              this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id);
+              this.notification.showSuccess('Thêm loại tài sản thành công!');
+            }
+          },
+          error: () => this.notification.showError('Lỗi khi thêm loại tài sản.')
+        });
       }
     });
   }
@@ -606,9 +639,13 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         dateOfBirth: this.formatDate(raw.customerInfo.dateOfBirth),
         issueDate: this.formatDate(raw.customerInfo.issueDate)
       },
+      // Trong payload.loan
       loan: {
         ...raw.loanInfo,
         ...raw.loanExtraInfo,
+        assetTypeId: raw.loanInfo.assetType, // ← id
+        interestRateUnit: raw.loanInfo.interestRateUnit, // ← enum string
+        loanStatus: raw.loanExtraInfo.loanStatus, // ← enum string
         loanDate: this.formatDate(raw.loanInfo.loanDate)!
       },
       fees: raw.feesInfo,

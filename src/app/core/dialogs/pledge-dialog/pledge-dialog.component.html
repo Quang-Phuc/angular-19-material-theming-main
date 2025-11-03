@@ -157,8 +157,8 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Tình Trạng</mat-label>
                   <mat-select formControlName="loanStatus">
-                    @for (t of (statusList$ | async); track t) {
-                      <mat-option [value]="t">{{ t }}</mat-option>
+                    @for (s of (loanStatuses$ | async); track s.id) {
+                      <mat-option [value]="s.id">{{ s.name }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -206,15 +206,15 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Loại Tài Sản *</mat-label>
-              <input matInput formControlName="assetType" [matAutocomplete]="autoAsset"> <mat-autocomplete #autoAsset="matAutocomplete">
-              @for (opt of (assetTypes$ | async); track opt) {
-                <mat-option [value]="opt">{{ opt }}</mat-option>
-              }
-            </mat-autocomplete>
+              <mat-select formControlName="assetType">
+                @for (opt of (assetTypes$ | async); track opt.id) {
+                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                }
+              </mat-select>
             </mat-form-field>
 
-            <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()" matTooltip="Thêm loại tài sản mới">
-              <mat-icon>add</mat-icon><span>Thêm mới</span>
+            <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()">
+              <mat-icon>add</mat-icon> Thêm mới
             </button>
           </div>
 
@@ -246,10 +246,12 @@
             <div class="interest-item">
               <label class="interest-label">Lãi Suất *</label>
               <div class="input-group">
-                <input matInput type="number" formControlName="interestRateValue" class="number-input" placeholder="0"> <mat-select formControlName="interestRateUnit" class="unit-select"> <mat-option value="Lai/Trieu/Ngay">Lãi/Triệu/Ngày</mat-option>
-                <mat-option value="Lai%/Thang">Lãi%/Tháng</mat-option>
-                <mat-option value="Lai/Ngay">Lãi/Ngày</mat-option>
-              </mat-select>
+                <input matInput type="number" formControlName="interestRateValue" class="number-input" placeholder="0">
+                <mat-select formControlName="interestRateUnit" class="unit-select">
+                  @for (unit of (interestRateUnits$ | async); track unit.id) {
+                    <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+                  }
+                </mat-select>
               </div>
             </div>
 
@@ -283,8 +285,8 @@
         <div class="fee-grid" formGroupName="warehouseFee"> <label>Phí kho</label>
           <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
           <mat-radio-group formControlName="type">
-            <mat-radio-button value="NhapTien">Nhập Tiền</mat-radio-button>
-            <mat-radio-button value="NhapPhanTram">Nhập %</mat-radio-button>
+            <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
+            <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
           </mat-radio-group>
         </div>
         <hr>
