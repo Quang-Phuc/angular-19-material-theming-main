@@ -45,8 +45,15 @@ interface ApiResponse<T> {
   message: string; errorCode: string; data?: T;
 }
 interface AssetTypeItem {
-  id: number; name: string; description: string; idUrl?: string; createdBy?: string;
-  createdDate?: string; lastUpdatedBy?: string; lastUpdatedDate?: string;
+  id: number;
+  name: string;
+  description: string;
+  storeId: number;
+  attributes: {
+    id: number;
+    label: string;
+    assetTypeId: number;
+  }[];
 }
 interface UserStore {
   id: number;
@@ -314,12 +321,28 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // === LOAD DATA ===
   private loadAssetTypes(): void {
-    this.apiService.get<ApiResponse<AssetTypeItem[]>>('/asset-types').pipe(
-      map(response => response.result === 'success' && response.data ? response.data.map(item => ({
-        id: item.id,
-        name: item.name
-      })) : []),
-      tap(types => this.assetTypes$.next(types)),
+    if (!this.activeStoreId) return;
+
+    this.apiService.get<ApiResponse<AssetTypeItem[]>>(`/asset-types/store/${this.activeStoreId}`).pipe(
+      map(response => {
+        if (response.result === 'success' && response.data) {
+          return response.data.map(item => ({
+            id: item.id,
+            name: item.name,
+            // Lưu thêm attributes để dùng khi chọn loại tài sản
+            _raw: item
+          }));
+        }
+        return [];
+      }),
+      tap(types => {
+        this.assetTypes$.next(types);
+        // Nếu đang edit và có assetTypeId → tự động load attributes
+        const currentAssetType = this.pledgeForm.get('loanInfo.assetType')?.value;
+        if (this.isEditMode && currentAssetType) {
+          this.loadAssetAttributes(currentAssetType);
+        }
+      }),
       catchError(err => {
         console.error('Load asset types error:', err);
         this.notification.showError('Lỗi tải loại tài sản.');
