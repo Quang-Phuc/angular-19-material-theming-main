@@ -10,6 +10,7 @@
 
     <mat-accordion multi>
 
+      <!-- 1. Thông tin người vay -->
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>1. Thông tin người vay</mat-panel-title>
@@ -96,6 +97,7 @@
 
       <div class="webcam-modal" *ngIf="showWebcam">...</div>
 
+      <!-- Thông tin nâng cao -->
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>Thông tin nâng cao (Khách hàng)</mat-panel-title>
@@ -192,7 +194,7 @@
         </mat-tab-group>
       </mat-expansion-panel>
 
-
+      <!-- 2. Thông tin cho vay -->
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>2. Thông tin cho vay</mat-panel-title>
@@ -202,7 +204,8 @@
           <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
               <mat-label>Tên Tài Sản *</mat-label>
-              <input matInput formControlName="assetName" placeholder="Xe Wave RSX"> </mat-form-field>
+              <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
+            </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Loại Tài Sản *</mat-label>
@@ -221,12 +224,14 @@
           <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
               <mat-label>Ngày Vay *</mat-label>
-              <input matInput [matDatepicker]="dpVay" formControlName="loanDate"> <mat-datepicker-toggle matIconSuffix [for]="dpVay"></mat-datepicker-toggle>
+              <input matInput [matDatepicker]="dpVay" formControlName="loanDate">
+              <mat-datepicker-toggle matIconSuffix [for]="dpVay"></mat-datepicker-toggle>
               <mat-datepicker #dpVay></mat-datepicker>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Tổng Tiền Vay *</mat-label>
-              <input matInput type="number" formControlName="loanAmount" placeholder="0"> </mat-form-field>
+              <input matInput type="number" formControlName="loanAmount" placeholder="0">
+            </mat-form-field>
           </div>
 
           <div class="interest-group-grid">
@@ -270,19 +275,23 @@
             <div class="interest-item">
               <label class="interest-label">Số lần trả *</label>
               <div class="input-group">
-                <input matInput type="number" formControlName="paymentCount" class="number-input" placeholder="1"> </div>
+                <input matInput type="number" formControlName="paymentCount" class="number-input" placeholder="1">
+              </div>
             </div>
           </div>
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Ghi Chú (Hợp đồng)</mat-label>
-            <textarea matInput formControlName="note" rows="2"></textarea> </mat-form-field>
+            <textarea matInput formControlName="note" rows="2"></textarea>
+          </mat-form-field>
         </div>
       </mat-expansion-panel>
 
+      <!-- 3. Các loại phí -->
       <mat-expansion-panel formGroupName="feesInfo">
         <mat-expansion-panel-header><mat-panel-title>3. Các loại phí</mat-panel-title></mat-expansion-panel-header>
 
-        <div class="fee-grid" formGroupName="warehouseFee"> <label>Phí kho</label>
+        <div class="fee-grid" formGroupName="warehouseFee">
+          <label>Phí kho</label>
           <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
           <mat-radio-group formControlName="type">
             <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
@@ -295,10 +304,7 @@
 
           <div class="fee-grid" formGroupName="storageFee">
             <label>Phí lưu kho</label>
-            <mat-form-field appearance="outline">
-              <mat-label>Giá trị</mat-label>
-              <input matInput type="number" formControlName="value">
-            </mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -307,10 +313,7 @@
 
           <div class="fee-grid" formGroupName="riskFee">
             <label>Phí rủi ro</label>
-            <mat-form-field appearance="outline">
-              <mat-label>Giá trị</mat-label>
-              <input matInput type="number" formControlName="value">
-            </mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -319,10 +322,7 @@
 
           <div class="fee-grid" formGroupName="managementFee">
             <label>Phí quản lí</label>
-            <mat-form-field appearance="outline">
-              <mat-label>Giá trị</mat-label>
-              <input matInput type="number" formControlName="value">
-            </mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -331,38 +331,67 @@
         </mat-expansion-panel>
       </mat-expansion-panel>
 
+      <!-- 4. Thông tin tài sản thế chấp (CẬP NHẬT ĐỘNG) -->
       <mat-expansion-panel formGroupName="collateralInfo">
         <mat-expansion-panel-header><mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
-        <div class="form-grid-4-col">
-          <mat-form-field appearance="outline"><mat-label>Định Giá Tài Sản</mat-label><input matInput type="number" formControlName="valuation"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Biển Kiểm Soát</mat-label><input matInput formControlName="licensePlate"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số Khung</mat-label><input matInput formControlName="chassisNumber"></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Số Máy</mat-label><input matInput formControlName="engineNumber"></mat-form-field>
-        </div>
+
+        <!-- Trường chung -->
         <div class="form-grid-2-col">
+          <mat-form-field appearance="outline">
+            <mat-label>Định Giá Tài Sản</mat-label>
+            <input matInput type="number" formControlName="valuation">
+          </mat-form-field>
+
           <div class="kho-row">
             <mat-form-field appearance="outline" class="flex-grow">
               <mat-label>Kho</mat-label>
-              <mat-select formControlName="warehouseId"> @for (opt of (warehouseList$ | async); track opt.id) {
-                <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-              }
+              <mat-select formControlName="warehouseId">
+                @for (opt of (warehouseList$ | async); track opt.id) {
+                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                }
               </mat-select>
             </mat-form-field>
-
             <button mat-mini-fab color="primary" class="add-warehouse-mini-btn" (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
               <mat-icon>add</mat-icon>
             </button>
           </div>
+        </div>
 
+        <div class="form-grid-2-col">
           <mat-form-field appearance="outline">
             <mat-label>Mã Tài Sản</mat-label>
             <input matInput formControlName="assetCode">
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width"><mat-label>Ghi Chú (Tài sản)</mat-label><textarea matInput formControlName="assetNote" rows="2"></textarea></mat-form-field>
+        <!-- Thuộc tính động -->
+        <div *ngIf="assetAttributes.length > 0; else fallbackFields">
+          <h4 class="attributes-title">Thuộc tính: {{ getAssetTypeName(pledgeForm.get('loanInfo.assetType')?.value) }}</h4>
+          <div formArrayName="attributes" class="form-grid-2-col">
+            @for (attr of assetAttributes; track attr.label; let i = $index) {
+              <mat-form-field appearance="outline">
+                <mat-label>{{ attr.label }} {{ attr.required ? '*' : '' }}</mat-label>
+                <input matInput [formControlName]="i" [placeholder]="'Nhập ' + attr.label.toLowerCase()">
+              </mat-form-field>
+            }
+          </div>
+        </div>
+
+        <!-- Fallback cho loại "Khác" -->
+        <ng-template #fallbackFields>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mô tả chi tiết tài sản</mat-label>
+            <textarea matInput formControlName="assetNote" rows="3" placeholder="VD: Laptop Dell XPS 13, Serial: ABC123, Mới 90%"></textarea>
+          </mat-form-field>
+        </ng-template>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Ghi Chú (Tài sản)</mat-label>
+          <textarea matInput formControlName="assetNote" rows="2"></textarea>
+        </mat-form-field>
       </mat-expansion-panel>
 
+      <!-- 5. Đính kèm file -->
       <mat-expansion-panel formGroupName="attachments">
         <mat-expansion-panel-header><mat-panel-title>5. Đính kèm file</mat-panel-title></mat-expansion-panel-header>
         <div class="file-dropzone"
