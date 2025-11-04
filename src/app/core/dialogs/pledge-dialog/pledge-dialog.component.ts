@@ -486,28 +486,46 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // === ADD NEW ===
+  // === ADD NEW ASSET TYPE ===
   addNewAssetType(): void {
     const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
       width: '500px',
       data: { assetTypes: this.assetTypes$.value.map(t => t.name) }
     });
 
-    dialogRef.afterClosed().subscribe((res: { typeName: string, id?: number } | undefined) => {
-      if (res && res.typeName) {
-        this.apiService.post<ApiResponse<{ id: number }>>('/asset-types', {
-          typeName: res.typeName
-        }).subscribe({
-          next: (resp) => {
-            if (resp.result === 'success' && resp.data?.id) {
-              const newType: AssetTypeOption = { id: resp.data.id, name: res.typeName };
-              this.assetTypes$.next([...this.assetTypes$.value, newType]);
-              this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id);
-              this.notification.showSuccess('Thêm loại tài sản thành công!');
-            }
-          },
-          error: () => this.notification.showError('Lỗi khi thêm loại tài sản.')
-        });
-      }
+    dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
+      if (!res) return;
+
+      // === ĐẢM BẢO GỬI ĐẦY ĐỦ: typeCode, typeName, status, attributes ===
+      const payload = {
+        typeCode: res.typeCode,
+        typeName: res.typeName,
+        status: res.status,
+        attributes: res.attributes.filter(attr => attr.label.trim() !== '') // Lọc bỏ rỗng
+      };
+
+      this.apiService.post<ApiResponse<{ id: number }>>('/asset-types', payload).subscribe({
+        next: (resp) => {
+          if (resp.result === 'success' && resp.data?.id) {
+            const newType: AssetTypeOption = { id: resp.data.id, name: res.typeName };
+            this.assetTypes$.next([...this.assetTypes$.value, newType]);
+
+            // Tự động chọn loại tài sản vừa thêm
+            this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id.toString());
+
+            // Tải lại thuộc tính động cho loại tài sản mới
+            this.loadAssetAttributes(newType.id.toString());
+
+            this.notification.showSuccess(`Thêm loại tài sản "${res.typeName}" thành công!`);
+          } else {
+            this.notification.showError('Thêm loại tài sản thất bại. Vui lòng thử lại.');
+          }
+        },
+        error: (err) => {
+          console.error('Add asset type error:', err);
+          this.notification.showError('Lỗi kết nối server khi thêm loại tài sản.');
+        }
+      });
     });
   }
 
@@ -826,7 +844,7 @@ export class AddAssetTypeDialogComponent {
         typeCode: v.typeCode,
         typeName: v.typeName,
         status: v.status,
-        attributes: v.attributes
+        attributes: v.attributes.filter((a: any) => a.label && a.label.trim() !== '')
       };
       this.dialogRef.close(newAsset);
     }

@@ -201,25 +201,7 @@
         </mat-expansion-panel-header>
 
         <div formGroupName="loanInfo">
-          <div class="form-grid-asset-with-button">
-            <mat-form-field appearance="outline">
-              <mat-label>Tên Tài Sản *</mat-label>
-              <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
-            </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Loại Tài Sản *</mat-label>
-              <mat-select formControlName="assetType">
-                @for (opt of (assetTypes$ | async); track opt.id) {
-                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()">
-              <mat-icon>add</mat-icon> Thêm mới
-            </button>
-          </div>
 
           <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
@@ -336,6 +318,25 @@
         <mat-expansion-panel-header><mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
 
         <!-- Trường chung -->
+        <div class="form-grid-asset-with-button">
+          <mat-form-field appearance="outline">
+            <mat-label>Tên Tài Sản *</mat-label>
+            <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Loại Tài Sản *</mat-label>
+            <mat-select formControlName="assetType">
+              @for (opt of (assetTypes$ | async); track opt.id) {
+                <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()">
+            <mat-icon>add</mat-icon> Thêm mới
+          </button>
+        </div>
         <div class="form-grid-2-col">
           <mat-form-field appearance="outline">
             <mat-label>Định Giá Tài Sản</mat-label>
@@ -357,12 +358,6 @@
           </div>
         </div>
 
-        <div class="form-grid-2-col">
-          <mat-form-field appearance="outline">
-            <mat-label>Mã Tài Sản</mat-label>
-            <input matInput formControlName="assetCode">
-          </mat-form-field>
-        </div>
 
         <!-- Thuộc tính động -->
         <div *ngIf="assetAttributes.length > 0; else fallbackFields">
