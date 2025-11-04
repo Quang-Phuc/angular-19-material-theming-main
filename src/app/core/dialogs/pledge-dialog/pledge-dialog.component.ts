@@ -63,6 +63,7 @@ interface UserStore {
 interface AssetTypeOption {
   id: number;
   name: string;
+  attributes?: AssetTypeAttribute[]; // Thêm để cache
 }
 
 @Component({
@@ -193,23 +194,45 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // 1. Tải dữ liệu động: loại tài sản, người theo dõi, kho
     this.loadAssetTypes();
     this.loadFollowerList();
     this.loadWarehouseList();
 
+    // 2. Kiểm tra storeId bắt buộc
     if (!this.activeStoreId) {
       this.notification.showError('Lỗi: Không xác định được cửa hàng. Vui lòng đóng và thử lại.');
       this.dialogRef.close(false);
       return;
     }
 
+    // 3. Chế độ chỉnh sửa: patch dữ liệu cũ
     if (this.isEditMode && this.dialogData.contract) {
       this.patchFormData(this.dialogData.contract);
     }
 
-    // Theo dõi thay đổi loại tài sản
-    this.pledgeForm.get('loanInfo.assetType')?.valueChanges.subscribe(id => {
-      if (id) this.loadAssetAttributes(id);
+    // 4. Theo dõi thay đổi loại tài sản → hiển thị thuộc tính động (dùng cache)
+    this.pledgeForm.get('loanInfo.assetType')?.valueChanges.subscribe(selectedId => {
+      if (!selectedId) {
+        this.clearAttributes();
+        return;
+      }
+
+      const selectedType = this.assetTypes$.value.find(
+        t => t.id.toString() === selectedId.toString()
+      );
+
+      if (selectedType?.attributes) {
+        this.assetAttributes = selectedType.attributes.map(attr => ({
+          ...attr,
+          required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(attr.label)
+        }));
+        this.buildAttributeFormControls();
+      } else {
+        this.clearAttributes();
+      }
+
+      this.cdr.detectChanges();
     });
   }
 
@@ -227,29 +250,29 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // === HÀM MỚI: TẢI THUỘC TÍNH TÀI SẢN ===
-  private loadAssetAttributes(assetTypeId: string): void {
-    if (!assetTypeId) {
-      this.clearAttributes();
-      return;
-    }
-
-    this.apiService.get<ApiResponse<AssetType>>(`/asset-types/${assetTypeId}`).pipe(
-      map(res => res.result === 'success' && res.data ? res.data.attributes : []),
-      tap(attrs => {
-        this.assetAttributes = attrs.map(a => ({
-          ...a,
-          required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(a.label)
-        }));
-        this.buildAttributeFormControls();
-      }),
-      catchError(err => {
-        console.error('Load attributes error:', err);
-        this.notification.showError('Lỗi tải thuộc tính tài sản.');
-        this.clearAttributes();
-        return of([]);
-      })
-    ).subscribe();
-  }
+  // private loadAssetAttributes(assetTypeId: string): void {
+  //   if (!assetTypeId) {
+  //     this.clearAttributes();
+  //     return;
+  //   }
+  //
+  //   this.apiService.get<ApiResponse<AssetType>>(`/asset-types/${assetTypeId}`).pipe(
+  //     map(res => res.result === 'success' && res.data ? res.data.attributes : []),
+  //     tap(attrs => {
+  //       this.assetAttributes = attrs.map(a => ({
+  //         ...a,
+  //         required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(a.label)
+  //       }));
+  //       this.buildAttributeFormControls();
+  //     }),
+  //     catchError(err => {
+  //       console.error('Load attributes error:', err);
+  //       this.notification.showError('Lỗi tải thuộc tính tài sản.');
+  //       this.clearAttributes();
+  //       return of([]);
+  //     })
+  //   ).subscribe();
+  // }
 
   private buildAttributeFormControls(): void {
     this.clearAttributes();
@@ -325,27 +348,68 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.apiService.get<ApiResponse<AssetTypeItem[]>>(`/asset-types/store/${this.activeStoreId}`).pipe(
       map(response => {
-        if (response.result === 'success' && response.data) {
-          return response.data.map(item => ({
-            id: item.id,
-            name: item.name,
-            // Lưu thêm attributes để dùng khi chọn loại tài sản
-            _raw: item
-          }));
+        if (response.result !== 'success' || !response.data) {
+          return [];
         }
-        return [];
+
+        // Bước 1: Lọc trùng tên (chỉ giữ loại đầu tiên, cảnh báo loại sau)
+        const seenNames = new Set<string>();
+        const uniqueItems = response.data.filter(item => {
+          if (seenNames.has(item.name)) {
+            console.warn(`[AssetType] Trùng tên loại tài sản: "${item.name}" (ID: ${item.id}) – Đã bỏ qua.`);
+            return false;
+          }
+          seenNames.add(item.name);
+          return true;
+        });
+
+        // Bước 2: Chuyển đổi thành AssetTypeOption + cache attributes
+        return uniqueItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          attributes: item.attributes.map(attr => ({
+            label: attr.label,
+            required: false // Sẽ gán lại ở valueChanges
+          }))
+        } as AssetTypeOption & { attributes: AssetTypeAttribute[] }));
       }),
       tap(types => {
+        // Cập nhật danh sách loại tài sản
         this.assetTypes$.next(types);
-        // Nếu đang edit và có assetTypeId → tự động load attributes
-        const currentAssetType = this.pledgeForm.get('loanInfo.assetType')?.value;
-        if (this.isEditMode && currentAssetType) {
-          this.loadAssetAttributes(currentAssetType);
+
+        // === CHỈ KHI EDIT: Tự động load attributes + patch giá trị cũ ===
+        const currentAssetTypeId = this.pledgeForm.get('loanInfo.assetType')?.value;
+        if (this.isEditMode && currentAssetTypeId && this.dialogData.contract) {
+          const selectedType = types.find(t => t.id.toString() === currentAssetTypeId.toString());
+
+          if (selectedType?.attributes) {
+            // Gán danh sách thuộc tính + đánh dấu required
+            this.assetAttributes = selectedType.attributes.map(attr => ({
+              ...attr,
+              required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(attr.label)
+            }));
+
+            // Tạo form controls
+            this.buildAttributeFormControls();
+
+            // SỬA LỖI TS18048: Kiểm tra savedAttrs trước khi dùng
+            const savedAttrs = this.dialogData.contract?.collateral?.attributes;
+            if (savedAttrs && Array.isArray(savedAttrs) && savedAttrs.length > 0) {
+              savedAttrs.forEach((attr, i) => {
+                const control = this.attributesFormArray.at(i);
+                if (control) {
+                  control.setValue(attr.value || '');
+                }
+              });
+            }
+          } else {
+            this.clearAttributes();
+          }
         }
       }),
       catchError(err => {
         console.error('Load asset types error:', err);
-        this.notification.showError('Lỗi tải loại tài sản.');
+        this.notification.showError('Lỗi tải danh sách loại tài sản.');
         return of([]);
       })
     ).subscribe();
@@ -537,7 +601,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
             this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id.toString());
 
             // Tải lại thuộc tính động cho loại tài sản mới
-            this.loadAssetAttributes(newType.id.toString());
+            // this.loadAssetAttributes(newType.id.toString());
 
             this.notification.showSuccess(`Thêm loại tài sản "${res.typeName}" thành công!`);
           } else {
