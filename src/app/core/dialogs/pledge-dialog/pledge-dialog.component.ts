@@ -240,7 +240,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       if (selectedType?.attributes) {
         this.assetAttributes = selectedType.attributes.map(attr => ({
           ...attr,
-          required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(attr.label)
         }));
         this.buildAttributeFormControls();
       } else {
@@ -264,30 +263,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.assetTypes$.value.find(t => t.id.toString() === id)?.name || 'Khác';
   }
 
-  // === HÀM MỚI: TẢI THUỘC TÍNH TÀI SẢN ===
-  // private loadAssetAttributes(assetTypeId: string): void {
-  //   if (!assetTypeId) {
-  //     this.clearAttributes();
-  //     return;
-  //   }
-  //
-  //   this.apiService.get<ApiResponse<AssetType>>(`/asset-types/${assetTypeId}`).pipe(
-  //     map(res => res.result === 'success' && res.data ? res.data.attributes : []),
-  //     tap(attrs => {
-  //       this.assetAttributes = attrs.map(a => ({
-  //         ...a,
-  //         required: ['Biển số', 'Số khung', 'Số máy', 'Hãng', 'Model', 'IMEI'].includes(a.label)
-  //       }));
-  //       this.buildAttributeFormControls();
-  //     }),
-  //     catchError(err => {
-  //       console.error('Load attributes error:', err);
-  //       this.notification.showError('Lỗi tải thuộc tính tài sản.');
-  //       this.clearAttributes();
-  //       return of([]);
-  //     })
-  //   ).subscribe();
-  // }
+
 
   private buildAttributeFormControls(): void {
     this.clearAttributes();
