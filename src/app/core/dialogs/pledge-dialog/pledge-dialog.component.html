@@ -319,86 +319,83 @@
       <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
       <div class="progress-bar-placeholder" *ngIf="!isLoading"></div>
 
-      <mat-dialog-content>
-        <form [formGroup]="pledgeForm">
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title>
+        </mat-expansion-panel-header>
 
-          <mat-accordion multi>
+        <div formGroupName="collateralInfo">
+          <div class="form-grid-asset-with-button">
+            <mat-form-field appearance="outline">
+              <mat-label>Tên Tài Sản *</mat-label>
+              <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
+            </mat-form-field>
 
-            <mat-expansion-panel [expanded]="true" formGroupName="collateralInfo">
-              <mat-expansion-panel-header><mat-panel-title>4. Thông tin tài sản thế chấp</mat-panel-title></mat-expansion-panel-header>
+            <mat-form-field appearance="outline">
+              <mat-label>Loại Tài Sản *</mat-label>
+              <mat-select formControlName="assetType">
+                @for (opt of (assetTypes$ | async); track opt.id) {
+                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
 
-              <div class="form-grid-asset-with-button">
-                <mat-form-field appearance="outline">
-                  <mat-label>Tên Tài Sản *</mat-label>
-                  <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
-                </mat-form-field>
+            <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()">
+              <mat-icon>add</mat-icon> Thêm mới
+            </button>
+          </div>
 
-                <mat-form-field appearance="outline">
-                  <mat-label>Loại Tài Sản *</mat-label>
-                  <mat-select formControlName="assetType">
-                    @for (opt of (assetTypes$ | async); track opt.id) {
-                      <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Mã Tài Sản (Asset Code)</mat-label>
+              <input matInput formControlName="assetCode" placeholder="Mã riêng của tài sản (VD: IMEI, số hợp đồng cũ)">
+            </mat-form-field>
 
-                <button mat-flat-button class="add-asset-type-btn" (click)="addNewAssetType()">
-                  <mat-icon>add</mat-icon> Thêm mới
-                </button>
-              </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Định Giá Tài Sản</mat-label>
+              <input matInput type="number" formControlName="valuation">
+            </mat-form-field>
+          </div>
 
-              <div class="form-grid-2-col">
-                <mat-form-field appearance="outline">
-                  <mat-label>Mã Tài Sản (Asset Code)</mat-label>
-                  <input matInput formControlName="assetCode" placeholder="Mã riêng của tài sản (VD: IMEI, số hợp đồng cũ)">
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Định Giá Tài Sản</mat-label>
-                  <input matInput type="number" formControlName="valuation">
-                </mat-form-field>
-              </div>
-
-              <div class="form-grid-2-col">
-                <div class="kho-row full-width">
-                  <mat-form-field appearance="outline" class="flex-grow">
-                    <mat-label>Kho</mat-label>
-                    <mat-select formControlName="warehouseId">
-                      @for (opt of (warehouseList$ | async); track opt.id) {
-                        <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                  <button mat-mini-fab color="primary" class="add-warehouse-mini-btn" (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
-                    <mat-icon>add</mat-icon>
-                  </button>
-                </div>
-              </div>
-
-
-              <div *ngIf="assetAttributes.length > 0">
-                <h4 class="attributes-title">Thuộc tính: {{ getAssetTypeName(pledgeForm.get('collateralInfo.assetType')?.value) }}</h4>
-                <div formArrayName="attributes" class="form-grid-2-col">
-                  @for (attr of assetAttributes; track attr.label; let i = $index) {
-                    <mat-form-field appearance="outline">
-                      <mat-label>{{ attr.label }} {{ attr.required ? '*' : '' }}</mat-label>
-                      <input matInput [formControlName]="i" [placeholder]="'Nhập ' + attr.label.toLowerCase()">
-                    </mat-form-field>
+          <div class="form-grid-2-col">
+            <div class="kho-row full-width">
+              <mat-form-field appearance="outline" class="flex-grow">
+                <mat-label>Kho</mat-label>
+                <mat-select formControlName="warehouseId">
+                  @for (opt of (warehouseList$ | async); track opt.id) {
+                    <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
                   }
-                </div>
-              </div>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Ghi Chú (Tài sản)</mat-label>
-                <textarea matInput formControlName="assetNote" rows="2"></textarea>
+                </mat-select>
               </mat-form-field>
-            </mat-expansion-panel>
+              <button mat-mini-fab color="primary" class="add-warehouse-mini-btn"
+                      (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
 
-            <mat-expansion-panel formGroupName="attachments">
-            </mat-expansion-panel>
+          <div *ngIf="assetAttributes.length > 0">
+            <h4 class="attributes-title">
+              Thuộc tính: {{ getAssetTypeName(pledgeForm.get('collateralInfo.assetType')?.value) }}
+            </h4>
 
-          </mat-accordion>
-        </form>
-      </mat-dialog-content>
+            <div formArrayName="attributes" class="form-grid-2-col">
+              @for (attr of assetAttributes; track attr.label; let i = $index) {
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ attr.label }} {{ attr.required ? '*' : '' }}</mat-label>
+                  <input matInput [formControlName]="i" [placeholder]="'Nhập ' + attr.label.toLowerCase()">
+                </mat-form-field>
+              }
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ghi Chú (Tài sản)</mat-label>
+            <textarea matInput formControlName="assetNote" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
 
       <!-- 5. Đính kèm file -->
       <mat-expansion-panel formGroupName="attachments">
