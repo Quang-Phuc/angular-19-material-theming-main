@@ -31,6 +31,7 @@ import { ApiService } from '../../services/api.service';
 import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
 import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AddWarehouseDialogComponent } from './add-warehouse-dialog.component';
+import { MatTableModule } from '@angular/material/table';
 
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; required?: boolean; }
@@ -75,6 +76,7 @@ interface AssetTypeOption {
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
     MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
     MatListModule,
+    MatTableModule,  // ← THÊM DÒNG NÀY
     AddWarehouseDialogComponent
   ],
   templateUrl: './pledge-dialog.component.html',
@@ -86,6 +88,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   isEditMode = false;
   isLoading = false;
   showWebcam = false;
+  displayedColumns: string[] = ['assetName', 'assetType', 'assetCode', 'valuation', 'actions'];
+  collateralList: any[] = [];
+  private lastSelectedAssetType: string | null = null;
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
@@ -677,6 +682,106 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         next: (data: any) => { if (data && data.fullName) { this.showConfirmAndPopulate(data); } },
         error: (err) => console.error('Auto search error:', err)
       });
+  }
+  addCollateral(): void {
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    const attributesArray = collateralGroup.get('attributes') as FormArray;
+
+    // Kiểm tra validate
+    if (collateralGroup.invalid) {
+      collateralGroup.markAllAsTouched();
+      this.findAndFocusFirstInvalidFieldInGroup(collateralGroup);
+      this.notification.showError('Vui lòng điền đầy đủ thông tin tài sản (các trường * và thuộc tính bắt buộc).');
+      return;
+    }
+
+    // Thu thập dữ liệu
+    const raw = collateralGroup.getRawValue();
+    const assetItem = {
+      assetName: raw.assetName,
+      assetType: raw.assetType,
+      assetCode: raw.assetCode,
+      valuation: raw.valuation,
+      warehouseId: raw.warehouseId,
+      assetNote: raw.assetNote,
+      attributes: this.assetAttributes.map((attr, i) => ({
+        label: attr.label,
+        value: (attributesArray.at(i)?.value || '').trim(),
+        required: attr.required
+      }))
+    };
+
+    // Thêm vào danh sách
+    this.collateralList = [...this.collateralList, assetItem];
+    this.notification.showSuccess('Đã thêm tài sản vào danh sách!');
+
+    // Lưu lại loại tài sản để giữ khi nhập tiếp
+    this.lastSelectedAssetType = raw.assetType;
+
+    // Reset form (giữ lại loại tài sản)
+    this.resetCollateralForm();
+    this.cdr.detectChanges();
+  }
+
+  private resetCollateralForm(): void {
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    collateralGroup.reset({
+      assetName: '',
+      assetType: this.lastSelectedAssetType || '',
+      assetCode: '',
+      valuation: 0,
+      warehouseId: '',
+      assetNote: ''
+    });
+
+    // Xóa attributes
+    this.clearAttributes();
+    if (this.lastSelectedAssetType) {
+      // Tải lại attributes cho loại cũ
+      this.pledgeForm.get('collateralInfo.assetType')?.setValue(this.lastSelectedAssetType);
+    }
+  }
+
+  removeCollateral(index: number): void {
+    this.collateralList.splice(index, 1);
+    this.collateralList = [...this.collateralList];
+    this.notification.showSuccess('Đã xóa tài sản khỏi danh sách.');
+    this.cdr.detectChanges();
+  }
+  private findAndFocusFirstInvalidFieldInGroup(group: FormGroup): void {
+    const invalidControl = Object.keys(group.controls).find(key => {
+      const control = group.get(key);
+      return control && control.invalid && (control.dirty || control.touched);
+    });
+
+    if (invalidControl) {
+      const el = this.el.nativeElement.querySelector(`[formControlName="${invalidControl}"]`);
+      if (el) {
+        setTimeout(() => {
+          el.focus();
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+      return;
+    }
+
+    // Kiểm tra attributes
+    const attrs = group.get('attributes') as FormArray;
+    if (attrs) {
+      for (let i = 0; i < attrs.length; i++) {
+        const ctrl = attrs.at(i);
+        if (ctrl.invalid && (ctrl.dirty || ctrl.touched)) {
+          const el = this.el.nativeElement.querySelector(`[formControlName="${i}"]`);
+          if (el) {
+            setTimeout(() => {
+              el.focus();
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+          }
+          break;
+        }
+      }
+    }
   }
 
   private showConfirmAndPopulate(customerData: any): void {
