@@ -5,15 +5,13 @@ import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { HttpParams } from '@angular/common/http';
 
-/* -------------------------------------------------------------------------- */
-/*                           COMMON RESPONSE TYPES                            */
-/* -------------------------------------------------------------------------- */
 export interface ApiResponse<T> {
   result: string;
   message: string;
   errorCode: string;
   data: T;
 }
+
 export interface ApiPagedData<T> {
   content: T[];
   pageable: any;
@@ -28,7 +26,6 @@ export interface ApiPagedData<T> {
   empty: boolean;
 }
 
-/* --------------------------- PAGED RESPONSE ---------------------------- */
 export interface PagedResponse<T> {
   content: T[];
   totalElements: number;
@@ -37,9 +34,6 @@ export interface PagedResponse<T> {
   size: number;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                           PLEDGE CONTRACT INTERFACES                       */
-/* -------------------------------------------------------------------------- */
 export interface PledgeCustomer {
   fullName: string;
   dateOfBirth?: string | null;
@@ -48,7 +42,6 @@ export interface PledgeCustomer {
   permanentAddress?: string | null;
   issueDate?: string | null;
   issuePlace?: string | null;
-  /*** Các trường mở rộng (extra + family) ***/
   customerCode?: string;
   occupation?: string;
   workplace?: string;
@@ -67,7 +60,6 @@ export interface PledgeCustomer {
   motherName?: string;
   motherPhone?: string;
   motherOccupation?: string;
-  /*** Ảnh chân dung ***/
   idUrl?: string;
 }
 
@@ -82,13 +74,8 @@ export interface PledgeLoanInfo {
   interestRateValue: number;
   interestRateUnit: string;
   paymentCount: number;
-  interestPaymentType:
-    | 'PERIODIC_INTEREST'
-    | 'INSTALLMENT'
-    | 'LUMP_SUM_END'
-    | 'RENEWAL';
+  interestPaymentType: 'PERIODIC_INTEREST' | 'INSTALLMENT' | 'LUMP_SUM_END' | 'RENEWAL';
   note?: string | null;
-  /*** Các trường phụ (extra) ***/
   loanStatus?: string;
   partnerType?: string;
   follower?: string;
@@ -104,7 +91,10 @@ export interface CollateralAttribute {
   label: string;
   value: string;
 }
+
 export interface PledgeCollateral {
+  assetName: string;
+  assetType: string;
   valuation?: number;
   warehouseId?: string;
   assetCode?: string;
@@ -115,20 +105,15 @@ export interface PledgeCollateral {
 export interface PledgeContract {
   id?: string;
   storeId?: string;
-
   customer: PledgeCustomer;
   loan: PledgeLoanInfo;
-
   fees?: {
     warehouseFee?: FeeInfo;
     storageFee?: FeeInfo;
     riskFee?: FeeInfo;
     managementFee?: FeeInfo;
   };
-
-  collateral?: PledgeCollateral;
-
-  /*** Thông tin hiển thị trong list ***/
+  collateral?: PledgeCollateral[];  // Đổi thành mảng
   ngayHetHan?: string;
   collateralDisplay?: string;
   loanAmount?: number;
@@ -140,20 +125,12 @@ export interface PledgeContract {
   status?: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 SERVICE                                    */
-/* -------------------------------------------------------------------------- */
 @Injectable({ providedIn: 'root' })
 export class PledgeService {
   private readonly api = inject(ApiService);
   private readonly base = '/v1/pledges';
 
-  /* --------------------------- LIST (PAGED) --------------------------- */
-  getPledges(
-    page: number,
-    size: number,
-    filter: any
-  ): Observable<PagedResponse<PledgeContract>> {
+  getPledges(page: number, size: number, filter: any): Observable<PagedResponse<PledgeContract>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
@@ -164,44 +141,30 @@ export class PledgeService {
     if (filter.timeRange) params = params.set('time', filter.timeRange);
     if (filter.storeId) params = params.set('storeId', filter.storeId);
 
-    return this.api
-      .get<ApiResponse<ApiPagedData<PledgeContract>>>(this.base, params)
-      .pipe(
-        map(res => ({
-          content: res.data.content,
-          totalElements: res.data.totalElements,
-          totalPages: res.data.totalPages,
-          number: res.data.number,
-          size: res.data.size,
-        } as PagedResponse<PledgeContract>))
-      );
+    return this.api.get<ApiResponse<ApiPagedData<PledgeContract>>>(this.base, params).pipe(
+      map(res => ({
+        content: res.data.content,
+        totalElements: res.data.totalElements,
+        totalPages: res.data.totalPages,
+        number: res.data.number,
+        size: res.data.size,
+      }))
+    );
   }
 
-  /* --------------------------- DETAIL --------------------------- */
   getPledgeById(id: string): Observable<PledgeContract> {
-    return this.api
-      .get<ApiResponse<PledgeContract>>(`${this.base}/${id}`)
-      .pipe(map(res => res.data));
+    return this.api.get<ApiResponse<PledgeContract>>(`${this.base}/${id}`).pipe(map(res => res.data));
   }
 
-  /* --------------------------- CREATE --------------------------- */
   createPledge(data: PledgeContract): Observable<PledgeContract> {
-    return this.api
-      .post<ApiResponse<PledgeContract>>(this.base, data)
-      .pipe(map(res => res.data));
+    return this.api.post<ApiResponse<PledgeContract>>(this.base, data).pipe(map(res => res.data));
   }
 
-  /* --------------------------- UPDATE --------------------------- */
   updatePledge(id: string, data: PledgeContract): Observable<PledgeContract> {
-    return this.api
-      .put<ApiResponse<PledgeContract>>(`${this.base}/${id}`, data)
-      .pipe(map(res => res.data));
+    return this.api.put<ApiResponse<PledgeContract>>(`${this.base}/${id}`, data).pipe(map(res => res.data));
   }
 
-  /* --------------------------- DELETE --------------------------- */
   deletePledge(id: string): Observable<void> {
-    return this.api
-      .delete<ApiResponse<void>>(`${this.base}/${id}`)
-      .pipe(map(() => void 0));
+    return this.api.delete<ApiResponse<void>>(`${this.base}/${id}`).pipe(map(() => void 0));
   }
 }
