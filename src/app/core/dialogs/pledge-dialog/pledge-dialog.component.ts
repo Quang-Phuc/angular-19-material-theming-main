@@ -637,44 +637,36 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc.');
 
-      // === LOG CHI TIẾT CÁC TRƯỜNG LỖI ===
-      const invalidControls: string[] = [];
+      // === LOG CHI TIẾT LỖI ===
       const errors: string[] = [];
-
-      // Hàm đệ quy kiểm tra tất cả control trong form
-      const findInvalidControls = (control: any, path: string = '') => {
+      const findInvalid = (control: any, path: string = '') => {
         if (control instanceof FormGroup || control instanceof FormArray) {
           Object.keys(control.controls).forEach(key => {
             const child = control.get(key);
             const newPath = path ? `${path}.${key}` : key;
-            findInvalidControls(child, newPath);
+            findInvalid(child, newPath);
           });
-        } else {
-          if (control.invalid && (control.dirty || control.touched)) {
-            invalidControls.push(path);
-            const err = control.errors ? Object.keys(control.errors).join(', ') : 'unknown';
-            errors.push(`${path}: ${err}`);
-          }
+        } else if (control.invalid && (control.dirty || control.touched)) {
+          const err = control.errors ? Object.keys(control.errors).join(', ') : 'unknown';
+          errors.push(`${path}: ${err}`);
         }
       };
+      findInvalid(this.pledgeForm);
 
-      findInvalidControls(this.pledgeForm);
-
-      console.group('Form Invalid - Chi tiết lỗi');
-      console.warn('Tổng số trường lỗi:', invalidControls.length);
+      console.group('Form Invalid');
+      console.warn('Tổng lỗi:', errors.length);
       console.table(errors.map((e, i) => ({ STT: i + 1, Lỗi: e })));
       console.groupEnd();
 
-      // === Tự động focus vào trường lỗi đầu tiên ===
       this.pledgeForm.markAllAsTouched();
       this.findAndFocusFirstInvalidField();
-
       return;
     }
 
     this.isLoading = true;
     const raw = this.pledgeForm.getRawValue();
 
+    // === TẠO PAYLOAD ===
     const payload: PledgeContract = {
       storeId: this.activeStoreId!,
       customer: {
@@ -691,7 +683,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         loanDate: this.formatDate(raw.loanInfo.loanDate)!
       },
       fees: raw.feesInfo,
-      collateral: this.collateralList  // Gửi mảng collateral
+      collateral: this.collateralList
     };
 
     if (!payload.storeId) {
@@ -700,30 +692,37 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    // === TẠO FormData ===
     const formData = new FormData();
-    formData.append("payload", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+    formData.append('payload', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 
+    // Portrait
     if (this.portraitFile) {
-      formData.append("portrait", this.portraitFile, this.portraitFile.name);
+      formData.append('portrait', this.portraitFile, this.portraitFile.name);
     } else if (this.pledgeForm.get('portraitInfo.idUrl')?.value) {
       const blob = this.dataURLtoBlob(this.pledgeForm.get('portraitInfo.idUrl')?.value);
-      if (blob) formData.append("portrait", blob, "portrait.jpg");
+      if (blob) formData.append('portrait', blob, 'portrait.jpg');
     }
 
-    this.uploadedFiles.forEach(f => formData.append("attachments", f.file, f.name));
+    // Attachments
+    this.uploadedFiles.forEach(f => formData.append('attachments', f.file, f.name));
 
-    const serviceCall = this.isEditMode && this.dialogData.contract?.id
-      ? this.pledgeService.updatePledge(this.dialogData.contract.id, payload)
-      : this.pledgeService.createPledge(payload);
+    // === GỌI API TRỰC TIẾP QUA apiService ===
+    const url = this.isEditMode && this.dialogData.contract?.id
+      ? `/v1/pledges/${this.dialogData.contract.id}`
+      : '/v1/pledges';
 
-    serviceCall.subscribe({
-      next: () => {
+    const httpMethod = this.isEditMode ? this.apiService.put : this.apiService.post;
+
+    httpMethod.call(this.apiService, url, formData).subscribe({
+      next: (res: any) => {
         this.isLoading = false;
         this.notification.showSuccess(this.isEditMode ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
         this.dialogRef.close(true);
       },
       error: (err) => {
         this.isLoading = false;
+        console.error('Lỗi lưu hợp đồng:', err);
         this.notification.showError(err.error?.message || 'Lỗi khi lưu hợp đồng.');
       }
     });
