@@ -2,7 +2,7 @@
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
   OnDestroy, ChangeDetectorRef, AfterViewInit,
-  QueryList, ViewChildren
+  QueryList, ViewChildren, TemplateRef
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
@@ -88,13 +88,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   isEditMode = false;
   isLoading = false;
   showWebcam = false;
-  displayedColumns: string[] = ['assetName', 'assetType', 'assetCode', 'valuation', 'actions'];
+  displayedColumns: string[] = ['assetName', 'assetType', 'assetCode', 'valuation', 'view', 'actions'];
   collateralList: any[] = [];
   private lastSelectedAssetType: string | null = null;
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('collateralDetailDialog') collateralDetailDialog!: TemplateRef<any>;
+
 
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
@@ -146,7 +148,19 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   get attributesFormArray(): FormArray {
     return this.pledgeForm.get('collateralInfo.attributes') as FormArray;
   }
+  viewCollateralDetail(item: any): void {
+    this.matDialog.open(this.collateralDetailDialog, {
+      width: '600px',
+      maxHeight: '80vh',
+      data: item,
+      panelClass: 'collateral-detail-dialog'
+    });
+  }
 
+// Helper: Lấy tên kho
+  getWarehouseName(id: string): string {
+    return this.warehouseList$.value.find(w => w.id === id)?.name || 'Không xác định';
+  }
   constructor() {
     this.isEditMode = !!this.dialogData.contract;
     this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
@@ -265,7 +279,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // === HÀM MỚI: LẤY TÊN LOẠI TÀI SẢN ===
   getAssetTypeName(id: string): string {
-    return this.assetTypes$.value.find(t => t.id.toString() === id)?.name || 'Khác';
+    if (!id) return 'Không xác định';
+    return this.assetTypes$.value.find(t => t.id.toString() === id.toString())?.name || 'Khác';
   }
 
 

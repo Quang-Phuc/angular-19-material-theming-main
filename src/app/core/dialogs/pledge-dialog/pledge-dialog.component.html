@@ -438,9 +438,19 @@
                   </button>
                 </td>
               </ng-container>
-
+              <!-- Thêm cột Xem -->
+              <ng-container matColumnDef="view">
+                <th mat-header-cell *matHeaderCellDef> </th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <button mat-icon-button color="primary" (click)="viewCollateralDetail(i)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <!-- CHỈ GIỮ 1 DÒNG HEADER VÀ 1 DÒNG ROW -->
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
             </table>
           </div>
         }
@@ -489,3 +499,48 @@
     <mat-icon>save</mat-icon> {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
   </button>
 </mat-dialog-actions>
+
+<!-- THÊM NGAY SAU ĐÂY -->
+<ng-template #collateralDetailDialog let-data>
+  <h2 mat-dialog-title>
+    <mat-icon>description</mat-icon> Chi tiết tài sản: {{ data.assetName }}
+  </h2>
+
+  <mat-dialog-content class="collateral-detail-content">
+    <div class="detail-grid">
+      <div><strong>Loại tài sản:</strong></div>
+      <div>{{ getAssetTypeName(data.assetType) }}</div>
+
+      <div><strong>Mã tài sản:</strong></div>
+      <div>{{ data.assetCode || '-' }}</div>
+
+      <div><strong>Định giá:</strong></div>
+      <div>{{ data.valuation | number:'1.0-0' }} VNĐ</div>
+
+      <div><strong>Kho lưu trữ:</strong></div>
+      <div>{{ getWarehouseName(data.warehouseId) || '-' }}</div>
+
+      <div><strong>Ghi chú:</strong></div>
+      <div class="note">{{ data.assetNote || '-' }}</div>
+    </div>
+
+    @if (data.attributes && data.attributes.length > 0) {
+      <h4 style="margin: 20px 0 8px; color: #1976d2;">
+        <mat-icon fontSet="material-icons-outlined">list_alt</mat-icon>
+        Thuộc tính
+      </h4>
+      <div class="attributes-grid">
+        @for (attr of data.attributes; track attr.label) {
+          <div class="attr-item">
+            <strong>{{ attr.label }}:</strong>
+            <span>{{ attr.value || '-' }}</span>
+          </div>
+        }
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close>Đóng</button>
+  </mat-dialog-actions>
+</ng-template>
