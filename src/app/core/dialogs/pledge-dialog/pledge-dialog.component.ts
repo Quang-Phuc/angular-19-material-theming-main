@@ -227,7 +227,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // 4. Theo dõi thay đổi loại tài sản → hiển thị thuộc tính động (dùng cache)
-    this.pledgeForm.get('loanInfo.assetType')?.valueChanges.subscribe(selectedId => {
+    this.pledgeForm.get('collateralInfo.assetType')?.valueChanges.subscribe(selectedId => {
       if (!selectedId) {
         this.clearAttributes();
         return;
@@ -238,9 +238,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       );
 
       if (selectedType?.attributes) {
-        this.assetAttributes = selectedType.attributes.map(attr => ({
-          ...attr,
-        }));
+        this.assetAttributes = selectedType.attributes.map(attr => ({ ...attr }));
+        console.log('Thuộc tính:', this.assetAttributes);
+
         this.buildAttributeFormControls();
       } else {
         this.clearAttributes();
@@ -266,13 +266,21 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   private buildAttributeFormControls(): void {
-    this.clearAttributes();
+    const attributesArray = this.fb.array([]);
+
     this.assetAttributes.forEach(attr => {
       const control = this.fb.control('', attr.required ? Validators.required : null);
-      this.attributesFormArray.push(control);
+      attributesArray.push(control);
     });
+
+    // ✅ Ép kiểu FormGroup để dùng được setControl()
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    collateralGroup.setControl('attributes', attributesArray);
+
     this.cdr.detectChanges();
   }
+
+
 
   private clearAttributes(): void {
     while (this.attributesFormArray.length) {
