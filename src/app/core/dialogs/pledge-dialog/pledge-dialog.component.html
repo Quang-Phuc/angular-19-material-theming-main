@@ -359,22 +359,24 @@
               </div>
 
               <div class="form-grid-2-col">
-                <mat-form-field appearance="outline" class="flex-grow">
-                  <mat-label>Kho</mat-label>
-                  <mat-select formControlName="warehouseId">
-                    @for (opt of (warehouseList$ | async); track opt.id) {
-                      <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-                <button mat-mini-fab color="primary" class="add-warehouse-mini-btn" (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
-                  <mat-icon>add</mat-icon>
-                </button>
+                <div class="kho-row full-width">
+                  <mat-form-field appearance="outline" class="flex-grow">
+                    <mat-label>Kho</mat-label>
+                    <mat-select formControlName="warehouseId">
+                      @for (opt of (warehouseList$ | async); track opt.id) {
+                        <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-mini-fab color="primary" class="add-warehouse-mini-btn" (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
               </div>
 
 
               <div *ngIf="assetAttributes.length > 0">
-                <h4 class="attributes-title">Thuộc tính: {{ getAssetTypeName(pledgeForm.get('loanInfo.assetType')?.value) }}</h4>
+                <h4 class="attributes-title">Thuộc tính: {{ getAssetTypeName(pledgeForm.get('collateralInfo.assetType')?.value) }}</h4>
                 <div formArrayName="attributes" class="form-grid-2-col">
                   @for (attr of assetAttributes; track attr.label; let i = $index) {
                     <mat-form-field appearance="outline">

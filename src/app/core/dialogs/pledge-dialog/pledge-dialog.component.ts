@@ -155,7 +155,12 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         phoneNumber: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]],
         permanentAddress: [''],
         issueDate: [null],
-        issuePlace: ['']
+        issuePlace: [''],
+
+        portraitInfo: this.fb.group({
+          idUrl: [''],
+          base64Data: [''],
+        }),
       }),
       customerExtraInfo: this.fb.group({
         customerCode: [''], occupation: [''], workplace: [''], householdRegistration: [''],
@@ -182,11 +187,21 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         riskFee: this.createFeeGroup(), managementFee: this.createFeeGroup()
       }),
       collateralInfo: this.fb.group({
-        valuation: [0], warehouseId: [''], assetCode: [''], assetNote: [''],
-        attributes: this.fb.array([]) // <-- Động
+        // Đưa các trường chính và bắt buộc lên đầu
+        assetName: ['', Validators.required], // <-- ĐÃ SỬA: Đưa lên đầu
+        assetType: [null, Validators.required], // <-- ĐÃ SỬA: Đưa lên đầu
+
+        // Các trường còn lại
+        valuation: [0],
+        warehouseId: [''],
+        assetCode: [''], // <-- Trường bạn yêu cầu thêm (đã có)
+        assetNote: [''],
+        attributes: this.fb.array([]),
       }),
       attachments: this.fb.group({})
     });
+    console.log('[DEBUG-Constructor] Pledge Form đã được khởi tạo:', this.pledgeForm);
+    console.log('[DEBUG-Constructor] Controls trong collateralInfo:', Object.keys(this.pledgeForm.get('collateralInfo')?.value as any));
   }
 
   private createFeeGroup(): FormGroup {
