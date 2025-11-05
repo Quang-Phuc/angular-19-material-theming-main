@@ -66,6 +66,112 @@ interface AssetTypeOption {
   name: string;
   attributes?: AssetTypeAttribute[];
 }
+@Component({
+  selector: 'app-add-asset-type-dialog',
+  standalone: true,
+  imports: [
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
+    MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
+    MatExpansionModule, MatListModule
+  ],
+  template: `
+    <mat-dialog-content>
+      <h2 mat-dialog-title>Thêm mới loại tài sản</h2>
+      <form [formGroup]="assetTypeForm">
+        <div class="info-section">
+          <h3>Thông tin chung</h3>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Lĩnh vực</mat-label>
+              <input matInput value="Cầm đồ + Nhận vay" disabled>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Mã loại tài sản (*)</mat-label>
+              <input matInput formControlName="typeCode" placeholder="VD: XM, ĐT">
+            </mat-form-field>
+          </div>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Tên loại tài sản (*)</mat-label>
+              <input matInput formControlName="typeName" placeholder="Xe máy">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Trạng thái</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="Bình thường">Bình thường</mat-option>
+                <mat-option value="Không hoạt động">Không hoạt động</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="info-section">
+          <h3>Cấu hình thuộc tính hàng hóa</h3>
+          <div formArrayName="attributes">
+            <div *ngFor="let ctrl of attributesArray.controls; let i=index" [formGroupName]="i" class="attribute-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Thuộc tính {{i+1}} (VD: Biển số xe)</mat-label>
+                <input matInput formControlName="label" placeholder="VD: Biển số xe">
+                <button mat-icon-button matSuffix (click)="removeAttribute(i)" type="button">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" (click)="addAttribute()" class="add-attribute-btn">
+            <mat-icon>add</mat-icon> Thêm thuộc tính
+          </button>
+        </div>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()">Đóng</button>
+      <button mat-flat-button color="primary" [disabled]="assetTypeForm.invalid" (click)="onSave()">Thêm mới</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    .info-section { margin-bottom: 24px; }
+    .info-section h3 { font-weight: 600; color: #004d40; margin-bottom: 16px; }
+    .attribute-row { margin-bottom: 16px; }
+    .add-attribute-btn { margin-top: 8px; }
+    .form-grid-2-col { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+    .full-width { width: 100%; }
+  `]
+})
+export class AddAssetTypeDialogComponent {
+  assetTypeForm: FormGroup;
+  get attributesArray() { return this.assetTypeForm.get('attributes') as FormArray; }
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<AddAssetTypeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
+  ) {
+    this.assetTypeForm = this.fb.group({
+      typeCode: ['', Validators.required],
+      typeName: ['', Validators.required],
+      status: ['Bình thường'],
+      attributes: this.fb.array([this.fb.group({ label: [''] })])
+    });
+  }
+
+  addAttribute(): void { this.attributesArray.push(this.fb.group({ label: [''] })); }
+  removeAttribute(i: number): void { this.attributesArray.removeAt(i); }
+
+  onSave(): void {
+    if (this.assetTypeForm.valid) {
+      const v = this.assetTypeForm.value;
+      const newAsset: AssetType = {
+        typeCode: v.typeCode,
+        typeName: v.typeName,
+        status: v.status,
+        attributes: v.attributes.filter((a: any) => a.label && a.label.trim() !== '')
+      };
+      this.dialogRef.close(newAsset);
+    }
+  }
+
+  onCancel(): void { this.dialogRef.close(); }
+}
 
 @Component({
   selector: 'app-pledge-dialog',
@@ -75,7 +181,7 @@ interface AssetTypeOption {
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
     MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
-    MatListModule, MatTableModule, AddWarehouseDialogComponent
+    MatListModule, MatTableModule, AddWarehouseDialogComponent,AddAssetTypeDialogComponent
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
@@ -956,38 +1062,4 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 }
-export class AddAssetTypeDialogComponent {
-  assetTypeForm: FormGroup;
-  get attributesArray() { return this.assetTypeForm.get('attributes') as FormArray; }
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<AddAssetTypeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
-  ) {
-    this.assetTypeForm = this.fb.group({
-      typeCode: ['', Validators.required],
-      typeName: ['', Validators.required],
-      status: ['Bình thường'],
-      attributes: this.fb.array([this.fb.group({ label: [''] })])
-    });
-  }
-
-  addAttribute(): void { this.attributesArray.push(this.fb.group({ label: [''] })); }
-  removeAttribute(i: number): void { this.attributesArray.removeAt(i); }
-
-  onSave(): void {
-    if (this.assetTypeForm.valid) {
-      const v = this.assetTypeForm.value;
-      const newAsset: AssetType = {
-        typeCode: v.typeCode,
-        typeName: v.typeName,
-        status: v.status,
-        attributes: v.attributes.filter((a: any) => a.label && a.label.trim() !== '')
-      };
-      this.dialogRef.close(newAsset);
-    }
-  }
-
-  onCancel(): void { this.dialogRef.close(); }
-}
