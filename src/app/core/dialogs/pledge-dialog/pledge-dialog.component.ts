@@ -351,23 +351,136 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadFollowerList(): void {
-    // Giữ nguyên code load follower
+    if (!this.activeStoreId) {
+      this.followerList$.next([{ id: 'all', name: 'Tất cả' }]);
+      return;
+    }
+
+    this.apiService.get<ApiResponse<UserStore[]>>(`/users-stores/store/${this.activeStoreId}`).pipe(
+      map(response => {
+        if (response.result === 'success' && response.data) {
+          const allOption: DropdownOption = { id: 'all', name: 'Tất cả' };
+          const userOptions: DropdownOption[] = response.data.map(user => ({
+            id: user.id.toString(),
+            name: `${user.fullName} - ${user.phone}`
+          }));
+          return [allOption, ...userOptions];
+        }
+        return [{ id: 'all', name: 'Tất cả' }];
+      }),
+      tap(options => this.followerList$.next(options)),
+      catchError(err => {
+        console.error('Load follower list error:', err);
+        this.notification.showError('Lỗi tải danh sách người theo dõi.');
+        return of([{ id: 'all', name: 'Tất cả' }]);
+      })
+    ).subscribe();
   }
 
   private loadWarehouseList(): void {
-    // Giữ nguyên code load warehouse
+    if (!this.activeStoreId) {
+      this.warehouseList$.next([]);
+      return;
+    }
+
+    this.apiService.get<ApiResponse<{ id: number; name: string; address: string; description?: string }[]>>(`/warehouses/store/${this.activeStoreId}`).pipe(
+      map(response => response.result === 'success' && response.data ? response.data.map(w => ({ id: w.id.toString(), name: w.name })) : []),
+      tap(options => this.warehouseList$.next(options)),
+      catchError(err => {
+        console.error('Load warehouse list error:', err);
+        this.notification.showError('Lỗi tải danh sách kho.');
+        return of([]);
+      })
+    ).subscribe();
   }
 
   addNewAssetType(): void {
-    // Giữ nguyên code add new asset type
+    const dialogRef = this.matDialog.open(AddAssetTypeDialogComponent, {
+      width: '500px',
+      data: { assetTypes: this.assetTypes$.value.map(t => t.name) }
+    });
+
+    dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
+      if (!res) return;
+
+      // === ĐẢM BẢO GỬI ĐẦY ĐỦ: typeCode, typeName, status, attributes ===
+      const payload = {
+        typeCode: res.typeCode,
+        typeName: res.typeName,
+        status: res.status,
+        attributes: res.attributes.filter(attr => attr.label.trim() !== '') // Lọc bỏ rỗng
+      };
+
+      this.apiService.post<ApiResponse<{ id: number }>>('/asset-types', payload).subscribe({
+        next: (resp) => {
+          if (resp.result === 'success' && resp.data?.id) {
+            const newType: AssetTypeOption = { id: resp.data.id, name: res.typeName };
+            this.assetTypes$.next([...this.assetTypes$.value, newType]);
+
+            // Tự động chọn loại tài sản vừa thêm
+            this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id.toString());
+
+            // Tải lại thuộc tính động cho loại tài sản mới
+            // this.loadAssetAttributes(newType.id.toString());
+
+            this.notification.showSuccess(`Thêm loại tài sản "${res.typeName}" thành công!`);
+          } else {
+            this.notification.showError('Thêm loại tài sản thất bại. Vui lòng thử lại.');
+          }
+        },
+        error: (err) => {
+          console.error('Add asset type error:', err);
+          this.notification.showError('Lỗi kết nối server khi thêm loại tài sản.');
+        }
+      });
+    });
   }
 
   addNewWarehouse(): void {
-    // Giữ nguyên code add new warehouse
+    const dialogRef = this.matDialog.open(AddWarehouseDialogComponent, {
+      width: '500px',
+      data: { storeId: this.activeStoreId }
+    });
+
+    dialogRef.afterClosed().subscribe((result: { name: string; address: string; description: string } | undefined) => {
+      if (!result) return;
+
+      const payload = { name: result.name, address: result.address, description: result.description };
+
+      this.apiService.post<ApiResponse<{ id: number }>>(`/warehouses/${this.activeStoreId}`, payload).subscribe({
+        next: (response) => {
+          if (response.result === 'success' && response.data?.id) {
+            const newWarehouse: DropdownOption = { id: response.data.id.toString(), name: result.name };
+            const current = this.warehouseList$.value;
+            this.warehouseList$.next([...current, newWarehouse]);
+            this.pledgeForm.get('collateralInfo.warehouseId')?.setValue(newWarehouse.id);
+            this.notification.showSuccess(`Đã thêm kho: ${result.name}`);
+          }
+        },
+        error: (err) => {
+          console.error('Add warehouse error:', err);
+          this.notification.showError('Lỗi khi thêm kho mới.');
+        }
+      });
+    });
   }
 
+
   private setupAutoSearchOnBlur(): void {
-    // Giữ nguyên code auto search
+    setTimeout(() => {
+      const phoneInput = document.querySelector('input[formControlName="phoneNumber"]') as HTMLInputElement;
+      const cccdInput = document.querySelector('input[formControlName="identityNumber"]') as HTMLInputElement;
+      if (phoneInput) {
+        fromEvent(phoneInput, 'blur')
+          .pipe(debounceTime(300), distinctUntilChanged(), filter(() => this.isPhoneOrCccdValidForSearch()))
+          .subscribe(() => this.triggerCustomerSearch());
+      }
+      if (cccdInput) {
+        fromEvent(cccdInput, 'blur')
+          .pipe(debounceTime(300), distinctUntilChanged(), filter(() => this.isPhoneOrCccdValidForSearch()))
+          .subscribe(() => this.triggerCustomerSearch());
+      }
+    }, 100);
   }
 
   private isPhoneOrCccdValidForSearch(): boolean {
@@ -487,7 +600,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private triggerCustomerSearch(): void {
-    // Giữ nguyên
+    const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
+    if (!phone && !idNumber) return;
+    this.customerService.searchCustomer({ phoneNumber: phone, identityNumber: idNumber })
+      .subscribe({
+        next: (data: any) => { if (data && data.fullName) { this.showConfirmAndPopulate(data); } },
+        error: (err) => console.error('Auto search error:', err)
+      });
   }
 
 
@@ -528,11 +648,24 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private showConfirmAndPopulate(customerData: any): void {
-    // Giữ nguyên
+    const name = customerData.fullName || 'Khách hàng';
+    const phone = customerData.phoneNumber ? `(${customerData.phoneNumber})` : '';
+    const message = `Tìm thấy khách hàng: <strong>${name}</strong> ${phone}.<br><small>Đã có dữ liệu: thông tin cá nhân, gia đình, thu nhập, nguồn...</small><br><strong>Bạn có muốn sử dụng dữ liệu đã lưu không?</strong>`;
+    this.notification.showConfirm(message, 'Có', 'Không', 15000)
+      .then(confirmed => {
+        if (confirmed) {
+          this.populateAllCustomerData(customerData);
+          this.notification.showSuccess('Đã điền thông tin khách hàng!');
+        }
+      });
   }
 
   private populateAllCustomerData(data: any): void {
-    // Giữ nguyên
+    this.pledgeForm.patchValue({
+      customerInfo: data,
+      customerExtraInfo: data,
+      familyInfo: data
+    });
   }
 
   addOrUpdateCollateral(): void {
@@ -732,6 +865,23 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.stopWebcam();
     this.dialogRef.close(false);
   }
+  findCustomer(): void {
+    // (Tên formControlName đã là tiếng Anh)
+    const phone = this.pledgeForm.get('customerInfo.phoneNumber')?.value?.trim() || '';
+    const idNumber = this.pledgeForm.get('customerInfo.identityNumber')?.value?.trim() || '';
+    if (!phone && !idNumber) {
+      this.notification.showError('Vui lòng nhập số điện thoại hoặc số CCCD để tìm kiếm.');
+      return;
+    }
+    this.customerService.searchCustomer({ phoneNumber: phone, identityNumber: idNumber })
+      .subscribe({
+        next: (data: any) => {
+          if (data && data.fullName) { this.showConfirmAndPopulate(data); }
+          else { this.notification.showError('Không tìm thấy khách hàng.'); }
+        },
+        error: () => this.notification.showError('Lỗi khi tìm kiếm khách hàng.')
+      });
+  }
 
   private formatDate(date: any): string | null {
     return date ? this.datePipe.transform(date, 'yyyy-MM-dd') : null;
@@ -805,4 +955,39 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+}
+export class AddAssetTypeDialogComponent {
+  assetTypeForm: FormGroup;
+  get attributesArray() { return this.assetTypeForm.get('attributes') as FormArray; }
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<AddAssetTypeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
+  ) {
+    this.assetTypeForm = this.fb.group({
+      typeCode: ['', Validators.required],
+      typeName: ['', Validators.required],
+      status: ['Bình thường'],
+      attributes: this.fb.array([this.fb.group({ label: [''] })])
+    });
+  }
+
+  addAttribute(): void { this.attributesArray.push(this.fb.group({ label: [''] })); }
+  removeAttribute(i: number): void { this.attributesArray.removeAt(i); }
+
+  onSave(): void {
+    if (this.assetTypeForm.valid) {
+      const v = this.assetTypeForm.value;
+      const newAsset: AssetType = {
+        typeCode: v.typeCode,
+        typeName: v.typeName,
+        status: v.status,
+        attributes: v.attributes.filter((a: any) => a.label && a.label.trim() !== '')
+      };
+      this.dialogRef.close(newAsset);
+    }
+  }
+
+  onCancel(): void { this.dialogRef.close(); }
 }
