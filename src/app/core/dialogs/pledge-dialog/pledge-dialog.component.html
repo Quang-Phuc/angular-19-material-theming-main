@@ -347,20 +347,13 @@
             </button>
           </div>
 
-          <div class="form-grid-2-col">
-            <mat-form-field appearance="outline">
-              <mat-label>Mã Tài Sản (Asset Code)</mat-label>
-              <input matInput formControlName="assetCode" placeholder="Mã riêng của tài sản (VD: IMEI, số hợp đồng cũ)">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Định Giá Tài Sản</mat-label>
-              <input matInput type="number" formControlName="valuation">
-            </mat-form-field>
-          </div>
 
           <div class="form-grid-2-col">
-            <div class="kho-row full-width">
+            <div class="form-grid-asset-with-button">
+              <mat-form-field appearance="outline">
+                <mat-label>Định Giá Tài Sản</mat-label>
+                <input matInput type="number" formControlName="valuation">
+              </mat-form-field>
               <mat-form-field appearance="outline" class="flex-grow">
                 <mat-label>Kho</mat-label>
                 <mat-select formControlName="warehouseId">
