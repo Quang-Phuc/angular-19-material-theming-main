@@ -115,7 +115,8 @@
               <div class="form-grid-3-col">
                 <mat-form-field appearance="outline"><mat-label>Hộ Khẩu Thường Trú</mat-label><input matInput formControlName="householdRegistration"></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" formControlName="email"></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Thu Nhập (VNĐ/tháng)</mat-label><input matInput type="number" formControlName="incomeVndPerMonth"></mat-form-field>
+                <mat-form-field appearance="outline"><mat-label>Thu Nhập (VNĐ/tháng)</mat-label><input matInput type="text" formControlName="incomeVndPerMonth" appCurrencyFormat [allowZero]="true" placeholder="0">
+                  </mat-form-field>
               </div>
               <div class="form-grid-3-col">
                 <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="contactPerson"></mat-form-field>
@@ -212,7 +213,8 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Tổng Tiền Vay *</mat-label>
-              <input matInput type="number" formControlName="loanAmount" placeholder="0">
+              <input matInput type="text" formControlName="loanAmount" appCurrencyFormat placeholder="0">
+
             </mat-form-field>
           </div>
 
@@ -274,7 +276,7 @@
 
         <div class="fee-grid" formGroupName="warehouseFee">
           <label>Phí kho</label>
-          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
           <mat-radio-group formControlName="type">
             <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
             <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -349,7 +351,7 @@
           <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
               <mat-label>Định Giá Tài Sản</mat-label>
-              <input matInput type="number" formControlName="valuation">
+              <input matInput type="text" formControlName="valuation" appCurrencyFormat [allowZero]="true" placeholder="0">
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -417,7 +419,7 @@
               <!-- Cột Định giá -->
               <ng-container matColumnDef="valuation">
                 <th mat-header-cell *matHeaderCellDef> Định giá </th>
-                <td mat-cell *matCellDef="let item"> {{ item.valuation | number }} </td>
+                <td mat-cell *matCellDef="let item"> {{ item.valuation | vnd }} </td>
               </ng-container>
 
               <!-- Cột Xóa -->

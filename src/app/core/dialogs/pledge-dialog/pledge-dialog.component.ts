@@ -33,6 +33,11 @@ import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from
 import { AddWarehouseDialogComponent } from './add-warehouse-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 
+// Thêm import các thành phần mới
+import { CurrencyFormatDirective } from '../../utils/currency-format.directive';
+import { VndPipe } from '../../utils/currency.pipe';
+import { CurrencyService } from '../../services/currency.service';
+
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute { label: string; value?: string; required?: boolean; }
 interface AssetType {
@@ -181,7 +186,10 @@ export class AddAssetTypeDialogComponent {
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
     MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
-    MatListModule, MatTableModule, AddWarehouseDialogComponent,AddAssetTypeDialogComponent
+    MatListModule, MatTableModule, AddWarehouseDialogComponent,AddAssetTypeDialogComponent,
+    CurrencyFormatDirective,
+    VndPipe
+
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
@@ -244,6 +252,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private matDialog = inject(MatDialog);
   private stream: MediaStream | null = null;
+
+  // Inject CurrencyService
+  private currencyService = inject(CurrencyService);
 
   assetAttributes: AssetTypeAttribute[] = [];
   get attributesFormArray(): FormArray {
@@ -422,6 +433,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         attributes: c.attributes ? c.attributes.map(a => ({ ...a })) : []
       }));
     }
+
+    // Sau khi patch, format lại các trường tiền tệ
+    setTimeout(() => this.formatCurrencyFields(), 0);
   }
 
   private loadAssetTypes(): void {
@@ -777,6 +791,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         if (confirmed) {
           this.populateAllCustomerData(customerData);
           this.notification.showSuccess('Đã điền thông tin khách hàng!');
+          // Sau khi populate, format lại các trường tiền tệ
+          setTimeout(() => this.formatCurrencyFields(), 0);
         }
       });
   }
@@ -848,6 +864,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       item.attributes.forEach((attr: any, i: number) => {
         this.attributesFormArray.at(i).setValue(attr.value);
       });
+      // Format lại trường valuation sau edit
+      this.formatCurrencyFields();
     }, 0);
 
     this.cdr.detectChanges();
@@ -868,6 +886,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.pledgeForm.get('collateralInfo.assetType')?.setValue(this.lastSelectedAssetType);
     }
     this.selectedCollateralIndex = null;
+    // Format lại sau reset
+    setTimeout(() => this.formatCurrencyFields(), 0);
   }
 
   removeCollateral(index: number): void {
@@ -1076,5 +1096,44 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-}
+  // Hàm mới để format tất cả các trường tiền tệ
+  private formatCurrencyFields(): void {
+    // Các selector cho các trường cần format
+    const selectors = [
+      'input[formControlName="valuation"]',
+      'input[formControlName="loanAmount"]',
+      'input[formControlName="incomeVndPerMonth"]',
+      // Các phí: vì chúng trong FormGroup con, dùng querySelectorAll
+      'input[formControlName="value"]' // sẽ match nhiều
+    ];
 
+    selectors.forEach(selector => {
+      const inputs = this.el.nativeElement.querySelectorAll(selector);
+      inputs.forEach((input: HTMLInputElement) => {
+        if (input && typeof (input as any).formatDisplay === 'function') {
+          (input as any).formatDisplay();
+        } else {
+          // Fallback dùng service
+          const controlName = input.getAttribute('formControlName');
+          let control;
+          if (controlName === 'value') {
+            // Xử lý phí: tìm parent formGroupName
+            const parent = input.closest('[formGroupName]');
+            if (parent) {
+              const groupName = parent.getAttribute('formGroupName');
+              control = this.pledgeForm.get(`feesInfo.${groupName}.value`);
+            }
+          } else {
+            if (controlName) {
+              control = this.pledgeForm.get(controlName);
+            }
+          }
+          if (control) {
+            input.value = this.currencyService.format(control.value);
+          }
+        }
+      });
+    });
+  }
+
+}
