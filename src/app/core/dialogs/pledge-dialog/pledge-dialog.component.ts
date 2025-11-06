@@ -311,7 +311,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         contractCode: [''], loanAmount: [0, [Validators.required, Validators.min(1000)]],
         interestTermValue: [1, Validators.required], interestTermUnit: ['MONTH', Validators.required],
         interestRateValue: [0, Validators.required], interestRateUnit: ['INTEREST_PER_MILLION_PER_DAY', Validators.required],
-        paymentCount: [1, Validators.required], interestPaymentType: ['PERIODIC_INTEREST', Validators.required], note: ['']
+        paymentCount: [1, Validators.required], interestPaymentType: ['PERIODIC_INTEREST', Validators.required], note: [''],
+        loanStatus: [''],
+        follower: ['']
       }),
       feesInfo: this.fb.group({
         warehouseFee: this.createFeeGroup(), storageFee: this.createFeeGroup(),
