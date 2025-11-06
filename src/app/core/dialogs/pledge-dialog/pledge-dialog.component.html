@@ -346,28 +346,26 @@
               <mat-icon>add</mat-icon> Thêm mới
             </button>
           </div>
+          <div class="form-grid-asset-with-button">
+            <mat-form-field appearance="outline">
+              <mat-label>Định Giá Tài Sản</mat-label>
+              <input matInput type="number" formControlName="valuation">
+            </mat-form-field>
 
+            <mat-form-field appearance="outline">
+              <mat-label>Kho</mat-label>
+              <mat-select formControlName="warehouseId">
+                @for (opt of (warehouseList$ | async); track opt.id) {
+                  <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
 
-          <div class="form-grid-2-col">
-            <div class="form-grid-asset-with-button">
-              <mat-form-field appearance="outline">
-                <mat-label>Định Giá Tài Sản</mat-label>
-                <input matInput type="number" formControlName="valuation">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="flex-grow">
-                <mat-label>Kho</mat-label>
-                <mat-select formControlName="warehouseId">
-                  @for (opt of (warehouseList$ | async); track opt.id) {
-                    <mat-option [value]="opt.id">{{ opt.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-              <button mat-mini-fab color="primary" class="add-warehouse-mini-btn"
-                      (click)="addNewWarehouse()" matTooltip="Thêm kho mới">
-                <mat-icon>add</mat-icon>
-              </button>
-            </div>
+            <button mat-flat-button class="add-asset-type-btn" (click)="addNewWarehouse()">
+              <mat-icon>add</mat-icon> Thêm mới
+            </button>
           </div>
+
 
           <div *ngIf="assetAttributes.length > 0">
             <h4 class="attributes-title">
