@@ -108,8 +108,8 @@ interface AssetTypeOption {
             <mat-form-field appearance="outline">
               <mat-label>Trạng thái</mat-label>
               <mat-select formControlName="status">
-                <mat-option value="Bình thường">Bình thường</mat-option>
-                <mat-option value="Không hoạt động">Không hoạt động</mat-option>
+                <mat-option value="ACTIVE">Hoạt động</mat-option>
+                <mat-option value="INACTIVE">Không hoạt động</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -159,7 +159,7 @@ export class AddAssetTypeDialogComponent {
     this.assetTypeForm = this.fb.group({
       typeCode: ['', Validators.required],
       typeName: ['', Validators.required],
-      status: ['Bình thường'],
+      status: ['ACTIVE'],
       attributes: this.fb.array([this.fb.group({ label: [''] })])
     });
   }
@@ -318,8 +318,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         riskFee: this.createFeeGroup(), managementFee: this.createFeeGroup()
       }),
       collateralInfo: this.fb.group({
-        assetName: ['', Validators.required],
-        assetType: [null, Validators.required],
+        assetName: [''],
+        assetType: [''],
         valuation: [0],
         warehouseId: [''],
         assetCode: [''],
@@ -919,10 +919,49 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSave(): void {
+    // === TỰ ĐỘNG THÊM TÀI SẢN ĐANG NHẬP DỞ (NẾU HỢP LỆ) ===
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    if (collateralGroup && collateralGroup.dirty) {
+      const raw = collateralGroup.getRawValue();
+      const hasData = raw.assetName?.trim() || raw.assetType || raw.valuation > 0;
+
+      if (hasData && collateralGroup.valid) {
+        const attributesArray = collateralGroup.get('attributes') as FormArray;
+
+        const newAsset = {
+          assetName: raw.assetName?.trim(),
+          assetType: raw.assetType,
+          assetCode: raw.assetCode ?? '',
+          valuation: this.currencyService.parse(raw.valuation),
+          warehouseId: raw.warehouseId ?? '',
+          assetNote: raw.assetNote?.trim() ?? '',
+          attributes: this.assetAttributes.map((attr, i) => ({
+            id: attr.id,
+            label: attr.label,
+            value: (attributesArray.at(i)?.value ?? '').toString().trim(),
+            required: attr.required ?? false
+          })).filter(a => a.value)
+        };
+
+        // Nếu đang edit → cập nhật, không thì thêm mới
+        if (this.selectedCollateralIndex !== null) {
+          this.collateralList[this.selectedCollateralIndex] = newAsset;
+          this.selectedCollateralIndex = null;
+          this.notification.showInfo('Đã cập nhật tài sản đang chỉnh sửa.');
+        } else {
+          this.collateralList = [...this.collateralList, newAsset];
+          this.notification.showInfo('Đã tự động thêm tài sản đang nhập vào danh sách.');
+        }
+
+        this.resetCollateralForm();
+        this.cdr.detectChanges();
+      }
+    }
+
+    // === KIỂM TRA FORM CHÍNH ===
     if (this.pledgeForm.invalid) {
       this.notification.showError('Vui lòng điền đầy đủ các trường bắt buộc.');
 
-      // === LOG CHI TIẾT LỖI ===
       const errors: string[] = [];
       const findInvalid = (control: any, path: string = '') => {
         if (control instanceof FormGroup || control instanceof FormArray) {
@@ -970,7 +1009,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       fees: raw.feesInfo,
       collateral: this.collateralList.map(c => ({
         ...c,
-        valuation: this.currencyService.parse(c.valuation), // ÉP "5.656" → 5656
+        valuation: this.currencyService.parse(c.valuation),
         assetNote: c.assetNote?.trim() ?? ''
       }))
     };
@@ -996,7 +1035,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     // Attachments
     this.uploadedFiles.forEach(f => formData.append('attachments', f.file, f.name));
 
-    // === GỌI API TRỰC TIẾP QUA apiService ===
+    // === GỌI API ===
     const url = this.isEditMode && this.dialogData.contract?.id
       ? `/v1/pledges/${this.dialogData.contract.id}`
       : '/v1/pledges';
@@ -1018,8 +1057,28 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onCancel(): void {
-    this.stopWebcam();
-    this.dialogRef.close(false);
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    const hasPendingAsset = collateralGroup?.dirty &&
+      (collateralGroup.get('assetName')?.value?.trim() ||
+        collateralGroup.get('assetType')?.value ||
+        collateralGroup.get('valuation')?.value > 0);
+
+    if (hasPendingAsset) {
+      this.notification.showConfirm(
+        'Bạn đang nhập tài sản nhưng chưa thêm vào danh sách.<br><strong>Thoát sẽ mất dữ liệu này.</strong>',
+        'Vẫn thoát',
+        'Ở lại',
+        15000
+      ).then(confirmed => {
+        if (confirmed) {
+          this.stopWebcam();
+          this.dialogRef.close(false);
+        }
+      });
+    } else {
+      this.stopWebcam();
+      this.dialogRef.close(false);
+    }
   }
   findCustomer(): void {
     // (Tên formControlName đã là tiếng Anh)

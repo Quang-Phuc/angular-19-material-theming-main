@@ -235,7 +235,7 @@
           <div class="form-grid-2-col">
             <mat-form-field appearance="outline">
               <mat-label>Lãi suất</mat-label>
-              <input matInput type="number" formControlName="interestRateValue" placeholder="0">
+              <input matInput type="text" formControlName="interestRateValue" appCurrencyFormat placeholder="0">
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -331,12 +331,12 @@
         <div formGroupName="collateralInfo">
           <div class="form-grid-asset-with-button">
             <mat-form-field appearance="outline">
-              <mat-label>Tên Tài Sản *</mat-label>
+              <mat-label>Tên Tài Sản</mat-label>
               <input matInput formControlName="assetName" placeholder="Xe Wave RSX">
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Loại Tài Sản *</mat-label>
+              <mat-label>Loại Tài Sản</mat-label>
               <mat-select formControlName="assetType">
                 @for (opt of (assetTypes$ | async); track opt.id) {
                   <mat-option [value]="opt.id">{{ opt.name }}</mat-option>

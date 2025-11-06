@@ -10,8 +10,17 @@ export class CurrencyService {
     return isNaN(num) ? '' : num.toLocaleString('vi-VN');
   }
 
-  parse(value: string): number {
+  parse(value: any): number {
+    console.log('CurrencyService.parse() nhận giá trị:', value, ' - kiểu:', typeof value);
     if (!value) return 0;
+    if (typeof value !== 'string') {
+      // nếu là số thì trả về luôn
+      if (typeof value === 'number') return value;
+      // nếu không phải chuỗi cũng không phải số, log thêm để debug
+      console.warn('Giá trị không hợp lệ:', value);
+      return 0;
+    }
     return parseInt(value.replace(/,/g, ''), 10) || 0;
   }
+
 }
