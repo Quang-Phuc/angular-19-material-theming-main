@@ -662,39 +662,33 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
     const attributesArray = collateralGroup.get('attributes') as FormArray;
 
-    // Kiểm tra validate
     if (collateralGroup.invalid) {
       collateralGroup.markAllAsTouched();
       this.findAndFocusFirstInvalidFieldInGroup(collateralGroup);
-      this.notification.showError('Vui lòng điền đầy đủ thông tin tài sản (các trường * và thuộc tính bắt buộc).');
+      this.notification.showError('Vui lòng điền đầy đủ thông tin tài sản.');
       return;
     }
 
-    // Thu thập dữ liệu
     const raw = collateralGroup.getRawValue();
+
     const assetItem = {
       assetName: raw.assetName,
       assetType: raw.assetType,
-      assetCode: raw.assetCode,
-      valuation: raw.valuation,
-      warehouseId: raw.warehouseId,
-      assetNote: raw.assetNote,
+      assetCode: raw.assetCode ?? '',
+      // ÉP CHUỖI "5.656" → 5656
+      valuation: this.currencyService.parse(raw.valuation),
+      warehouseId: raw.warehouseId ?? '',
+      assetNote: raw.assetNote?.trim() ?? '',
       attributes: this.assetAttributes.map((attr, i) => ({
         id: attr.id,
         label: attr.label,
-        value: (attributesArray.at(i)?.value || '').trim(),
-        required: attr.required
+        value: (attributesArray.at(i)?.value ?? '').toString().trim(),
+        required: attr.required ?? false
       }))
     };
 
-    // Thêm vào danh sách
     this.collateralList = [...this.collateralList, assetItem];
-    this.notification.showSuccess('Đã thêm tài sản vào danh sách!');
-
-    // Lưu lại loại tài sản để giữ khi nhập tiếp
     this.lastSelectedAssetType = raw.assetType;
-
-    // Reset form (giữ lại loại tài sản)
     this.resetCollateralForm();
     this.cdr.detectChanges();
   }
@@ -974,7 +968,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         loanDate: this.formatDate(raw.loanInfo.loanDate)!
       },
       fees: raw.feesInfo,
-      collateral: this.collateralList
+      collateral: this.collateralList.map(c => ({
+        ...c,
+        valuation: this.currencyService.parse(c.valuation), // ÉP "5.656" → 5656
+        assetNote: c.assetNote?.trim() ?? ''
+      }))
     };
 
     if (!payload.storeId) {
