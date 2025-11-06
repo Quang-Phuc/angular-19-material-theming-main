@@ -509,38 +509,43 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: AssetType | undefined) => {
       if (!res) return;
 
-      // === ĐẢM BẢO GỬI ĐẦY ĐỦ: typeCode, typeName, status, attributes ===
       const payload = {
         typeCode: res.typeCode,
         typeName: res.typeName,
         status: res.status,
-        attributes: res.attributes.filter(attr => attr.label.trim() !== '') // Lọc bỏ rỗng
+        attributes: res.attributes.filter(attr => attr.label.trim() !== '')
       };
 
-      this.apiService.post<ApiResponse<{ id: number }>>('/asset-types', payload).subscribe({
-        next: (resp) => {
-          if (resp.result === 'success' && resp.data?.id) {
-            const newType: AssetTypeOption = { id: resp.data.id, name: res.typeName };
+      this.apiService.post('/asset-types', payload).subscribe({
+        next: (response: any) => {
+          if (response && response.id) {
+            const newType: AssetTypeOption = {
+              id: response.id,
+              name: response.typeName
+            };
+
+            // ✅ Cập nhật danh sách loại tài sản hiển thị
             this.assetTypes$.next([...this.assetTypes$.value, newType]);
 
-            // Tự động chọn loại tài sản vừa thêm
-            this.pledgeForm.get('loanInfo.assetType')?.setValue(newType.id.toString());
+            // ✅ Gán loại tài sản mới được tạo vào form
+            this.pledgeForm.get('collateralInfo.assetType')?.setValue(newType.id.toString());
 
-            // Tải lại thuộc tính động cho loại tài sản mới
+            // ✅ Load lại thuộc tính động (nếu có)
             // this.loadAssetAttributes(newType.id.toString());
 
-            this.notification.showSuccess(`Thêm loại tài sản "${res.typeName}" thành công!`);
+            this.notification.showSuccess(`Thêm loại tài sản "${response.typeName}" thành công!`);
           } else {
-            this.notification.showError('Thêm loại tài sản thất bại. Vui lòng thử lại.');
+            this.notification.showError('Không nhận được ID loại tài sản từ API.');
           }
         },
         error: (err) => {
           console.error('Add asset type error:', err);
-          this.notification.showError('Lỗi kết nối server khi thêm loại tài sản.');
+          this.notification.showError('Lỗi khi thêm loại tài sản.');
         }
       });
     });
   }
+
 
   addNewWarehouse(): void {
     const dialogRef = this.matDialog.open(AddWarehouseDialogComponent, {
