@@ -551,16 +551,24 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     dialogRef.afterClosed().subscribe((result: { name: string; address: string; description: string } | undefined) => {
       if (!result) return;
 
-      const payload = { name: result.name, address: result.address, description: result.description };
+      const payload = {
+        name: result.name,
+        address: result.address,
+        description: result.description
+      };
 
-      this.apiService.post<ApiResponse<{ id: number }>>(`/warehouses/${this.activeStoreId}`, payload).subscribe({
-        next: (response) => {
-          if (response.result === 'success' && response.data?.id) {
-            const newWarehouse: DropdownOption = { id: response.data.id.toString(), name: result.name };
-            const current = this.warehouseList$.value;
-            this.warehouseList$.next([...current, newWarehouse]);
-            this.pledgeForm.get('collateralInfo.warehouseId')?.setValue(newWarehouse.id);
-            this.notification.showSuccess(`Đã thêm kho: ${result.name}`);
+      this.apiService.post(`/warehouses/store/${this.activeStoreId}`, payload).subscribe({
+        next: (response: any) => {
+          if (response && response.id) {
+            this.notification.showSuccess(`Đã thêm kho: ${response.name}`);
+
+            // ✅ Gọi lại API để load danh sách kho mới nhất
+            this.loadWarehouseList();
+
+            // ✅ Set giá trị kho vừa thêm vào form
+            this.pledgeForm.get('collateralInfo.warehouseId')?.setValue(response.id.toString());
+          } else {
+            this.notification.showError('Không nhận được ID từ API.');
           }
         },
         error: (err) => {
@@ -570,6 +578,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
   }
+
+
 
 
   private setupAutoSearchOnBlur(): void {
