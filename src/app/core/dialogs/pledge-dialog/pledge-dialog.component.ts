@@ -803,6 +803,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       customerExtraInfo: data,
       familyInfo: data
     });
+
+    // ← DÒNG DUY NHẤT CẦN THÊM
+    setTimeout(() => this.formatCurrencyFields(), 0);
   }
 
   addOrUpdateCollateral(): void {
