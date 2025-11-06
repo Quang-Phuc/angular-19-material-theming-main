@@ -90,6 +90,7 @@ export interface FeeInfo {
 export interface CollateralAttribute {
   label: string;
   value: string;
+  id: number;
 }
 
 export interface PledgeCollateral {

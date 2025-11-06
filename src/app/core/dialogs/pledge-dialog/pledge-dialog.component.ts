@@ -39,7 +39,12 @@ import { VndPipe } from '../../utils/currency.pipe';
 import { CurrencyService } from '../../services/currency.service';
 
 interface DropdownOption { id: string; name: string; }
-interface AssetTypeAttribute { label: string; value?: string; required?: boolean; }
+interface AssetTypeAttribute {
+  id?: number;        // ← Thêm id
+  label: string;
+  value?: string;
+  required?: boolean;
+}
 interface AssetType {
   typeCode: string;
   typeName: string;
@@ -456,6 +461,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           id: item.id,
           name: item.name,
           attributes: item.attributes.map(attr => ({
+            id: attr.id,
             label: attr.label,
             required: false
           }))
@@ -674,6 +680,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       warehouseId: raw.warehouseId,
       assetNote: raw.assetNote,
       attributes: this.assetAttributes.map((attr, i) => ({
+        id: attr.id,
         label: attr.label,
         value: (attributesArray.at(i)?.value || '').trim(),
         required: attr.required
@@ -848,6 +855,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const item = this.collateralList[index];
     this.selectedCollateralIndex = index;
 
+    // Patch các field
     this.pledgeForm.get('collateralInfo')?.patchValue({
       assetName: item.assetName,
       assetType: item.assetType,
@@ -857,15 +865,23 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       assetNote: item.assetNote
     });
 
-    // Load attributes (trigger valueChanges)
+    // Trigger load attributes từ assetTypes$
     this.pledgeForm.get('collateralInfo.assetType')?.setValue(item.assetType);
 
-    // Patch attributes values sau khi build controls
+    // Patch giá trị attribute sau khi build form
     setTimeout(() => {
+      // Lấy danh sách attribute từ assetTypes$ để có id
+      const selectedType = this.assetTypes$.value.find(t => t.id.toString() === item.assetType);
+      if (selectedType?.attributes) {
+        this.assetAttributes = selectedType.attributes; // Có id
+        this.buildAttributeFormControls();
+      }
+
+      // Patch value
       item.attributes.forEach((attr: any, i: number) => {
         this.attributesFormArray.at(i).setValue(attr.value);
       });
-      // Format lại trường valuation sau edit
+
       requestAnimationFrame(() => this.formatCurrencyFields());
     }, 0);
 
