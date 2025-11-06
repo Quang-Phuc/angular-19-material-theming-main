@@ -435,7 +435,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // Sau khi patch, format lại các trường tiền tệ
-    setTimeout(() => this.formatCurrencyFields(), 0);
+    requestAnimationFrame(() => this.formatCurrencyFields());
   }
 
   private loadAssetTypes(): void {
@@ -792,7 +792,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           this.populateAllCustomerData(customerData);
           this.notification.showSuccess('Đã điền thông tin khách hàng!');
           // Sau khi populate, format lại các trường tiền tệ
-          setTimeout(() => this.formatCurrencyFields(), 0);
+          requestAnimationFrame(() => this.formatCurrencyFields());
         }
       });
   }
@@ -803,9 +803,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       customerExtraInfo: data,
       familyInfo: data
     });
-
-    // ← DÒNG DUY NHẤT CẦN THÊM
-    setTimeout(() => this.formatCurrencyFields(), 0);
+    requestAnimationFrame(() => this.formatCurrencyFields());
   }
 
   addOrUpdateCollateral(): void {
@@ -868,7 +866,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         this.attributesFormArray.at(i).setValue(attr.value);
       });
       // Format lại trường valuation sau edit
-      this.formatCurrencyFields();
+      requestAnimationFrame(() => this.formatCurrencyFields());
     }, 0);
 
     this.cdr.detectChanges();
@@ -890,7 +888,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.selectedCollateralIndex = null;
     // Format lại sau reset
-    setTimeout(() => this.formatCurrencyFields(), 0);
+    requestAnimationFrame(() => this.formatCurrencyFields());
   }
 
   removeCollateral(index: number): void {
@@ -1118,19 +1116,16 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
           // Fallback dùng service
           const controlName = input.getAttribute('formControlName');
-          let control;
-          if (controlName === 'value') {
-            // Xử lý phí: tìm parent formGroupName
-            const parent = input.closest('[formGroupName]');
-            if (parent) {
-              const groupName = parent.getAttribute('formGroupName');
-              control = this.pledgeForm.get(`feesInfo.${groupName}.value`);
+          let path = controlName || '';
+          let current = input.parentElement;
+          while (current) {
+            if (current.hasAttribute('formGroupName')) {
+              const groupName = current.getAttribute('formGroupName');
+              path = groupName + '.' + path;
             }
-          } else {
-            if (controlName) {
-              control = this.pledgeForm.get(controlName);
-            }
+            current = current.parentElement;
           }
+          const control = this.pledgeForm.get(path);
           if (control) {
             input.value = this.currencyService.format(control.value);
           }

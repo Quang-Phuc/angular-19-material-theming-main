@@ -116,7 +116,7 @@
                 <mat-form-field appearance="outline"><mat-label>Hộ Khẩu Thường Trú</mat-label><input matInput formControlName="householdRegistration"></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" formControlName="email"></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Thu Nhập (VNĐ/tháng)</mat-label><input matInput type="text" formControlName="incomeVndPerMonth" appCurrencyFormat [allowZero]="true" placeholder="0">
-                  </mat-form-field>
+                </mat-form-field>
               </div>
               <div class="form-grid-3-col">
                 <mat-form-field appearance="outline"><mat-label>Người liên hệ</mat-label><input matInput formControlName="contactPerson"></mat-form-field>
@@ -195,100 +195,100 @@
         </mat-tab-group>
       </mat-expansion-panel>
 
-      <!-- 2. Thông tin cho vay -->
-      <mat-expansion-panel [expanded]="true">
+      <!-- 2. Thông tin khoản vay -->
+      <mat-expansion-panel>
         <mat-expansion-panel-header>
-          <mat-panel-title>2. Thông tin cho vay</mat-panel-title>
+          <mat-panel-title>2. Thông tin khoản vay</mat-panel-title>
         </mat-expansion-panel-header>
 
         <div formGroupName="loanInfo">
-
-
-          <div class="form-grid-asset-with-button">
+          <div class="form-grid-2-col">
             <mat-form-field appearance="outline">
-              <mat-label>Ngày Vay *</mat-label>
-              <input matInput [matDatepicker]="dpVay" formControlName="loanDate">
-              <mat-datepicker-toggle matIconSuffix [for]="dpVay"></mat-datepicker-toggle>
-              <mat-datepicker #dpVay></mat-datepicker>
+              <mat-label>Ngày vay *</mat-label>
+              <input matInput [matDatepicker]="loanDatePicker" formControlName="loanDate">
+              <mat-datepicker-toggle matIconSuffix [for]="loanDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #loanDatePicker></mat-datepicker>
             </mat-form-field>
+
             <mat-form-field appearance="outline">
-              <mat-label>Tổng Tiền Vay *</mat-label>
+              <mat-label>Số tiền vay *</mat-label>
               <input matInput type="text" formControlName="loanAmount" appCurrencyFormat placeholder="0">
-
             </mat-form-field>
           </div>
 
-          <div class="interest-group-grid">
-            <div class="interest-item">
-              <label class="interest-label">Kỳ Đóng Lãi *</label>
-              <div class="input-group">
-                <input matInput type="number" formControlName="interestTermValue" class="number-input" placeholder="1">
-                <mat-select formControlName="interestTermUnit" class="unit-select">
-                  <mat-option value="DAY">Ngày</mat-option>
-                  <mat-option value="WEEK">Tuần</mat-option>
-                  <mat-option value="PERIODIC_MONTH">Tháng định kỳ</mat-option>
-                  <mat-option value="MONTH">Tháng</mat-option>
-                </mat-select>
-              </div>
-            </div>
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Kỳ hạn lãi</mat-label>
+              <input matInput type="number" formControlName="interestTermValue" placeholder="1">
+            </mat-form-field>
 
-            <div class="interest-item">
-              <label class="interest-label">Lãi Suất *</label>
-              <div class="input-group">
-                <input matInput type="number" formControlName="interestRateValue" class="number-input" placeholder="0">
-                <mat-select formControlName="interestRateUnit" class="unit-select">
-                  @for (unit of (interestRateUnits$ | async); track unit.id) {
-                    <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
-                  }
-                </mat-select>
-              </div>
-            </div>
-
-            <div class="interest-item">
-              <label class="interest-label">Hình thức cho vay *</label>
-              <div class="input-group">
-                <mat-select formControlName="interestPaymentType" class="unit-select">
-                  <mat-option value="PERIODIC_INTEREST">Trả lãi định kỳ – Chuộc gốc cuối kỳ</mat-option>
-                  <mat-option value="INSTALLMENT">Trả góp gốc + lãi hằng kỳ</mat-option>
-                  <mat-option value="LUMP_SUM_END">Trả cuối kỳ (cả gốc + lãi 1 lần)</mat-option>
-                  <mat-option value="RENEWAL">Gia hạn hợp đồng (đáo hạn)</mat-option>
-                </mat-select>
-              </div>
-            </div>
-
-            <div class="interest-item">
-              <label class="interest-label">Số lần trả *</label>
-              <div class="input-group">
-                <input matInput type="number" formControlName="paymentCount" class="number-input" placeholder="1">
-              </div>
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Đơn vị kỳ hạn</mat-label>
+              <mat-select formControlName="interestTermUnit">
+                <mat-option value="DAY">Ngày</mat-option>
+                <mat-option value="MONTH">Tháng</mat-option>
+                <mat-option value="YEAR">Năm</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
+
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Lãi suất</mat-label>
+              <input matInput type="number" formControlName="interestRateValue" placeholder="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Đơn vị lãi suất</mat-label>
+              <mat-select formControlName="interestRateUnit">
+                @for (unit of (interestRateUnits$ | async); track unit.id) {
+                  <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-grid-2-col">
+            <mat-form-field appearance="outline">
+              <mat-label>Số kỳ thanh toán</mat-label>
+              <input matInput type="number" formControlName="paymentCount" placeholder="1">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hình thức trả lãi</mat-label>
+              <mat-select formControlName="interestPaymentType">
+                <mat-option value="PERIODIC_INTEREST">Trả lãi định kỳ</mat-option>
+                <mat-option value="END_OF_TERM">Cuối kỳ</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Ghi Chú (Hợp đồng)</mat-label>
+            <mat-label>Ghi chú (khoản vay)</mat-label>
             <textarea matInput formControlName="note" rows="2"></textarea>
           </mat-form-field>
         </div>
       </mat-expansion-panel>
 
-      <!-- 3. Các loại phí -->
-      <mat-expansion-panel formGroupName="feesInfo">
-        <mat-expansion-panel-header><mat-panel-title>3. Các loại phí</mat-panel-title></mat-expansion-panel-header>
+      <!-- 3. Phí dịch vụ -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>3. Phí dịch vụ</mat-panel-title>
+        </mat-expansion-panel-header>
 
-        <div class="fee-grid" formGroupName="warehouseFee">
-          <label>Phí kho</label>
-          <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
-          <mat-radio-group formControlName="type">
-            <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
-            <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
-          </mat-radio-group>
-        </div>
-        <hr>
-        <mat-expansion-panel>
-          <mat-expansion-panel-header><mat-panel-title>Các loại phí hàng kỳ</mat-panel-title></mat-expansion-panel-header>
+        <div formGroupName="feesInfo">
+          <div class="fee-grid" formGroupName="warehouseFee">
+            <label>Phí kho</label>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
+            <mat-radio-group formControlName="type">
+              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
+              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
+            </mat-radio-group>
+          </div>
 
           <div class="fee-grid" formGroupName="storageFee">
-            <label>Phí lưu kho</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+            <label>Phí lưu trữ</label>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -297,7 +297,7 @@
 
           <div class="fee-grid" formGroupName="riskFee">
             <label>Phí rủi ro</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
@@ -306,13 +306,13 @@
 
           <div class="fee-grid" formGroupName="managementFee">
             <label>Phí quản lí</label>
-            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="number" formControlName="value"></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Giá trị</mat-label><input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0"></mat-form-field>
             <mat-radio-group formControlName="type">
               <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
             </mat-radio-group>
           </div>
-        </mat-expansion-panel>
+        </div>
       </mat-expansion-panel>
 
       <!-- 4. Thông tin tài sản thế chấp (CẬP NHẬT ĐỘNG) -->
@@ -508,7 +508,7 @@
       <div>{{ data.assetCode || '-' }}</div>
 
       <div><strong>Định giá:</strong></div>
-      <div>{{ data.valuation | number:'1.0-0' }} VNĐ</div>
+      <div>{{ data.valuation | vnd }} VNĐ</div>
 
       <div><strong>Kho lưu trữ:</strong></div>
       <div>{{ getWarehouseName(data.warehouseId) || '-' }}</div>
