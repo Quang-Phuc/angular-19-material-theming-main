@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- THÊM MỚI: Phần chọn cửa hàng chính, tách riêng lên trên -->
+  <!-- CHỌN CỬA HÀNG -->
   <div class="store-selector-container">
     <mat-form-field appearance="outline" class="store-select-field">
       <mat-label>Cửa hàng chính</mat-label>
@@ -27,47 +27,71 @@
     </mat-form-field>
   </div>
 
+  <!-- THANH LỌC -->
   <mat-toolbar class="filter-toolbar" [formGroup]="filterForm">
 
+    <!-- TÌM KIẾM -->
     <mat-form-field appearance="outline" class="filter-field search-field">
       <mat-label>Tìm kiếm</mat-label>
       <input matInput formControlName="keyword" placeholder="Tên, SĐT khách hàng...">
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
 
+    <!-- TRẠNG THÁI HỢP ĐỒNG -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Trạng Thái</mat-label>
       <mat-select formControlName="loanStatus">
+        <mat-option value="">Tất cả</mat-option>
         <mat-option value="dang_vay">Đang vay</mat-option>
         <mat-option value="da_dong">Đã đóng</mat-option>
         <mat-option value="tre_han">Trễ hạn</mat-option>
       </mat-select>
     </mat-form-field>
 
+    <!-- TÌNH TRẠNG TÀI SẢN -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Tình trạng</mat-label>
       <mat-select formControlName="pledgeState">
-        <mat-option value="tat_ca">Tất cả</mat-option>
+        <mat-option value="">Tất cả</mat-option>
         <mat-option value="trong_kho">Trong kho</mat-option>
         <mat-option value="thanh_ly">Thanh lý</mat-option>
       </mat-select>
     </mat-form-field>
 
+    <!-- TỪ NGÀY -->
     <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Thời gian</mat-label>
-      <mat-select formControlName="timeRange">
-        <mat-option [value]="null">- Thời gian -</mat-option>
-        <mat-option value="today">Hôm nay</mat-option>
-        <mat-option value="this_week">Tuần này</mat-option>
-        <mat-option value="this_month">Tháng này</mat-option>
+      <mat-label>Từ ngày</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="fromDate">
+      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fromPicker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- ĐẾN NGÀY -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Đến ngày</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="toDate">
+      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+      <mat-datepicker #toPicker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- NGƯỜI THEO DÕI -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Người Theo Dõi</mat-label>
+      <mat-select formControlName="follower" (selectionChange)="onFollowerChange($event.value)">
+        <mat-option value="">Tất cả</mat-option>
+        @for (n of (followerList$ | async); track n.id) {
+          <mat-option [value]="n.id">{{ n.fullName }}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
 
+    <!-- NÚT TÌM KIẾM -->
     <button mat-flat-button color="primary" class="search-button" (click)="applyFilters()">
       <mat-icon>search</mat-icon>
       <span>Tìm kiếm</span>
     </button>
 
+    <!-- NÚT RESET -->
     <button mat-stroked-button (click)="resetFilters()" matTooltip="Đặt lại bộ lọc">
       <mat-icon>restart_alt</mat-icon>
     </button>
@@ -77,6 +101,7 @@
     </button>
   </mat-toolbar>
 
+  <!-- THANH HÀNH ĐỘNG -->
   <mat-toolbar class="action-toolbar">
     <button mat-flat-button class="add-new-button" (click)="openPledgeDialog()">
       <mat-icon>add</mat-icon>
@@ -89,8 +114,8 @@
     </button>
   </mat-toolbar>
 
+  <!-- BẢNG DANH SÁCH -->
   <div class="mat-elevation-z4 table-container">
-
     @if (isLoading) {
       <mat-progress-bar mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
     } @else {
@@ -98,7 +123,7 @@
     }
 
     <table mat-table [dataSource]="dataSource" matSort>
-
+      <!-- STT -->
       <ng-container matColumnDef="stt">
         <th mat-header-cell *matHeaderCellDef> STT </th>
         <td mat-cell *matCellDef="let i = index">
@@ -106,16 +131,18 @@
         </td>
       </ng-container>
 
+      <!-- MÃ HỢP ĐỒNG -->
       <ng-container matColumnDef="maHopDong">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Mã hợp đồng </th>
         <td mat-cell *matCellDef="let row">
-          <div class="cell-main-text">{{ row.id }}</div>
+          <div class="cell-main-text">{{ row.contractCode }}</div>
           <div class="cell-sub-text">
-            {{ row.ngayVay | date:'dd/MM/yy' }} - {{ row.ngayHetHan | date:'dd/MM/yy' }}
+            {{ row.loanDate | date:'dd/MM/yy' }} - {{ row.dueDate | date:'dd/MM/yy' }}
           </div>
         </td>
       </ng-container>
 
+      <!-- TÊN KHÁCH HÀNG -->
       <ng-container matColumnDef="tenKhachHang">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tên khách hàng </th>
         <td mat-cell *matCellDef="let row">
@@ -123,33 +150,38 @@
         </td>
       </ng-container>
 
+      <!-- TÀI SẢN -->
       <ng-container matColumnDef="tsTheChap">
         <th mat-header-cell *matHeaderCellDef> TS thế chấp </th>
-        <td mat-cell *matCellDef="let row"> {{ row.collateral }} </td>
+        <td mat-cell *matCellDef="let row"> {{ row.assetName }} </td>
       </ng-container>
 
+      <!-- SỐ TIỀN VAY -->
       <ng-container matColumnDef="soTienVay">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Số tiền vay </th>
         <td mat-cell *matCellDef="let row">
           <div class="cell-main-text text-danger">{{ row.loanAmount | number:'1.0-0' }}</div>
-          <div class="cell-sub-text">(Lãi suất: {{ row.interestRate }})</div>
+          <div class="cell-sub-text">(Lãi suất: {{ row.interestRate }}%)</div>
         </td>
       </ng-container>
 
+      <!-- ĐÃ TRẢ -->
       <ng-container matColumnDef="soTienDaTra">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Số tiền đã trả </th>
         <td mat-cell *matCellDef="let row">
-          <div class="cell-main-text text-success">{{ row.paid | number:'1.0-0' }}</div>
+          <div class="cell-main-text text-success">{{ row.totalPaid | number:'1.0-0' }}</div>
         </td>
       </ng-container>
 
+      <!-- CÒN LẠI -->
       <ng-container matColumnDef="tienVayConLai">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tiền vay còn lại </th>
         <td mat-cell *matCellDef="let row">
-          <div class="cell-main-text">{{ row.remaining | number:'1.0-0' }}</div>
+          <div class="cell-main-text">{{ row.remainingPrincipal | number:'1.0-0' }}</div>
         </td>
       </ng-container>
 
+      <!-- LÃI ĐẾN HÔM NAY (THÊM MỚI ĐỂ KHẮC PHỤC LỖI) -->
       <ng-container matColumnDef="laiDenHomNay">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Lãi đến hôm nay </th>
         <td mat-cell *matCellDef="let row">
@@ -158,51 +190,42 @@
         </td>
       </ng-container>
 
+      <!-- TRẠNG THÁI -->
       <ng-container matColumnDef="trangThai">
         <th mat-header-cell *matHeaderCellDef> Trạng thái </th>
         <td mat-cell *matCellDef="let row">
-          <span class="status-chip status-debt">{{ row.status }}</span>
+          <span class="status-chip status-debt">{{ row.loanStatus }}</span>
         </td>
       </ng-container>
 
+      <!-- CHỨC NĂNG -->
       <ng-container matColumnDef="chucNang">
         <th mat-header-cell *matHeaderCellDef> Chức năng </th>
         <td mat-cell *matCellDef="let row" class="actions-cell">
-
           <button mat-icon-button matTooltip="Sửa" (click)="onEdit(row)">
             <mat-icon class="icon-edit">edit</mat-icon>
           </button>
-
           <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Tùy chọn khác">
             <mat-icon>more_vert</mat-icon>
           </button>
-
           <mat-menu #actionsMenu="matMenu">
             <button mat-menu-item (click)="onPrint(row)">
-              <mat-icon class="icon-print">print</mat-icon>
+              <mat-icon>print</mat-icon>
               <span>In hợp đồng</span>
             </button>
             <button mat-menu-item (click)="onShowHistory(row)">
-              <mat-icon class="icon-history">history</mat-icon>
+              <mat-icon>history</mat-icon>
               <span>Xem lịch sử</span>
             </button>
             <button mat-menu-item (click)="onDelete(row)">
-              <mat-icon class="icon-delete">delete</mat-icon>
+              <mat-icon>delete</mat-icon>
               <span>Xóa hợp đồng</span>
-            </button>
-
-
-            <button mat-menu-item>
-              <mat-icon>check_circle_outline</mat-icon>
-              <span>Đóng hợp đồng</span>
-            </button>
-            <button mat-menu-item>
-              <mat-icon>gavel</mat-icon>
-              <span>Thanh lý</span>
             </button>
           </mat-menu>
         </td>
       </ng-container>
+
+      <!-- HÀNG -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
@@ -219,6 +242,5 @@
                    showFirstLastButtons
                    aria-label="Chọn trang">
     </mat-paginator>
-
   </div>
 </div>

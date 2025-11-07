@@ -1,5 +1,4 @@
-// pledge-list.component.ts (HOÀN CHỈNH - SẠCH LỖI - ĐỒNG BỘ BACKEND)
-
+// src/app/features/users/pledge-list/pledge-list.component.ts
 import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -17,6 +16,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms';
 import { merge, Subject, of, Observable, take } from 'rxjs';
 import { catchError, map, startWith, switchMap, delay } from 'rxjs/operators';
@@ -29,24 +30,18 @@ import {
 } from '../../../core/services/pledge.service';
 import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
 import { StoreService } from '../../../core/services/store.service';
+import { ApiService } from '../../../core/services/api.service';
+import { PledgeSearchFilters } from '../../../core/models/pledge-search-filters.interface';
 
-// === INTERFACE ===
-interface ApiStore {
-  id: number;
-  name: string;
-  address: string;
-}
-
-interface MappedStore {
-  storeId: string;
-  storeName: string;
-}
+interface ApiStore { id: number; name: string; address: string; }
+interface MappedStore { storeId: string; storeName: string; }
+interface UserStore { id: number; fullName: string; phone: string; }
+interface ApiResponse<T> { data?: T; }
 
 @Component({
   selector: 'app-pledge-list',
   standalone: true,
   imports: [
-    // Checkmark XÓA: NgFor, CurrencyPipe → không dùng trong template
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -64,27 +59,25 @@ interface MappedStore {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
-    DatePipe,
+    MatDatepickerModule,
+    MatNativeDateModule,
     DecimalPipe
+  ],
+  providers: [
+    DatePipe  // THÊM VÀO ĐÂY – BẮT BUỘC!
   ],
   templateUrl: './pledge-list.component.html',
   styleUrl: './pledge-list.component.scss'
 })
 export class PledgeListComponent implements OnInit, AfterViewInit {
-
-  displayedColumns: string[] = [
-    'stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay',
-    'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'
-  ];
-
+  displayedColumns: string[] = ['stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay', 'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'];
   dataSource = new MatTableDataSource<PledgeContractListResponse>();
   totalElements = 0;
   isLoading = true;
-
   filterForm: FormGroup;
   private refreshTrigger = new Subject<void>();
-
   storeList$: Observable<MappedStore[]> = of([]);
+  followerList$: Observable<UserStore[]> = of([]);
   selectedStoreId: string | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -95,184 +88,87 @@ export class PledgeListComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private pledgeService = inject(PledgeService);
   private storeService = inject(StoreService);
+  private apiService = inject(ApiService);
+  private datePipe = inject(DatePipe); // HOẠT ĐỘNG
 
   constructor() {
     this.filterForm = this.fb.group({
-      keyword: [''],
-      loanStatus: ['dang_vay'],
-      pledgeState: ['tat_ca'],
-      timeRange: [null]
+      keyword: [''], loanStatus: ['dang_vay'], pledgeState: ['tat_ca'],
+      fromDate: [null], toDate: [null], follower: ['']
     });
   }
 
-  ngOnInit(): void {
-    this.loadStoreDropdown();
-  }
+  ngOnInit(): void { this.loadStoreDropdown(); }
 
-  // Checkmark TẢI DANH SÁCH CỬA HÀNG
   private loadStoreDropdown(): void {
     this.storeList$ = this.storeService.getStoreDropdownList().pipe(
-      map((response: any) => {
-        if (response?.data && Array.isArray(response.data)) {
-          return response.data.map((s: ApiStore) => ({
-            storeId: s.id.toString(),
-            storeName: s.name
-          }));
-        }
-        return [];
-      }),
-      catchError(err => {
-        console.error('Lỗi tải cửa hàng:', err);
-        this.notification.showError('Không tải được danh sách cửa hàng.');
-        return of([]);
-      })
+      map((res: any) => res?.data?.map((s: ApiStore) => ({ storeId: s.id.toString(), storeName: s.name })) || []),
+      catchError(err => { console.error(err); this.notification.showError('Lỗi tải cửa hàng'); return of([]); })
     );
 
-    // Chọn cửa hàng mặc định
     this.storeList$.pipe(take(1)).subscribe(stores => {
       if (stores.length > 0 && !this.selectedStoreId) {
         this.selectedStoreId = stores[0].storeId;
-        this.loadPledges(); // Tải ngay khi có store
+        this.loadFollowers(); this.loadPledges();
       }
     });
   }
 
-  onStoreChange(): void {
-    if (this.paginator) this.paginator.pageIndex = 0;
-    this.loadPledges();
+  private loadFollowers(): void {
+    if (!this.selectedStoreId) return;
+    this.followerList$ = this.apiService.get<ApiResponse<UserStore[]>>(`/v1/stores/${this.selectedStoreId}/staffs`).pipe(
+      map(res => res.data ?? []),
+      catchError(err => { console.error(err); this.notification.showError('Lỗi tải người theo dõi'); return of([]); })
+    );
   }
+
+  onStoreChange(): void { this.loadFollowers(); this.paginator.pageIndex = 0; this.loadPledges(); }
+  onFollowerChange(value: string): void { this.applyFilters(); }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    merge(this.sort.sortChange, this.paginator.page, this.refreshTrigger).pipe(
+      startWith({}), delay(0),
+      switchMap(() => {
+        this.isLoading = true;
+        const fv = this.filterForm.value;
+        const fromDate = fv.fromDate ? this.datePipe.transform(fv.fromDate, 'yyyy-MM-dd') || undefined : undefined;
+        const toDate = fv.toDate ? this.datePipe.transform(fv.toDate, 'yyyy-MM-dd') || undefined : undefined;
 
-    merge(this.sort.sortChange, this.paginator.page, this.refreshTrigger)
-      .pipe(
-        startWith({}),
-        delay(0),
-        switchMap(() => {
-          this.isLoading = true;
+        const filters: PledgeSearchFilters = {
+          keyword: fv.keyword || undefined,
+          loanStatus: fv.loanStatus || undefined,
+          pledgeStatus: fv.pledgeState || undefined,
+          storeId: this.selectedStoreId || undefined,
+          fromDate, toDate,
+          follower: fv.follower || undefined
+        };
 
-          // Checkmark CHUYỂN timeRange → fromDate/toDate
-          const formValue = this.filterForm.value;
-          let fromDate: string | null = null;
-          let toDate: string | null = null;
+        (Object.keys(filters) as (keyof PledgeSearchFilters)[]).forEach(k => {
+          if (filters[k] === '' || filters[k] == null) delete filters[k];
+        });
 
-          if (formValue.timeRange) {
-            const now = new Date();
-            const today = now.toISOString().split('T')[0];
-
-            switch (formValue.timeRange) {
-              case 'today':
-                fromDate = toDate = today;
-                break;
-              case 'this_week':
-                const weekStart = new Date(now);
-                weekStart.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
-                fromDate = weekStart.toISOString().split('T')[0];
-                toDate = today;
-                break;
-              case 'this_month':
-                fromDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-                toDate = today;
-                break;
-            }
-          }
-
-          const filters = {
-            ...formValue,
-            storeId: this.selectedStoreId,
-            pledgeStatus: formValue.pledgeState, // Checkmark Map sang backend
-            fromDate,
-            toDate
-          };
-
-          // Xóa các field không cần
-          Object.keys(filters).forEach(key => {
-            if (filters[key] === '' || filters[key] === null || filters[key] === undefined) {
-              delete filters[key];
-            }
-          });
-
-          return this.pledgeService.getPledgeList(
-            this.paginator.pageIndex,
-            this.paginator.pageSize,
-            filters
-          ).pipe(
-            catchError(err => {
-              this.notification.showError('Lỗi tải dữ liệu hợp đồng');
-              this.isLoading = false;
-              return of(null);
-            })
-          );
-        }),
-        map(data => {
-          this.isLoading = false;
-          if (!data) return [];
-          this.totalElements = data.totalElements;
-          return data.content;
-        })
-      )
-      .subscribe(data => this.dataSource.data = data);
+        return this.pledgeService.getPledgeList(this.paginator.pageIndex, this.paginator.pageSize, filters).pipe(
+          catchError(err => { this.notification.showError('Lỗi tải dữ liệu'); this.isLoading = false; return of(null); })
+        );
+      }),
+      map(data => { this.isLoading = false; if (!data) return []; this.totalElements = data.totalElements; return data.content; })
+    ).subscribe(data => this.dataSource.data = data);
   }
 
-  loadPledges(): void {
-    this.refreshTrigger.next();
-  }
+  loadPledges(): void { this.refreshTrigger.next(); }
+  applyFilters(): void { this.paginator.pageIndex = 0; this.loadPledges(); }
+  resetFilters(): void { this.filterForm.reset({ keyword: '', loanStatus: 'dang_vay', pledgeState: 'tat_ca', fromDate: null, toDate: null, follower: '' }); this.applyFilters(); }
 
-  applyFilters(): void {
-    if (this.paginator) this.paginator.pageIndex = 0;
-    this.loadPledges();
-  }
-
-  resetFilters(): void {
-    this.filterForm.reset({
-      keyword: '',
-      loanStatus: 'dang_vay',
-      pledgeState: 'tat_ca',
-      timeRange: null
-    });
-    this.applyFilters();
-  }
-
-  // Checkmark SỬA: Truyền đúng storeId khi thêm/sửa
   openPledgeDialog(row?: PledgeContractListResponse): void {
-    if (!this.selectedStoreId) {
-      this.notification.showError('Vui lòng chọn cửa hàng.');
-      return;
-    }
-
-    this.dialog.open(PledgeDialogComponent, {
-      width: '90%',
-      maxWidth: '1200px',
-      disableClose: true,
-      data: {
-        contract: row || null,
-        storeId: row?.storeId || this.selectedStoreId
-      }
-    }).afterClosed().subscribe(result => {
-      if (result) this.loadPledges();
-    });
+    if (!this.selectedStoreId) { this.notification.showError('Chọn cửa hàng'); return; }
+    this.dialog.open(PledgeDialogComponent, { width: '90%', maxWidth: '1200px', disableClose: true, data: { contract: row || null, storeId: row?.storeId || this.selectedStoreId } })
+      .afterClosed().subscribe(r => { if (r) this.loadPledges(); });
   }
 
-  onEdit(row: PledgeContractListResponse): void {
-    this.openPledgeDialog(row);
-  }
-
-  onPrint(row: PledgeContractListResponse): void {
-    this.notification.showInfo(`In hợp đồng ${row.id}`);
-  }
-
-  onShowHistory(row: PledgeContractListResponse): void {
-    this.notification.showInfo(`Lịch sử hợp đồng ${row.id}`);
-  }
-
-  onDelete(row: PledgeContractListResponse): void {
-    this.notification.showWarning(`Xóa hợp đồng ${row.id}? (Chưa triển khai)`);
-  }
-
-  // Checkmark THÊM: Mở danh sách thanh lý
-  openLiquidationAssets(): void {
-    this.notification.showInfo('Mở danh sách tài sản cần thanh lý...');
-    // TODO: Mở dialog hoặc chuyển trang
-  }
+  onEdit(row: PledgeContractListResponse): void { this.openPledgeDialog(row); }
+  onPrint(row: PledgeContractListResponse): void { this.notification.showInfo(`In hợp đồng ${row.id}`); }
+  onShowHistory(row: PledgeContractListResponse): void { this.notification.showInfo(`Lịch sử ${row.id}`); }
+  onDelete(row: PledgeContractListResponse): void { this.notification.showWarning(`Xóa ${row.id}?`); }
+  openLiquidationAssets(): void { this.notification.showInfo('Tài sản cần thanh lý...'); }
 }
