@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
-  ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, FormControl
 } from '@angular/forms';
 import {
   MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog
@@ -37,6 +37,7 @@ import { MatTableModule } from '@angular/material/table';
 import { CurrencyFormatDirective } from '../../utils/currency-format.directive';
 import { VndPipe } from '../../utils/currency.pipe';
 import { CurrencyService } from '../../services/currency.service';
+import {ConfirmDialogComponent} from '../confirm-dialog/confirm-dialog.component';
 
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute {
@@ -153,6 +154,7 @@ export class AddAssetTypeDialogComponent {
 
   constructor(
     private fb: FormBuilder,
+    private dialog: MatDialog,
     public dialogRef: MatDialogRef<AddAssetTypeDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { assetTypes: string[] }
   ) {
@@ -278,7 +280,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor() {
     this.isEditMode = !!this.dialogData.contract;
     this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
-
     this.pledgeForm = this.fb.group({
       portraitInfo: this.fb.group({ idUrl: [null] }),
       customerInfo: this.fb.group({
@@ -304,7 +305,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         motherName: [''], motherPhone: [''], motherOccupation: ['']
       }),
       loanExtraInfo: this.fb.group({
-        loanStatus: ['NORMAL'], partnerType: ['khach_hang'], follower: ['all'], customerSource: ['all']
+        loanStatus: ['NORMAL'], partnerType: ['khach_hang'], follower: [''], customerSource: ['all']
       }),
       loanInfo: this.fb.group({
         loanDate: [new Date(), Validators.required],
@@ -606,6 +607,24 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  onFollowerChange(followerId: string): void {
+    if (!followerId) return;
+
+    // 1️⃣ Gán vào loanExtraInfo
+    this.pledgeForm.get('loanExtraInfo.follower')?.setValue(followerId);
+
+    // 2️⃣ Gán vào loanInfo (nếu bạn muốn đồng bộ)
+    this.pledgeForm.get('loanInfo.follower')?.setValue(followerId);
+
+    // 3️⃣ (tuỳ chọn) Nếu bạn muốn lưu luôn vào tài sản
+    const collateralGroup = this.pledgeForm.get('collateralInfo') as FormGroup;
+    if (collateralGroup) {
+      collateralGroup.addControl('follower', new FormControl(followerId));
+    }
+
+    console.log('Follower ID được set:', followerId);
+    console.log('Form hiện tại:', this.pledgeForm.value);
+  }
 
 
 
@@ -788,16 +807,32 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private showConfirmAndPopulate(customerData: any): void {
     const name = customerData.fullName || 'Khách hàng';
     const phone = customerData.phoneNumber ? `(${customerData.phoneNumber})` : '';
-    const message = `Tìm thấy khách hàng: <strong>${name}</strong> ${phone}.<br><small>Đã có dữ liệu: thông tin cá nhân, gia đình, thu nhập, nguồn...</small><br><strong>Bạn có muốn sử dụng dữ liệu đã lưu không?</strong>`;
-    this.notification.showConfirm(message, 'Có', 'Không', 15000)
-      .then(confirmed => {
-        if (confirmed) {
-          this.populateAllCustomerData(customerData);
-          this.notification.showSuccess('Đã điền thông tin khách hàng!');
-          // Sau khi populate, format lại các trường tiền tệ
-          requestAnimationFrame(() => this.formatCurrencyFields());
-        }
-      });
+
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true, // không cho click ra ngoài để đóng
+      data: {
+        title: 'Xác nhận sử dụng dữ liệu khách hàng',
+        content: `
+          <div>
+            <p>Tìm thấy khách hàng: <strong>${name}</strong> ${phone}</p>
+            <p style="color:#666;">Đã có dữ liệu: thông tin cá nhân, gia đình, thu nhập, nguồn...</p>
+            <p><strong>Bạn có muốn sử dụng dữ liệu đã lưu không?</strong></p>
+          </div>
+        `,
+        confirmText: 'Có',
+        cancelText: 'Không'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.populateAllCustomerData(customerData);
+        // Gọi notification hoặc hành động sau khi xác nhận
+        // this.notification.showSuccess('Đã điền thông tin khách hàng!');
+        requestAnimationFrame(() => this.formatCurrencyFields());
+      }
+    });
   }
 
   private populateAllCustomerData(data: any): void {
@@ -1171,6 +1206,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error("Lỗi khi focus vào trường invalid:", error);
     }
   }
+
+
 
   // Hàm mới để format tất cả các trường tiền tệ
   private formatCurrencyFields(): void {

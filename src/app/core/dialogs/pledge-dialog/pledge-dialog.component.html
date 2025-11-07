@@ -282,7 +282,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Người Theo Dõi</mat-label>
-              <mat-select formControlName="follower">
+              <mat-select formControlName="follower" (selectionChange)="onFollowerChange($event.value)">
                 @for (n of (followerList$ | async); track n.id) {
                   <mat-option [value]="n.id">{{ n.name }}</mat-option>
                 }
