@@ -33,6 +33,25 @@ export interface PagedResponse<T> {
   number: number;
   size: number;
 }
+// --- Dành riêng cho màn hình danh sách hợp đồng cầm đồ ---
+
+export interface PledgeContractListResponse {
+  id: number;
+  contractCode: string;
+  loanDate: string;
+  dueDate: string;
+  customerName: string;
+  phoneNumber: string;
+  assetName: string;
+  loanAmount: number;
+  totalPaid: number;
+  remainingPrincipal: number;
+  status: string;
+  follower: string;
+  pledgeStatus: string;
+  storeId:number;
+}
+
 
 export interface PledgeCustomer {
   fullName: string;
@@ -126,23 +145,76 @@ export interface PledgeContract {
   status?: string;
 }
 
+export interface PledgeSearchRequest {
+  keyword?: string;
+  follower?: string;
+  fromDate?: string | null; // ISO: "2025-11-01"
+  toDate?: string | null;
+  loanStatus?: string;
+  pledgeStatus?: string;
+  storeId?: string;
+  page: number;
+  size: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PledgeService {
   private readonly api = inject(ApiService);
   private readonly base = '/v1/pledges';
 
-  getPledges(page: number, size: number, filter: any): Observable<PagedResponse<PledgeContract>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('keyword', filter.keyword ?? '')
-      .set('status', filter.loanStatus ?? 'dang_vay')
-      .set('state', filter.pledgeState ?? 'tat_ca');
+  getPledgeList(
+    page: number,
+    size: number,
+    filter: any
+  ): Observable<PagedResponse<PledgeContractListResponse>> {
 
-    if (filter.timeRange) params = params.set('time', filter.timeRange);
-    if (filter.storeId) params = params.set('storeId', filter.storeId);
+    // Xử lý timeRange → fromDate + toDate
+    let fromDate: string | null = null;
+    let toDate: string | null = null;
 
-    return this.api.get<ApiResponse<ApiPagedData<PledgeContract>>>(this.base, params).pipe(
+    if (filter.timeRange) {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+
+      switch (filter.timeRange) {
+        case 'today':
+          fromDate = today;
+          toDate = today;
+          break;
+        case 'this_week':
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          fromDate = weekStart.toISOString().split('T')[0];
+          toDate = today;
+          break;
+        case 'this_month':
+          fromDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+          toDate = today;
+          break;
+      }
+    }
+
+    const body: PledgeSearchRequest = {
+      page,
+      size,
+      keyword: filter.keyword || undefined,
+      loanStatus: filter.loanStatus || undefined,
+      pledgeStatus: filter.pledgeState || undefined,
+      storeId: filter.storeId || undefined,
+      fromDate,
+      toDate,
+      // follower: filter.follower || undefined, // nếu backend cần
+    };
+
+    // Xóa các field undefined
+    const cleanBody = Object.fromEntries(
+      Object.entries(body).filter(([_, v]) => v !== undefined && v !== null)
+    );
+
+    return this.api.post<ApiResponse<ApiPagedData<PledgeContractListResponse>>>(
+      `${this.base}/search`, // ĐỔI TỪ /list → /search
+      cleanBody
+    ).pipe(
       map(res => ({
         content: res.data.content,
         totalElements: res.data.totalElements,
@@ -152,6 +224,7 @@ export class PledgeService {
       }))
     );
   }
+
 
   getPledgeById(id: string): Observable<PledgeContract> {
     return this.api.get<ApiResponse<PledgeContract>>(`${this.base}/${id}`).pipe(map(res => res.data));

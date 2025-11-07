@@ -1,6 +1,7 @@
-// pledge-list.component.ts (ĐÃ CẬP NHẬT - FIX XỬ LÝ API STORE RESPONSE)
+// pledge-list.component.ts (HOÀN CHỈNH - SẠCH LỖI - ĐỒNG BỘ BACKEND)
+
 import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe, NgFor } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -16,20 +17,20 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { FormsModule } from '@angular/forms'; // THÊM MỚI: Cho ngModel
+import { FormsModule } from '@angular/forms';
 import { merge, Subject, of, Observable, take } from 'rxjs';
-import { catchError, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
+import { catchError, map, startWith, switchMap, delay } from 'rxjs/operators';
+
 import { NotificationService } from '../../../core/services/notification.service';
-
-import { PledgeService, PledgeContract, PagedResponse } from '../../../core/services/pledge.service';
+import {
+  PledgeService,
+  PagedResponse,
+  PledgeContractListResponse
+} from '../../../core/services/pledge.service';
 import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
-
-// *** THÊM MỚI 1: Import StoreService ***
 import { StoreService } from '../../../core/services/store.service';
-// (Giả sử đường dẫn này đúng, nếu pledge-list và store-list ở thư mục khác nhau, hãy điều chỉnh)
 
-// *** THÊM MỚI: Interface cho Store từ API ***
+// === INTERFACE ===
 interface ApiStore {
   id: number;
   name: string;
@@ -45,32 +46,46 @@ interface MappedStore {
   selector: 'app-pledge-list',
   standalone: true,
   imports: [
-    CommonModule, NgFor, FormsModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
-    MatSortModule, MatFormFieldModule, MatInputModule, MatIconModule,
-    MatButtonModule, MatDialogModule, MatSelectModule, MatToolbarModule,
-    MatProgressBarModule, MatMenuModule, MatTooltipModule, MatBadgeModule,
-    MatDatepickerModule, CurrencyPipe, DatePipe, DecimalPipe
+    // Checkmark XÓA: NgFor, CurrencyPipe → không dùng trong template
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatSelectModule,
+    MatToolbarModule,
+    MatProgressBarModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    DatePipe,
+    DecimalPipe
   ],
   templateUrl: './pledge-list.component.html',
   styleUrl: './pledge-list.component.scss'
 })
-export class PledgeListComponent implements AfterViewInit, OnInit {
+export class PledgeListComponent implements OnInit, AfterViewInit {
 
   displayedColumns: string[] = [
     'stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay',
     'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'
   ];
-  dataSource = new MatTableDataSource<PledgeContract>();
 
+  dataSource = new MatTableDataSource<PledgeContractListResponse>();
   totalElements = 0;
   isLoading = true;
 
   filterForm: FormGroup;
   private refreshTrigger = new Subject<void>();
 
-  // *** THAY ĐỔI 2: Biến chứa danh sách cửa hàng và storeId được chọn ***
-  storeList$: Observable<MappedStore[]> = of([]);  // *** SỬA: Type MappedStore[] ***
-  selectedStoreId: string | null = null; // THÊM MỚI: Biến riêng cho storeId
+  storeList$: Observable<MappedStore[]> = of([]);
+  selectedStoreId: string | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -79,13 +94,10 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   private pledgeService = inject(PledgeService);
-
-  // *** THÊM MỚI 3: Inject StoreService ***
   private storeService = inject(StoreService);
 
   constructor() {
     this.filterForm = this.fb.group({
-      // *** THAY ĐỔI 4: XÓA storeId khỏi form ***
       keyword: [''],
       loanStatus: ['dang_vay'],
       pledgeState: ['tat_ca'],
@@ -94,57 +106,40 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    // *** THAY ĐỔI 5: Tải danh sách cửa hàng và chọn mặc định đầu tiên ***
     this.loadStoreDropdown();
   }
 
-  /**
-   * *** THAY ĐỔI 6: Hàm tải danh sách cửa hàng và chọn store đầu tiên làm mặc định ***
-   * (Sửa: Map API response.data thành MappedStore[] để match HTML template)
-   */
-  loadStoreDropdown(): void {
+  // Checkmark TẢI DANH SÁCH CỬA HÀNG
+  private loadStoreDropdown(): void {
     this.storeList$ = this.storeService.getStoreDropdownList().pipe(
-      map((response: any) => {  // *** THÊM MỚI: Map response.data ***
-        console.log('Raw store API response:', response); // THÊM: Log raw response để debug
-        if (response && response.data && Array.isArray(response.data)) {
-          return response.data.map((store: ApiStore) => ({
-            storeId: store.id.toString(),  // *** THÊM: Convert id to string ***
-            storeName: store.name
-          })) as MappedStore[];
+      map((response: any) => {
+        if (response?.data && Array.isArray(response.data)) {
+          return response.data.map((s: ApiStore) => ({
+            storeId: s.id.toString(),
+            storeName: s.name
+          }));
         }
         return [];
       }),
       catchError(err => {
-        console.error('Lỗi tải store list:', err); // THÊM: Log error để debug
-        this.notification.showError('Lỗi tải danh sách cửa hàng.');
+        console.error('Lỗi tải cửa hàng:', err);
+        this.notification.showError('Không tải được danh sách cửa hàng.');
         return of([]);
       })
     );
 
-    // *** THÊM MỚI: Subscribe riêng để set default selectedStoreId sau khi emit
+    // Chọn cửa hàng mặc định
     this.storeList$.pipe(take(1)).subscribe(stores => {
-      console.log('Mapped store list loaded:', stores); // THÊM: Log mapped data để debug
-      if (stores && stores.length > 0 && !this.selectedStoreId) {
+      if (stores.length > 0 && !this.selectedStoreId) {
         this.selectedStoreId = stores[0].storeId;
-        console.log('Default store selected:', this.selectedStoreId); // THÊM: Log selection
-        // Trigger load pledges ngay nếu có default store
-        if (this.paginator) {
-          this.loadPledges();
-        }
+        this.loadPledges(); // Tải ngay khi có store
       }
     });
   }
 
-  /**
-   * *** THÊM MỚI 7: Xử lý thay đổi store ***
-   */
   onStoreChange(): void {
-    console.log('Store changed to:', this.selectedStoreId); // THÊM: Log để debug
-    // Reset về trang đầu và refresh data khi thay đổi store
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-    this.refreshTrigger.next();
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadPledges();
   }
 
   ngAfterViewInit(): void {
@@ -156,37 +151,68 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
         delay(0),
         switchMap(() => {
           this.isLoading = true;
-          // *** THAY ĐỔI 8: Tạo object filter riêng, thêm storeId vào ***
+
+          // Checkmark CHUYỂN timeRange → fromDate/toDate
+          const formValue = this.filterForm.value;
+          let fromDate: string | null = null;
+          let toDate: string | null = null;
+
+          if (formValue.timeRange) {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            switch (formValue.timeRange) {
+              case 'today':
+                fromDate = toDate = today;
+                break;
+              case 'this_week':
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
+                fromDate = weekStart.toISOString().split('T')[0];
+                toDate = today;
+                break;
+              case 'this_month':
+                fromDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+                toDate = today;
+                break;
+            }
+          }
+
           const filters = {
-            ...this.filterForm.value,
-            storeId: this.selectedStoreId // Luôn truyền storeId (bắt buộc)
+            ...formValue,
+            storeId: this.selectedStoreId,
+            pledgeStatus: formValue.pledgeState, // Checkmark Map sang backend
+            fromDate,
+            toDate
           };
-          console.log('Calling API with filters:', filters); // THÊM: Log filters để debug
-          return this.pledgeService.getPledges(
+
+          // Xóa các field không cần
+          Object.keys(filters).forEach(key => {
+            if (filters[key] === '' || filters[key] === null || filters[key] === undefined) {
+              delete filters[key];
+            }
+          });
+
+          return this.pledgeService.getPledgeList(
             this.paginator.pageIndex,
             this.paginator.pageSize,
             filters
           ).pipe(
-            catchError((error: Error) => {
-              console.error('API error:', error); // THÊM: Log error
+            catchError(err => {
+              this.notification.showError('Lỗi tải dữ liệu hợp đồng');
               this.isLoading = false;
-              this.notification.showError(error.message || 'Lỗi khi tải hợp đồng');
               return of(null);
             })
           );
         }),
         map(data => {
           this.isLoading = false;
-          if (data === null) {
-            return [];
-          }
+          if (!data) return [];
           this.totalElements = data.totalElements;
           return data.content;
         })
-      ).subscribe(data => {
-      console.log('Pledges loaded:', data); // THÊM: Log data để debug
-      this.dataSource.data = data;
-    });
+      )
+      .subscribe(data => this.dataSource.data = data);
   }
 
   loadPledges(): void {
@@ -194,15 +220,10 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
   }
 
   applyFilters(): void {
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-    this.refreshTrigger.next();
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadPledges();
   }
 
-  /**
-   * *** THAY ĐỔI 9: Cập nhật hàm reset (không reset storeId) ***
-   */
   resetFilters(): void {
     this.filterForm.reset({
       keyword: '',
@@ -213,54 +234,45 @@ export class PledgeListComponent implements AfterViewInit, OnInit {
     this.applyFilters();
   }
 
-  /**
-   * *** THAY ĐỔI 10: Cập nhật hàm mở dialog (sử dụng selectedStoreId) ***
-   */
-  openPledgeDialog(row?: PledgeContract): void {
-    // *** THAY ĐỔI: Luôn có selectedStoreId vì store là bắt buộc ***
+  // Checkmark SỬA: Truyền đúng storeId khi thêm/sửa
+  openPledgeDialog(row?: PledgeContractListResponse): void {
     if (!this.selectedStoreId) {
-      this.notification.showError('Vui lòng chọn một cửa hàng trước khi thêm mới.');
+      this.notification.showError('Vui lòng chọn cửa hàng.');
       return;
     }
 
-    const dialogRef = this.dialog.open(PledgeDialogComponent, {
+    this.dialog.open(PledgeDialogComponent, {
       width: '90%',
       maxWidth: '1200px',
-      // Truyền một object chứa contract và storeId
+      disableClose: true,
       data: {
-        contract: row, // Dữ liệu hợp đồng (null nếu thêm mới)
-        // Nếu là sửa (row có data), dùng storeId của row (nếu khác).
-        // Nếu là thêm mới (row là null), dùng selectedStoreId.
-        storeId: row ? row.storeId : this.selectedStoreId
-      },
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.refreshTrigger.next();
+        contract: row || null,
+        storeId: row?.storeId || this.selectedStoreId
       }
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadPledges();
     });
   }
 
-  // === CÁC HÀNH ĐỘNG TRÊN ROW ===
-  onEdit(row: PledgeContract): void {
+  onEdit(row: PledgeContractListResponse): void {
     this.openPledgeDialog(row);
   }
 
-  onPrint(row: PledgeContract): void {
-    this.notification.showInfo(`Đang in hợp đồng ${row.id}...`);
+  onPrint(row: PledgeContractListResponse): void {
+    this.notification.showInfo(`In hợp đồng ${row.id}`);
   }
 
-  onShowHistory(row: PledgeContract): void {
-    this.notification.showInfo(`Xem lịch sử HĐ ${row.id}...`);
+  onShowHistory(row: PledgeContractListResponse): void {
+    this.notification.showInfo(`Lịch sử hợp đồng ${row.id}`);
   }
 
-  onDelete(row: PledgeContract): void {
-    this.notification.showWarning(`Bạn có chắc muốn xóa HĐ ${row.id}? (Chưa thực thi)`);
+  onDelete(row: PledgeContractListResponse): void {
+    this.notification.showWarning(`Xóa hợp đồng ${row.id}? (Chưa triển khai)`);
   }
 
+  // Checkmark THÊM: Mở danh sách thanh lý
   openLiquidationAssets(): void {
-    // this.notification.showWarning('Xem danh sách "Tài sản cần thanh lý"...');
+    this.notification.showInfo('Mở danh sách tài sản cần thanh lý...');
+    // TODO: Mở dialog hoặc chuyển trang
   }
 }
