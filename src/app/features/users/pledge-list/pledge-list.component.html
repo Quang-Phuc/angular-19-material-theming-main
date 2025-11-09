@@ -1,21 +1,18 @@
+<!-- src/app/features/users/pledge-list/pledge-list.component.html -->
 <div class="page-container" data-aos="fade-in">
-
   <div class="page-header">
     <h1 class="page-title">Hợp đồng Cầm đồ</h1>
     <div class="header-actions">
-      <button mat-icon-button matTooltip="In danh sách">
-        <mat-icon>print</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Xuất file">
-        <mat-icon>download</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Đánh dấu">
-        <mat-icon color="primary">bookmark_border</mat-icon>
-      </button>
+      <button mat-icon-button matTooltip="In danh sách"><mat-icon>print</mat-icon></button>
+      <button mat-icon-button matTooltip="Xuất file"><mat-icon>download</mat-icon></button>
+      <button mat-icon-button matTooltip="Đánh dấu"><mat-icon color="primary">bookmark_border</mat-icon></button>
     </div>
   </div>
 
-  <!-- CHỌN CỬA HÀNG -->
+  <!-- Chọn cửa hàng -->
+  <!-- src/app/features/users/pledge-list/pledge-list.component.html -->
+  <!-- ... phần header như trước ... -->
+
   <div class="store-selector-container">
     <mat-form-field appearance="outline" class="store-select-field">
       <mat-label>Cửa hàng chính</mat-label>
@@ -27,17 +24,17 @@
     </mat-form-field>
   </div>
 
-  <!-- THANH LỌC -->
-  <mat-toolbar class="filter-toolbar" [formGroup]="filterForm">
+  <!-- ... phần toolbar filter, table, paginator giữ nguyên (đã dùng followerList$ | async sẵn) ... -->
 
-    <!-- TÌM KIẾM -->
+
+  <!-- Thanh lọc -->
+  <mat-toolbar class="filter-toolbar" [formGroup]="filterForm">
     <mat-form-field appearance="outline" class="filter-field search-field">
       <mat-label>Tìm kiếm</mat-label>
       <input matInput formControlName="keyword" placeholder="Tên, SĐT khách hàng...">
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
 
-    <!-- TRẠNG THÁI HỢP ĐỒNG -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Trạng Thái</mat-label>
       <mat-select formControlName="loanStatus">
@@ -48,7 +45,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- TÌNH TRẠNG TÀI SẢN -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Tình trạng</mat-label>
       <mat-select formControlName="pledgeState">
@@ -58,7 +54,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- TỪ NGÀY -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Từ ngày</mat-label>
       <input matInput [matDatepicker]="fromPicker" formControlName="fromDate">
@@ -66,7 +61,6 @@
       <mat-datepicker #fromPicker></mat-datepicker>
     </mat-form-field>
 
-    <!-- ĐẾN NGÀY -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Đến ngày</mat-label>
       <input matInput [matDatepicker]="toPicker" formControlName="toDate">
@@ -74,7 +68,6 @@
       <mat-datepicker #toPicker></mat-datepicker>
     </mat-form-field>
 
-    <!-- NGƯỜI THEO DÕI -->
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Người Theo Dõi</mat-label>
       <mat-select formControlName="follower" (selectionChange)="onFollowerChange($event.value)">
@@ -82,16 +75,15 @@
         @for (n of (followerList$ | async); track n.id) {
           <mat-option [value]="n.id">{{ n.fullName }}</mat-option>
         }
+
       </mat-select>
     </mat-form-field>
 
-    <!-- NÚT TÌM KIẾM -->
     <button mat-flat-button color="primary" class="search-button" (click)="applyFilters()">
       <mat-icon>search</mat-icon>
       <span>Tìm kiếm</span>
     </button>
 
-    <!-- NÚT RESET -->
     <button mat-stroked-button (click)="resetFilters()" matTooltip="Đặt lại bộ lọc">
       <mat-icon>restart_alt</mat-icon>
     </button>
@@ -101,20 +93,21 @@
     </button>
   </mat-toolbar>
 
-  <!-- THANH HÀNH ĐỘNG -->
+  <!-- Thanh hành động -->
   <mat-toolbar class="action-toolbar">
     <button mat-flat-button class="add-new-button" (click)="openPledgeDialog()">
       <mat-icon>add</mat-icon>
       <span>Thêm mới</span>
     </button>
     <span class="spacer"></span>
-    <button mat-flat-button color="warn" class="liquidation-button" (click)="openLiquidationAssets()" [matBadge]="3" matBadgePosition="after" matBadgeColor="warn">
+    <button mat-flat-button color="warn" class="liquidation-button"
+            (click)="openLiquidationAssets()" [matBadge]="3" matBadgePosition="after" matBadgeColor="warn">
       <mat-icon>gavel</mat-icon>
       <span>Tài sản cần thanh lý</span>
     </button>
   </mat-toolbar>
 
-  <!-- BẢNG DANH SÁCH -->
+  <!-- Bảng -->
   <div class="mat-elevation-z4 table-container">
     @if (isLoading) {
       <mat-progress-bar mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
@@ -146,7 +139,7 @@
       <ng-container matColumnDef="tenKhachHang">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tên khách hàng </th>
         <td mat-cell *matCellDef="let row">
-          <a href="javascript:;">{{ row.customerName }}</a>
+          <a href="javascript:;" (click)="onView(row)">{{ row.customerName }}</a>
         </td>
       </ng-container>
 
@@ -181,7 +174,7 @@
         </td>
       </ng-container>
 
-      <!-- LÃI ĐẾN HÔM NAY (THÊM MỚI ĐỂ KHẮC PHỤC LỖI) -->
+      <!-- LÃI ĐẾN HÔM NAY -->
       <ng-container matColumnDef="laiDenHomNay">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Lãi đến hôm nay </th>
         <td mat-cell *matCellDef="let row">
@@ -205,10 +198,15 @@
           <button mat-icon-button matTooltip="Sửa" (click)="onEdit(row)">
             <mat-icon class="icon-edit">edit</mat-icon>
           </button>
+
           <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Tùy chọn khác">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #actionsMenu="matMenu">
+            <button mat-menu-item (click)="onView(row)">
+              <mat-icon>visibility</mat-icon>
+              <span>Xem chi tiết</span>
+            </button>
             <button mat-menu-item (click)="onPrint(row)">
               <mat-icon>print</mat-icon>
               <span>In hợp đồng</span>
@@ -225,7 +223,6 @@
         </td>
       </ng-container>
 
-      <!-- HÀNG -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
@@ -236,7 +233,7 @@
       </tr>
     </table>
 
-    <mat-paginator #paginator
+    <mat-paginator #paginator="matPaginator"
                    [length]="totalElements"
                    [pageSizeOptions]="[10, 25, 50, 100]"
                    showFirstLastButtons

@@ -1,96 +1,138 @@
-// src/app/core/services/api.service.ts (Corrected)
-
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+// src/app/core/services/api.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-// *** No longer need to import AuthService here ***
-// import { AuthService } from './auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+type RespType = 'json' | 'blob' | 'text';
+export interface ApiRequestOptions {
+  params?: Record<string, any> | HttpParams;
+  headers?: Record<string, string> | HttpHeaders;
+  responseType?: RespType;
+}
+
+@Injectable({ providedIn: 'root' })
 export class ApiService {
-  private http = inject(HttpClient);
-  // *** No longer need to inject AuthService here ***
-  // private authService = inject(AuthService);
+  constructor(private http: HttpClient) {}
 
-  private readonly apiUrl = environment.apiUrl;
-
-  /**
-   * === UPDATED HELPER: Creates Authorization Headers ===
-   * Gets the token directly from localStorage.
-   * Returns null if no token is found.
-   */
-  private getAuthHeaders(): HttpHeaders | null {
-    // *** CHANGE: Get token directly from localStorage ***
-    const token = localStorage.getItem('authToken'); // Assumes 'authToken' is the key used by AuthService
-    if (!token) {
-      return null;
-    }
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+  private toHttpParams(p?: Record<string, any> | HttpParams): HttpParams {
+    if (p instanceof HttpParams) return p;
+    const o: Record<string, string> = {};
+    Object.entries(p ?? {}).forEach(([k, v]) => {
+      if (v === undefined || v === null) return;
+      o[k] = String(v);
     });
+    return new HttpParams({ fromObject: o });
   }
 
-  /**
-   * GET request - Automatically adds Auth Header if token exists
-   */
-  get<T>(
-    endpoint: string,
-    params?: HttpParams | { [param: string]: string | string[] },
-  ): Observable<T> {
-    const url = `${this.apiUrl}${endpoint}`;
-    const headers = this.getAuthHeaders();
-    const requestOptions = { params, headers: headers ?? undefined };
-    return this.http.get<T>(url, requestOptions).pipe(
-      catchError(this.handleError)
-    );
+  private toHttpHeaders(h?: Record<string, string> | HttpHeaders): HttpHeaders {
+    if (h instanceof HttpHeaders) return h;
+    return new HttpHeaders(h ?? {});
   }
 
-  /**
-   * POST request - Automatically adds Auth Header if token exists
-   */
-  post<T>(endpoint: string, data: unknown): Observable<T> {
-    const url = `${this.apiUrl}${endpoint}`;
-    const headers = this.getAuthHeaders();
-    const requestOptions = { headers: headers ?? undefined };
-    return this.http.post<T>(url, data, requestOptions).pipe(
-      catchError(this.handleError)
-    );
+  /** Ghép base URL nếu url là đường dẫn tương đối */
+  private resolveUrl(url: string): string {
+    if (/^https?:\/\//i.test(url)) return url;         // đã là absolute
+    const base = (environment.apiUrl || '').replace(/\/+$/, '');
+    const path = (url || '').replace(/^\/+/, '');
+    return `${base}/${path}`;                           // base/path
   }
 
-  /**
-   * PUT request - Automatically adds Auth Header if token exists
-   */
-  put<T>(endpoint: string, data: unknown): Observable<T> {
-    const url = `${this.apiUrl}${endpoint}`;
-    const headers = this.getAuthHeaders();
-    const requestOptions = { headers: headers ?? undefined };
-    return this.http.put<T>(url, data, requestOptions).pipe(
-      catchError(this.handleError)
-    );
+  get<T>(url: string, options: ApiRequestOptions | HttpParams = {} as any): Observable<T> {
+    const fullUrl = this.resolveUrl(url);
+    let params: HttpParams, headers: HttpHeaders, responseType: RespType = 'json';
+    if (options instanceof HttpParams) {
+      params = options; headers = new HttpHeaders({});
+    } else {
+      params = this.toHttpParams(options.params);
+      headers = this.toHttpHeaders(options.headers);
+      responseType = options.responseType ?? 'json';
+    }
+
+    switch (responseType) {
+      case 'blob':
+        return this.http.get(fullUrl, { params, headers, responseType: 'blob' })
+          .pipe(map(res => res as unknown as T));
+      case 'text':
+        return this.http.get(fullUrl, { params, headers, responseType: 'text' })
+          .pipe(map(res => res as unknown as T));
+      default:
+        return this.http.get<T>(fullUrl, { params, headers, responseType: 'json' });
+    }
   }
 
-  /**
-   * DELETE request - Automatically adds Auth Header if token exists
-   */
-  delete<T>(endpoint: string): Observable<T> {
-    const url = `${this.apiUrl}${endpoint}`;
-    const headers = this.getAuthHeaders();
-    const requestOptions = { headers: headers ?? undefined };
-    return this.http.delete<T>(url, requestOptions).pipe(
-      catchError(this.handleError)
-    );
+  post<T>(url: string, body?: any, options: ApiRequestOptions = {}): Observable<T> {
+    const fullUrl = this.resolveUrl(url);
+    const params = this.toHttpParams(options.params);
+    const headers = this.toHttpHeaders(options.headers);
+    const responseType = options.responseType ?? 'json';
+
+    switch (responseType) {
+      case 'blob':
+        return this.http.post(fullUrl, body ?? {}, { params, headers, responseType: 'blob' })
+          .pipe(map(res => res as unknown as T));
+      case 'text':
+        return this.http.post(fullUrl, body ?? {}, { params, headers, responseType: 'text' })
+          .pipe(map(res => res as unknown as T));
+      default:
+        const jsonHeaders = headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
+        return this.http.post<T>(fullUrl, body ?? {}, { params, headers: jsonHeaders, responseType: 'json' });
+    }
   }
 
-  /**
-   * Common error handler
-   */
-  private handleError(error: HttpErrorResponse) {
-    // You might add more sophisticated error logging/handling here
-    console.error('API Error:', error);
-    return throwError(() => error); // Forward the error
+  put<T>(url: string, body?: any, options: ApiRequestOptions = {}): Observable<T> {
+    const fullUrl = this.resolveUrl(url);
+    const params = this.toHttpParams(options.params);
+    const headers = this.toHttpHeaders(options.headers);
+    const responseType = options.responseType ?? 'json';
+
+    switch (responseType) {
+      case 'blob':
+        return this.http.put(fullUrl, body ?? {}, { params, headers, responseType: 'blob' })
+          .pipe(map(res => res as unknown as T));
+      case 'text':
+        return this.http.put(fullUrl, body ?? {}, { params, headers, responseType: 'text' })
+          .pipe(map(res => res as unknown as T));
+      default:
+        const jsonHeaders = headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
+        return this.http.put<T>(fullUrl, body ?? {}, { params, headers: jsonHeaders, responseType: 'json' });
+    }
+  }
+
+  delete<T>(url: string, options: ApiRequestOptions | HttpParams = {} as any): Observable<T> {
+    const fullUrl = this.resolveUrl(url);
+    let params: HttpParams, headers: HttpHeaders, responseType: RespType = 'json';
+    if (options instanceof HttpParams) {
+      params = options; headers = new HttpHeaders({});
+    } else {
+      params = this.toHttpParams(options.params);
+      headers = this.toHttpHeaders(options.headers);
+      responseType = options.responseType ?? 'json';
+    }
+
+    switch (responseType) {
+      case 'blob':
+        return this.http.delete(fullUrl, { params, headers, responseType: 'blob' })
+          .pipe(map(res => res as unknown as T));
+      case 'text':
+        return this.http.delete(fullUrl, { params, headers, responseType: 'text' })
+          .pipe(map(res => res as unknown as T));
+      default:
+        return this.http.delete<T>(fullUrl, { params, headers, responseType: 'json' });
+    }
+  }
+
+  download(url: string, params?: Record<string, any> | HttpParams): Observable<Blob> {
+    const fullUrl = this.resolveUrl(url);
+    const p = this.toHttpParams(params);
+    return this.http.get(fullUrl, { params: p, responseType: 'blob' });
+  }
+
+  upload<T>(url: string, formData: FormData, options: ApiRequestOptions = {}): Observable<T> {
+    const fullUrl = this.resolveUrl(url);
+    const params = this.toHttpParams(options.params);
+    const headers = this.toHttpHeaders(options.headers);
+    return this.http.post<T>(fullUrl, formData, { params, headers, responseType: 'json' });
   }
 }

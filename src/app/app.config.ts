@@ -13,6 +13,7 @@ import { errorInterceptor } from './core/interceptors/error.interceptor'; // Ki�
 
 // *** THÊM IMPORT NÀY VÀO ***
 import { provideNativeDateAdapter } from '@angular/material/core';
+import {authInterceptor} from './core/interceptors/auth.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
@@ -21,7 +22,9 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
 
     // *** DÒNG NÀY PHẢI GIỐNG HỆT NHƯ VẦY ***
-    provideHttpClient(withInterceptors([errorInterceptor])),
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
 
     importProvidersFrom(MatSnackBarModule),
 

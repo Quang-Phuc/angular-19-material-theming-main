@@ -13,6 +13,18 @@ export interface Store {
   createdAt: string;
 }
 
+// src/app/core/models/store.model.ts
+export interface ApiStore {
+  id: string | number;
+  name: string;
+  code?: string;
+  address?: string;
+  phone?: string;
+  status?: string;
+  [key: string]: any;
+}
+
+
 /**
  * Dùng cho API trả về danh sách có phân trang
  */

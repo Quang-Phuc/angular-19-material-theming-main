@@ -14,6 +14,12 @@ export interface User {
   // Thêm các trường khác nếu cần
 }
 
+export interface UserStore {
+  id: string;
+  fullName: string;
+  [key: string]: any;
+}
+
 // Định nghĩa response cho API danh sách User (giống StoreListResponse)
 export interface UserListResponse {
   message: string;
