@@ -210,7 +210,8 @@ export class PledgeListComponent implements OnInit {
     this.pledgeService.getPledgeById(id).subscribe({
       next: (res) => {
         this.dialog.open(PledgeDialogComponent, {
-          width: '1200px',
+          width: '1080px',
+          maxWidth: '98vw',
           data: {
             mode: 'view',
             pledgeData: res,
@@ -224,7 +225,8 @@ export class PledgeListComponent implements OnInit {
     this.pledgeService.getPledgeById(id).subscribe({
       next: (res) => {
         this.dialog.open(PledgeDialogComponent, {
-          width: '1200px',
+          width: '1080px',
+          maxWidth: '98vw',
           data: {
             mode: 'edit',
             pledgeData: res,
@@ -266,6 +268,10 @@ export class PledgeListComponent implements OnInit {
   private toISO(d: any): string | undefined {
     if (!d) return undefined;
     const date = d instanceof Date ? d : new Date(d);
-    return isNaN(+date) ? undefined : date.toISOString();
+    if (isNaN(+date)) return undefined;
+
+    // ✅ Loại bỏ "Z", giữ dạng cục bộ (Spring parse được LocalDateTime)
+    return date.toISOString().split('.')[0]; // "2025-11-23T17:00:00"
   }
+
 }

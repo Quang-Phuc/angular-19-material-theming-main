@@ -33,20 +33,27 @@
       <mat-label>Trạng thái vay</mat-label>
       <mat-select formControlName="loanStatus" (selectionChange)="applyFilters()">
         <mat-option value="">Tất cả</mat-option>
-        <mat-option value="dang_vay">Đang vay</mat-option>
-        <mat-option value="da_dong">Đã đóng</mat-option>
-        <mat-option value="tre_han">Trễ hạn</mat-option>
+        <mat-option value="NORMAL">Chưa vay</mat-option>
+        <mat-option value="NORMAL_2">Đang vay</mat-option>
+        <mat-option value="RISKY">Nợ rủi ro</mat-option>
+        <mat-option value="BAD_DEBT_R2">Nợ R2</mat-option>
+        <mat-option value="BAD_DEBT_R3">Nợ R3</mat-option>
+        <mat-option value="BAD_DEBT">Nợ xấu</mat-option>
       </mat-select>
     </mat-form-field>
+
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Tình trạng</mat-label>
       <mat-select formControlName="pledgeState" (selectionChange)="applyFilters()">
         <mat-option value="">Tất cả</mat-option>
-        <mat-option value="trong_kho">Trong kho</mat-option>
-        <mat-option value="thanh_ly">Thanh lý</mat-option>
+        <mat-option value="DANG_VAY">Đang vay</mat-option>
+        <mat-option value="QUA_HAN">Quá hạn</mat-option>
+        <mat-option value="DA_TRA_HET">Đã trả hết</mat-option>
+        <mat-option value="DA_DONG">Đã đóng</mat-option>
       </mat-select>
     </mat-form-field>
+
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Từ ngày</mat-label>

@@ -76,10 +76,16 @@ export class ApiService {
         return this.http.post(fullUrl, body ?? {}, { params, headers, responseType: 'text' })
           .pipe(map(res => res as unknown as T));
       default:
-        const jsonHeaders = headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
-        return this.http.post<T>(fullUrl, body ?? {}, { params, headers: jsonHeaders, responseType: 'json' });
+        // ✅ Nếu body là FormData → KHÔNG set Content-Type, để Angular tự thêm boundary
+        const isFormData = body instanceof FormData;
+        const finalHeaders = isFormData
+          ? headers
+          : headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
+
+        return this.http.post<T>(fullUrl, body ?? {}, { params, headers: finalHeaders, responseType: 'json' });
     }
   }
+
 
   put<T>(url: string, body?: any, options: ApiRequestOptions = {}): Observable<T> {
     const fullUrl = this.resolveUrl(url);
@@ -91,14 +97,26 @@ export class ApiService {
       case 'blob':
         return this.http.put(fullUrl, body ?? {}, { params, headers, responseType: 'blob' })
           .pipe(map(res => res as unknown as T));
+
       case 'text':
         return this.http.put(fullUrl, body ?? {}, { params, headers, responseType: 'text' })
           .pipe(map(res => res as unknown as T));
+
       default:
-        const jsonHeaders = headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
-        return this.http.put<T>(fullUrl, body ?? {}, { params, headers: jsonHeaders, responseType: 'json' });
+        // ✅ Nếu là FormData thì KHÔNG set Content-Type (Angular sẽ tự thêm boundary)
+        const isFormData = body instanceof FormData;
+        const finalHeaders = isFormData
+          ? headers
+          : headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
+
+        return this.http.put<T>(fullUrl, body ?? {}, {
+          params,
+          headers: finalHeaders,
+          responseType: 'json'
+        });
     }
   }
+
 
   delete<T>(url: string, options: ApiRequestOptions | HttpParams = {} as any): Observable<T> {
     const fullUrl = this.resolveUrl(url);

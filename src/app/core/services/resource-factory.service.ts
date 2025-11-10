@@ -66,13 +66,14 @@ export class ResourceClient<T> {
       ? {}
       : params;
 
-    // nếu truyền TableQuery thì chuẩn hoá
     const builtParams: Record<string, any> = {
       page: p.page ?? 0,
       size: p.size ?? 10,
       sort: p.sort,
       order: p.order,
-      keyword: p.keyword
+      keyword: p.keyword,
+      // ✅ Giữ lại tất cả các filter khác (merge thêm)
+      ...p
     };
 
     return this.page(builtParams).pipe(
@@ -83,6 +84,6 @@ export class ResourceClient<T> {
         size: res?.data?.size ?? builtParams['size'] ?? 10
       }))
     );
-
   }
+
 }

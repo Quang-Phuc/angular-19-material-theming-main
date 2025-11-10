@@ -286,6 +286,9 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!id) return 'Không xác định';
     return this.assetTypes$.value.find(t => t.id.toString() === id.toString())?.name || 'Khác';
   }
+  get viewMode(): boolean { return this.dialogData.mode === 'view'; }
+  get editMode(): boolean { return this.dialogData.mode === 'edit'; }
+
 
   constructor() {
     console.log('Phuc', JSON.stringify(this.dialogData, null, 2));
@@ -395,8 +398,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       attributesArray.push(control);
     });
     (this.pledgeForm.get('collateralInfo') as FormGroup).setControl('attributes', attributesArray);
+
+    // 🛡️ View mode: khóa ngay các control mới tạo
+    if (this.viewMode) {
+      attributesArray.disable({ emitEvent: false });
+    }
+
     this.cdr.detectChanges();
   }
+
 
   private clearAttributes(): void {
     while (this.attributesFormArray.length) {
@@ -456,7 +466,18 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     requestAnimationFrame(() => this.formatCurrencyFields());
   }
 
-  ngAfterViewInit(): void { this.setupAutoSearchOnBlur(); }
+  ngAfterViewInit(): void {
+    this.setupAutoSearchOnBlur();
+
+    if (this.viewMode) {
+      setTimeout(() => {
+        this.pledgeForm.disable({ emitEvent: false });
+        this.cdr.detectChanges();
+      }, 0);
+    }
+  }
+
+
   ngOnDestroy(): void { this.stopWebcam(); }
 
 
@@ -1153,11 +1174,18 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.uploadedFiles.forEach(f => formData.append('attachments', f.file, f.name));
 
     // === GỌI API ===
-    const url = this.isEditMode && this.dialogData.contract?.id
-      ? `/v1/pledges/${this.dialogData.contract.id}`
+    console.log('DEBUG 👉 isEditMode:', this.isEditMode);
+    console.log('DEBUG 👉 contract:', this.dialogData.contract);
+    console.log('DEBUG 👉 contract id:', this.dialogData.contract?.id);
+
+    const id = this.dialogData.pledgeData?.id || this.dialogData.contract?.id;
+
+    const url = this.isEditMode && id
+      ? `/v1/pledges/${id}`
       : '/v1/pledges';
 
-    const httpMethod = this.isEditMode ? this.apiService.put : this.apiService.post;
+    const httpMethod = this.isEditMode ? this.apiService.post : this.apiService.post;
+
 
     httpMethod.call(this.apiService, url, formData).subscribe({
       next: (res: any) => {

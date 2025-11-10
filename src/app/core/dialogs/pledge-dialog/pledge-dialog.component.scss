@@ -438,3 +438,13 @@ mat-dialog-actions {
     }
   }
 }
+
+.view-mode {
+  pointer-events: none;
+  opacity: 0.9;
+
+  mat-dialog-actions {
+    pointer-events: auto; // vẫn cho click "Đóng"
+  }
+}
+
