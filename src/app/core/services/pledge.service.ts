@@ -1,8 +1,11 @@
-// src/app/core/services/pledge.service.ts
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
-import { ApiResponse } from '../models/api.model';
+import {
+  ApiResponse,
+  ApiPagedResponse,
+  toPagedResult
+} from '../models/api.model';
 
 const BASE_URL = '/v1/pledges';
 
@@ -26,7 +29,6 @@ export interface PledgeListItem {
 export interface PledgeContract {
   id: string;
   storeId?: string;
-  // (rút gọn cho ngắn – giữ đúng theo model bạn đang dùng)
   customer?: any;
   loan?: any;
   fees?: any;
@@ -55,6 +57,11 @@ export interface SearchFilters {
 export interface PagedResult<T> {
   items: T[];
   total: number;
+  page?: number;
+  size?: number;
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -81,6 +88,7 @@ export class PledgeService {
       .pipe(map(() => true));
   }
 
+  // ✅ SỬA Ở ĐÂY: Ánh xạ theo ApiPagedResponse (data.content / data.totalElements)
   searchPledges(filters: SearchFilters): Observable<PagedResult<PledgeListItem>> {
     const toIso = (d: string | Date) => new Date(d).toISOString();
 
@@ -95,14 +103,21 @@ export class PledgeService {
     if (filters.page != null) params.page = filters.page;
     if (filters.size != null) params.size = filters.size;
 
-    return this.api.get<ApiResponse<{ items: PledgeListItem[]; total: number }>>(
-      `${BASE_URL}`,
-      { params }
-    ).pipe(
-      map(res => {
-        const d = res?.data || {};
-        return { items: d.items ?? [], total: d.total ?? 0 };
-      })
-    );
+    return this.api
+      .get<ApiPagedResponse<PledgeListItem>>(`${BASE_URL}`, { params })
+      .pipe(
+        map((resp) => {
+          const pr = toPagedResult(resp);
+          return {
+            items: pr.items,
+            total: pr.total,
+            page: pr.page,
+            size: pr.size,
+            totalPages: pr.totalPages,
+            first: pr.first,
+            last: pr.last
+          } as PagedResult<PledgeListItem>;
+        })
+      );
   }
 }
