@@ -122,8 +122,9 @@ export interface PledgeCollateral {
 }
 
 export interface PledgeContract {
-  id?: string;
-  storeId?: string;
+  id?: number | string;
+  contractCode?: string;
+  storeId?: number | string;
   customer: PledgeCustomer;
   loan: PledgeLoanInfo;
   fees?: {
@@ -133,6 +134,9 @@ export interface PledgeContract {
     managementFee?: FeeInfo;
   };
   collateral?: PledgeCollateral[];
+  paymentSchedule?: PaymentScheduleItem[];
+
+  // Các trường phụ hiển thị thêm (phía FE tự tính hoặc API trả)
   ngayHetHan?: string;
   collateralDisplay?: string;
   loanAmount?: number;
@@ -142,7 +146,21 @@ export interface PledgeContract {
   interestToday?: number;
   interestPeriod?: string;
   status?: string;
+
+  // Thêm để đồng bộ API mới
+  portraitUrl?: string;            // Ảnh chân dung
+  attachments?: string[];          // Danh sách file đính kèm (chỉ tên)
 }
+export interface PaymentScheduleItem {
+  periodNumber: number;
+  dueDate: string;
+  interestAmount: number;
+  principalAmount: number;
+  totalAmount: number;
+  status: 'PENDING' | 'PAID' | string;
+  paidDate?: string | null;
+}
+
 
 @Injectable({ providedIn: 'root' })
 export class PledgeService {
@@ -168,7 +186,7 @@ export class PledgeService {
     );
   }
 
-  getPledgeById(id: string): Observable<PledgeContract> {
+  getPledgeById(id: number): Observable<PledgeContract> {
     return this.api.get<ApiResponse<PledgeContract>>(`${this.base}/${id}`).pipe(map(res => res.data));
   }
 

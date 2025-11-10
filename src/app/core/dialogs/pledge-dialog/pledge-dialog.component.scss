@@ -416,3 +416,25 @@ mat-dialog-actions {
   align-items: center;
   gap: 8px;
 }
+.uploaded-files-list {
+  margin-top: 10px;
+
+  mat-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+
+    .truncate-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-left: 6px;
+    }
+  }
+}

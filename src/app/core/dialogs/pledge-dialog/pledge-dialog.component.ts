@@ -247,10 +247,17 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private portraitFile: File | null = null;
   isDragOver = false;
 
-  private activeStoreId: string | null = null;
+  private activeStoreId: number | null = null;
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
-  @Inject(MAT_DIALOG_DATA) public dialogData: { contract: PledgeContract | null, storeId: string | null } = inject(MAT_DIALOG_DATA);
+  @Inject(MAT_DIALOG_DATA)
+  public dialogData: {
+    contract?: PledgeContract | null;
+    storeId?: string | number | null;
+    pledgeData?: PledgeContract | null;
+    mode?: 'view' | 'edit' | 'create' | string;
+  } = inject(MAT_DIALOG_DATA);
+
   private notification = inject(NotificationService);
   private customerService = inject(CustomerService);
   private pledgeService = inject(PledgeService);
@@ -278,8 +285,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   constructor() {
+    console.log('Phuc', JSON.stringify(this.dialogData, null, 2));
     this.isEditMode = !!this.dialogData.contract;
-    this.activeStoreId = this.dialogData.contract?.storeId || this.dialogData.storeId;
+    this.activeStoreId = Number(
+      this.dialogData.contract?.storeId ??
+      this.dialogData.storeId ??
+      this.dialogData.pledgeData?.storeId ??
+      null
+    );
+
     this.pledgeForm = this.fb.group({
       portraitInfo: this.fb.group({ idUrl: [null] }),
       customerInfo: this.fb.group({
@@ -954,6 +968,71 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       panelClass: 'collateral-detail-dialog'
     });
   }
+  /** 🟢 Load chi tiết hợp đồng từ API */
+  /** 🟢 Load chi tiết hợp đồng */
+  loadPledgeDetail(id: string | number): void {
+    this.isLoading = true;
+
+    this.apiService.get<any>(`/v1/pledges/${id}`).subscribe({
+      next: (res) => {
+        const data = res?.data || res;
+        if (!data) return;
+
+        // ✅ Ảnh chân dung (hiển thị ngay)
+        if (data.portraitUrl) {
+          this.pledgeForm.get('portraitInfo.idUrl')?.setValue(data.portraitUrl);
+        }
+
+        // ✅ File đính kèm (đưa vào uploadedFiles để hiển thị và cho phép tải)
+        if (Array.isArray(data.attachments)) {
+          this.uploadedFiles = data.attachments.map((name: string) => ({
+            name,
+            url: '',      // backend chỉ trả tên file → sẽ tải khi click
+            file: null as any // placeholder, để tương thích kiểu
+          }));
+        }
+
+        // ✅ Patch dữ liệu hợp đồng vào form (dùng lại hàm cũ)
+        if (data.customer || data.loan || data.fees) {
+          this.patchFormData({
+            ...this.dialogData.contract,
+            ...data
+          });
+        }
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Lỗi tải chi tiết hợp đồng:', err);
+        this.notification.showError('Không thể tải dữ liệu hợp đồng');
+        this.isLoading = false;
+      },
+    });
+  }
+
+
+  /** 🟢 Tải file đính kèm */
+  /** 🟢 Khi bấm tải file đính kèm */
+  downloadAttachment(fileName: string): void {
+    if (!fileName) return;
+
+    this.apiService.download(`/v1/pledges/download/${fileName}`).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Lỗi tải file:', err);
+        this.notification.showError('Không thể tải file đính kèm');
+      },
+    });
+  }
+
+
 
   onSave(): void {
     // === TỰ ĐỘNG THÊM TÀI SẢN ĐANG NHẬP DỞ (NẾU HỢP LỆ) ===
@@ -1056,6 +1135,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isLoading = false;
       return;
     }
+
 
     // === TẠO FormData ===
     const formData = new FormData();

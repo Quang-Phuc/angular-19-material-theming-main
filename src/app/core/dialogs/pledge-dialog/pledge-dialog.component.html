@@ -522,7 +522,53 @@
             </mat-list>
           </div>
         }
-      </mat-expansion-panel>
+      </mat-expansion-panel><mat-expansion-panel formGroupName="attachments">
+      <mat-expansion-panel-header>
+        <mat-panel-title>5. Đính kèm file</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <!-- Khu vực upload file -->
+      <div class="file-dropzone"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)"
+           [class.drag-over]="isDragOver"
+           (click)="onAttachmentClick()">
+        <mat-icon>cloud_upload</mat-icon>
+        <span>
+      Bấm tải ảnh
+      <span style="font-weight:400;color:#6c757d;">Hoặc kéo thả tại đây</span>
+    </span>
+        <div class="dropzone-subtext">JPG, JPEG, PNG, PDF, DOC, DOCX ≤ 5MB</div>
+      </div>
+
+      <!-- Danh sách file -->
+      @if (uploadedFiles.length) {
+        <div class="uploaded-files-list">
+          <mat-list>
+            @for (f of uploadedFiles; track f.name; let i = $index) {
+              <mat-list-item>
+                <mat-icon matListItemIcon>attach_file</mat-icon>
+                <div matListItemTitle class="truncate-text">{{ f.name }}</div>
+
+                <!-- Nếu là file từ API (chưa có file thực) thì hiện nút tải -->
+                <button *ngIf="!f.file" mat-icon-button color="primary"
+                        matTooltip="Tải xuống" (click)="downloadAttachment(f.name)">
+                  <mat-icon>download</mat-icon>
+                </button>
+
+                <!-- Nếu là file vừa upload (có file thật) thì hiện nút xóa -->
+                <button *ngIf="f.file" mat-icon-button color="warn"
+                        matTooltip="Xóa file" (click)="removeAttachment(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-list-item>
+            }
+          </mat-list>
+        </div>
+      }
+    </mat-expansion-panel>
+
 
     </mat-accordion>
   </form>

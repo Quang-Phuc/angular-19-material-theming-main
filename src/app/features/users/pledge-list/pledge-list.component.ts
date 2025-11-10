@@ -36,13 +36,14 @@ import {
 } from '../../../core/models/api.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
+import { PledgeService } from '../../../core/services/pledge.service';
 
 interface StoreItem { storeId: string; storeName: string; }
 interface ApiStore { id: number | string; name: string; }
 interface UserStore { id: string | number; fullName: string; }
 
 interface PledgeRow {
-  id: string | number;
+  id: number;
   storeId?: string | number;
 
   contractCode: string;
@@ -92,6 +93,9 @@ export class PledgeListComponent implements OnInit {
     toDate: [null],
     follower: ['']
   });
+
+  constructor(private pledgeService: PledgeService) {}
+
   selectedStoreId: string | null = null;
 
   storeList$!: Observable<StoreItem[]>;
@@ -108,8 +112,8 @@ export class PledgeListComponent implements OnInit {
   ];
 
   rowActions: SmartTableAction<PledgeRow>[] = [
-    { icon: 'visibility', tooltip: 'Xem', handler: (row) => this.onView(row) },
-    { icon: 'edit', tooltip: 'Sửa', color: 'primary', handler: (row) => this.onEdit(row) },
+    { icon: 'visibility', tooltip: 'Xem', handler: (row) => this.viewPledge(row.id) },
+    { icon: 'edit', tooltip: 'Sửa', color: 'primary', handler: (row) => this.editPledge(row.id) },
     { icon: 'print', tooltip: 'In', handler: (row) => this.onPrint(row) },
     { icon: 'history', tooltip: 'Lịch sử', handler: (row) => this.onShowHistory(row) },
     { icon: 'delete', tooltip: 'Xoá', color: 'warn', handler: (row) => this.onDelete(row) },
@@ -202,8 +206,34 @@ export class PledgeListComponent implements OnInit {
 
   onFollowerChange(_: any): void { this.reloadTable(true); }
 
-  onView(row: PledgeRow): void { this.openPledgeDialog(row, true); }
-  onEdit(row: PledgeRow): void { this.openPledgeDialog(row, false); }
+  viewPledge(id: number): void {
+    this.pledgeService.getPledgeById(id).subscribe({
+      next: (res) => {
+        this.dialog.open(PledgeDialogComponent, {
+          width: '1200px',
+          data: {
+            mode: 'view',
+            pledgeData: res,
+          },
+        });
+      },
+      error: (err) => console.error('View error', err),
+    });
+  }
+  editPledge(id: number): void {
+    this.pledgeService.getPledgeById(id).subscribe({
+      next: (res) => {
+        this.dialog.open(PledgeDialogComponent, {
+          width: '1200px',
+          data: {
+            mode: 'edit',
+            pledgeData: res,
+          },
+        });
+      },
+      error: (err) => console.error('Edit error', err),
+    });
+  }
 
   onPrint(_row: PledgeRow): void { this.notify.show('Tính năng In đang phát triển'); }
   onShowHistory(_row: PledgeRow): void { this.notify.show('Tính năng Lịch sử đang phát triển'); }
