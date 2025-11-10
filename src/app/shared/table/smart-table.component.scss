@@ -1,253 +1,229 @@
-/* ===========================
-   SmartTable — Premium Style
-   =========================== */
+@use '@angular/material' as mat;
+@use 'sass:color';
 
-/* ---------- Theme tokens (dễ chỉnh) ---------- */
-:root {
-  --st-bg: #ffffff;
-  --st-surface: #f7f9fc;
-  --st-border: #e9eef5;
-  --st-text: #1f2937;
-  --st-subtext: #6b7280;
+// ==== Màu sắc chủ đạo ====
+$color-primary: #3f51b5;
+$color-accent: #ff4081;
+$color-success: #28a745;
+$color-warn: #f44336;
+$table-row-hover-bg: #e9ecef;
+$table-row-stripe-bg: #f8f9fa;
+$table-border-color: #dee2e6;
+$table-header-bg: #f8f9fa;
 
-  --st-primary: #2563eb;
-  --st-primary-weak: rgba(37, 99, 235, 0.08);
-  --st-accent: #06b6d4;
+// ==== Nền và chữ cho trạng thái ====
+$status-active-bg: #10b981;
+$status-active-text: #ffffff;
+$status-warning-bg: #fd7e14;
+$status-warning-text: #ffffff;
+$status-danger-bg: #dc3545;
+$status-danger-text: #ffffff;
 
-  --st-header-from: rgba(255, 255, 255, 0.7);
-  --st-header-to: rgba(255, 255, 255, 0.45);
-  --st-header-text: #0f172a;
+// ==== Container tổng ====
+.table-wrapper {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid $table-border-color;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: box-shadow 0.2s ease-in-out;
 
-  --st-row-hover: rgba(37, 99, 235, 0.06);
-  --st-row-zebra: #fbfdff;
-
-  --st-chip-ok: #10b981;
-  --st-chip-warn: #f59e0b;
-  --st-chip-err: #ef4444;
-
-  --st-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --st-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.12);
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --st-bg: #0b0f1a;
-    --st-surface: #0f1524;
-    --st-border: #1f2740;
-    --st-text: #e5e7eb;
-    --st-subtext: #9ca3af;
-
-    --st-primary: #60a5fa;
-    --st-primary-weak: rgba(96, 165, 250, 0.12);
-    --st-accent: #22d3ee;
-
-    --st-header-from: rgba(17, 24, 39, 0.7);
-    --st-header-to: rgba(17, 24, 39, 0.35);
-    --st-header-text: #e5e7eb;
-
-    --st-row-hover: rgba(96, 165, 250, 0.12);
-    --st-row-zebra: #0c1220;
-
-    --st-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
-    --st-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.6);
+  &:hover {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
   }
 }
 
-/* ---------- Host ---------- */
-:host {
-  display: block;
-  width: 100%;
-  background: transparent;
-}
-
-/* ---------- Card container (table wrapper) ---------- */
-.smart-table-card {
-  background: var(--st-bg);
-  border: 1px solid var(--st-border);
-  border-radius: 16px;
-  overflow: clip;
-  box-shadow: var(--st-shadow);
-  transition: box-shadow 180ms ease, transform 180ms ease;
-  backdrop-filter: saturate(140%) blur(6px);
-}
-.smart-table-card:hover {
-  box-shadow: var(--st-shadow-hover);
-}
-
-/* ---------- Table as block (for horizontal scroll) ---------- */
-.mat-table {
-  display: block;
-  overflow: auto;
-  background: var(--st-bg);
-}
-
-/* ---------- Sticky header & first column ---------- */
+// ==== Header ====
 th.mat-mdc-header-cell {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background:
-    linear-gradient(180deg, var(--st-header-from), var(--st-header-to)),
-    radial-gradient(1200px 80px at 10% 0%, rgba(37, 99, 235, 0.18), transparent 60%),
-    radial-gradient(900px 60px at 80% -10%, rgba(34, 211, 238, 0.16), transparent 60%);
-  color: var(--st-header-text) !important;
-  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, $color-primary, color.adjust($color-primary, $lightness: 10%));
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
   padding: 14px 16px;
-  font-weight: 700;
-  letter-spacing: .02em;
   text-transform: uppercase;
-  font-size: 12px;
-  border-bottom: 1px solid var(--st-border);
+  letter-spacing: 0.03em;
+  border-bottom: none;
 }
+
+tr.mat-mdc-header-row {
+  border-bottom: none;
+}
+
+// ==== Hàng dữ liệu ====
+tr.mat-mdc-row {
+  transition: background-color 0.2s ease;
+  &:nth-child(even) {
+    background-color: $table-row-stripe-bg;
+  }
+  &:hover {
+    background-color: $table-row-hover-bg;
+  }
+}
+
+// ==== Ô dữ liệu ====
+td.mat-mdc-cell {
+  padding: 14px 16px;
+  border-bottom: 1px solid $table-border-color;
+  font-size: 0.9rem;
+  color: #333;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom: none;
+}
+
 th.mat-mdc-header-cell:first-child,
 td.mat-mdc-cell:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--st-bg);
-  box-shadow: 1px 0 0 var(--st-border);
-}
-
-/* ---------- Row & cells ---------- */
-td.mat-mdc-cell {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--st-text);
-  border-bottom: 1px solid var(--st-border);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell {
-  background: var(--st-row-zebra);
-}
-
-tr.mat-mdc-row:hover td.mat-mdc-cell {
-  background: var(--st-row-hover);
-}
-
-/* Align helpers if you add classes from column config */
-td.mat-mdc-cell.text-end { text-align: end; }
-td.mat-mdc-cell.text-center { text-align: center; }
-
-/* ---------- Sort header arrow color ---------- */
-::ng-deep .mat-sort-header-arrow {
-  color: var(--st-header-text);
-}
-
-/* ---------- Action column ---------- */
-th.mat-mdc-header-cell.__actions,
-td.mat-mdc-cell.__actions {
+  width: 60px;
   text-align: center;
-  width: 220px;
-}
-td.mat-mdc-cell.__actions .action-group {
-  display: inline-flex;
-  gap: 8px;
-}
-td.mat-mdc-cell.__actions button[mat-icon-button] {
-  width: 36px; height: 36px;
-  border-radius: 12px;
-  background: var(--st-surface);
-  border: 1px solid var(--st-border);
-  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
-}
-td.mat-mdc-cell.__actions button[mat-icon-button]:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-  background: var(--st-primary-weak);
-}
-td.mat-mdc-cell.__actions mat-icon {
-  font-variation-settings: 'opsz' 20, 'wght' 600;
 }
 
-/* ---------- “Chip” trạng thái ---------- */
-.st-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .01em;
-  border: 1px solid var(--st-border);
-  background: var(--st-surface);
-  color: var(--st-text);
-}
-.st-chip--ok {
-  border-color: rgba(16, 185, 129, .35);
-  background: rgba(16, 185, 129, .12);
-  color: var(--st-text);
-}
-.st-chip--warn {
-  border-color: rgba(245, 158, 11, .35);
-  background: rgba(245, 158, 11, .12);
-}
-.st-chip--err {
-  border-color: rgba(239, 68, 68, .35);
-  background: rgba(239, 68, 68, .12);
+th.mat-mdc-header-cell:last-child,
+td.mat-mdc-cell:last-child {
+  width: 120px;
+  text-align: center;
 }
 
-/* ---------- “Money” style ---------- */
-.st-money {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-  letter-spacing: .02em;
+// ==== Paginator ====
+mat-paginator {
+  background-color: $table-header-bg;
+  border-top: 1px solid $table-border-color;
+  border-radius: 0 0 12px 12px;
+  font-size: 0.85rem;
 }
 
-/* ---------- Header badges (optional) ---------- */
-.st-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 8px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--st-primary);
-  background: var(--st-primary-weak);
-  border: 1px solid var(--st-border);
-  border-radius: 999px;
+// ==== Loading bar ====
+.table-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 10;
+}
+.table-progress-bar-placeholder {
+  height: 4px;
 }
 
-/* ---------- Paginator ---------- */
-::ng-deep .mat-mdc-paginator {
-  border-top: 1px solid var(--st-border);
-  background: var(--st-bg);
+// ==== Nút hành động ====
+td.mat-mdc-cell .action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+
+  button[mat-icon-button] {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    mat-icon {
+      font-size: 20px;
+    }
+
+    &:hover {
+      background-color: rgba(63, 81, 181, 0.08);
+      transform: scale(1.1);
+    }
+
+    &.edit {
+      color: $color-primary;
+    }
+
+    &.view {
+      color: $color-success;
+    }
+
+    &.delete {
+      color: $color-warn;
+    }
+
+    &.print {
+      color: $color-accent;
+    }
+  }
 }
 
-/* ---------- “No data” state ---------- */
+// ==== No Data ====
 .no-data {
-  display: grid;
-  place-items: center;
-  padding: 28px 16px;
-  margin: 12px 0 0;
-  color: var(--st-subtext);
-  background: repeating-linear-gradient(
-      -45deg,
-      transparent 0 6px,
-      rgba(2, 132, 199, 0.03) 6px 12px
-  );
-  border: 1px dashed var(--st-border);
-  border-radius: 12px;
+  text-align: center;
+  padding: 32px;
+  color: #888;
+  font-style: italic;
+  font-weight: 500;
+  background-color: #fff;
+  border-top: 1px solid $table-border-color;
 }
 
-/* ---------- Compact density modifier ---------- */
-:host(.compact) td.mat-mdc-cell { padding: 8px 12px; font-size: 13px; }
-:host(.compact) th.mat-mdc-header-cell { padding: 10px 12px; font-size: 11px; }
+// ==== Chip trạng thái ====
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  color: white;
 
-/* ---------- Optional: highlight selected row (if you add a selected class) ---------- */
-tr.mat-mdc-row.selected td.mat-mdc-cell {
-  background: var(--st-primary-weak);
-  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .15);
+  &.active {
+    background-color: $status-active-bg;
+    color: $status-active-text;
+  }
+
+  &.warning {
+    background-color: $status-warning-bg;
+    color: $status-warning-text;
+  }
+
+  &.danger {
+    background-color: $status-danger-bg;
+    color: $status-danger-text;
+  }
 }
 
-/* ---------- Subtle divider above header (nice in cards) ---------- */
-.smart-table-divider {
-  height: 10px;
-  background: linear-gradient(180deg, transparent, rgba(0,0,0,.05));
-  opacity: .5;
+// ==== Số tiền (định dạng cột số) ====
+.amount-cell {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: $color-primary;
+}
+
+// ==== Tooltip ====
+::ng-deep .mat-tooltip {
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
+// ==== Dark mode support ====
+@media (prefers-color-scheme: dark) {
+  .table-wrapper {
+    background-color: #1e1e1e;
+    border-color: #2a2a2a;
+  }
+
+  th.mat-mdc-header-cell {
+    background: linear-gradient(135deg, lighten($color-primary, 5%), lighten($color-accent, 10%));
+    color: #fff;
+  }
+
+  td.mat-mdc-cell {
+    color: #ddd;
+    border-bottom-color: #333;
+  }
+
+  tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell {
+    background-color: #232323;
+  }
+
+  .no-data {
+    background-color: #111;
+    color: #999;
+  }
 }
