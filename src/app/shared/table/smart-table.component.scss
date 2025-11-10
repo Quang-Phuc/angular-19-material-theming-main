@@ -269,3 +269,40 @@ tr.mat-mdc-row {
     opacity: 0.85;
   }
 }
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  min-width: 100px;
+  text-transform: capitalize;
+  gap: 6px;
+  animation: fadeInUp 0.3s ease both;
+
+  .status-icon {
+    font-size: 16px;
+  }
+
+  &.status-normal {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+  }
+  &.status-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+  }
+  &.status-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+  &.status-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }
+  &.status-default {
+    background: linear-gradient(135deg, #9ca3af, #6b7280);
+  }
+}
+

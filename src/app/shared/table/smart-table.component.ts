@@ -105,4 +105,34 @@ export class SmartTableComponent<T> implements OnInit, OnChanges {
     const pageSize = this.paginator?.pageSize ?? this.pageSize;
     this.loadPage(pageIndex, pageSize);
   }
+  getStatusClass(status: string | null | undefined): string {
+    if (!status) return 'status-default';
+    const s = status.toLowerCase();
+    if (s.includes('binh_thuong') || s.includes('đang vay')) return 'status-normal';
+    if (s.includes('quá hạn') || s.includes('overdue')) return 'status-warning';
+    if (s.includes('hủy') || s.includes('cancel')) return 'status-danger';
+    if (s.includes('mới') || s.includes('new')) return 'status-info';
+    return 'status-default';
+  }
+
+  getStatusLabel(status: string | null | undefined): string {
+    if (!status) return 'Không xác định';
+    switch (status.toUpperCase()) {
+      case 'BINH_THUONG': return 'Bình thường';
+      case 'QUÁ HẠN': return 'Quá hạn';
+      case 'HUY': return 'Huỷ';
+      default: return status;
+    }
+  }
+
+  getStatusIcon(status: string | null | undefined): string | null {
+    if (!status) return null;
+    const s = status.toLowerCase();
+    if (s.includes('binh_thuong') || s.includes('đang vay')) return 'check_circle';
+    if (s.includes('quá hạn') || s.includes('overdue')) return 'warning';
+    if (s.includes('hủy') || s.includes('cancel')) return 'cancel';
+    if (s.includes('mới') || s.includes('new')) return 'fiber_new';
+    return null;
+  }
+
 }
