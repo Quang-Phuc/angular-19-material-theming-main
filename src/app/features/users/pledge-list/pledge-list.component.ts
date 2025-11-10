@@ -1,174 +1,241 @@
 // src/app/features/users/pledge-list/pledge-list.component.ts
-import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import {
+  Component, ChangeDetectionStrategy, OnInit, ViewChild, inject
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatBadgeModule } from '@angular/material/badge';
+import { MatOptionModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { FormsModule } from '@angular/forms';
-import { merge, Subject, of, Observable, take } from 'rxjs';
-import { catchError, map, startWith, switchMap, delay } from 'rxjs/operators';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatBadgeModule } from '@angular/material/badge';
 
-import { NotificationService } from '../../../core/services/notification.service';
+import { Observable, of } from 'rxjs';
+import { catchError, map, take } from 'rxjs/operators';
+
+import { SmartTableComponent } from '../../../shared/table/smart-table.component';
 import {
-  PledgeService,
-  PagedResponse,
-  PledgeContractListResponse
-} from '../../../core/services/pledge.service';
-import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
-import { StoreService } from '../../../core/services/store.service';
-import { ApiService } from '../../../core/services/api.service';
-import { PledgeSearchFilters } from '../../../core/models/pledge-search-filters.interface';
+  SmartTableColumn,
+  SmartTableAction,
+  TableQuery,
+  PagedResult,
+} from '../../../shared/table/smart-table.types';
 
-interface ApiStore { id: number; name: string; address: string; }
-interface MappedStore { storeId: string; storeName: string; }
-interface UserStore { id: number; fullName: string; phone: string; }
-interface ApiResponse<T> { data?: T; }
+import { ApiService } from '../../../core/services/api.service';
+import { ResourceFactory } from '../../../core/services/resource-factory.service';
+import {
+  ApiResponse, ApiPage, ApiListResponse, isApiPage, unwrapData
+} from '../../../core/models/api.model';
+import { NotificationService } from '../../../core/services/notification.service';
+import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
+
+interface StoreItem { storeId: string; storeName: string; }
+interface ApiStore { id: number | string; name: string; }
+interface UserStore { id: string | number; fullName: string; }
+
+interface PledgeRow {
+  id: string | number;
+  storeId?: string | number;
+
+  contractCode: string;
+  customerName: string;
+  assetName: string;
+
+  loanDate?: string | Date;
+  dueDate?: string | Date;
+  loanAmount?: number;
+  totalPaid?: number;
+  remainingPrincipal?: number;
+  status?: string;
+  follower?: string;
+  pledgeStatus?: string;
+
+  // các field có thể có thêm tuỳ backend
+}
 
 @Component({
   selector: 'app-pledge-list',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatSelectModule,
-    MatToolbarModule,
-    MatProgressBarModule,
-    MatMenuModule,
-    MatTooltipModule,
-    MatBadgeModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    DecimalPipe
-  ],
-  providers: [
-    DatePipe  // THÊM VÀO ĐÂY – BẮT BUỘC!
+    CommonModule, FormsModule, ReactiveFormsModule,
+    MatToolbarModule, MatFormFieldModule, MatInputModule,
+    MatSelectModule, MatOptionModule, MatDatepickerModule, MatNativeDateModule,
+    MatButtonModule, MatIconModule, MatTooltipModule, MatDialogModule, MatBadgeModule,
+    SmartTableComponent
   ],
   templateUrl: './pledge-list.component.html',
-  styleUrl: './pledge-list.component.scss'
+  styleUrls: ['./pledge-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PledgeListComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['stt', 'maHopDong', 'tenKhachHang', 'tsTheChap', 'soTienVay', 'soTienDaTra', 'tienVayConLai', 'laiDenHomNay', 'trangThai', 'chucNang'];
-  dataSource = new MatTableDataSource<PledgeContractListResponse>();
-  totalElements = 0;
-  isLoading = true;
-  filterForm: FormGroup;
-  private refreshTrigger = new Subject<void>();
-  storeList$: Observable<MappedStore[]> = of([]);
-  followerList$: Observable<UserStore[]> = of([]);
+export class PledgeListComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private api = inject(ApiService);
+  private resources = inject(ResourceFactory);
+  private dialog = inject(MatDialog);
+  private notify = inject(NotificationService);
+
+  @ViewChild('table') table!: SmartTableComponent<PledgeRow>;
+
+  filterForm: FormGroup = this.fb.group({
+    keyword: [''],
+    loanStatus: [''],
+    pledgeState: [''],
+    fromDate: [null],
+    toDate: [null],
+    follower: ['']
+  });
   selectedStoreId: string | null = null;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  storeList$!: Observable<StoreItem[]>;
+  followerList$!: Observable<UserStore[]>;
 
-  private notification = inject(NotificationService);
-  private dialog = inject(MatDialog);
-  private fb = inject(FormBuilder);
-  private pledgeService = inject(PledgeService);
-  private storeService = inject(StoreService);
-  private apiService = inject(ApiService);
-  private datePipe = inject(DatePipe); // HOẠT ĐỘNG
+  columns: SmartTableColumn<PledgeRow>[] = [
+    { key: 'contractCode', header: 'Mã HĐ', sortable: true, width: '140px' },
+    { key: 'customerName', header: 'Khách hàng', sortable: true },
+    { key: 'assetName', header: 'Tài sản', sortable: true },
+    { key: 'loanAmount', header: 'Số tiền vay', type: 'number', align: 'end', sortable: true, width: '120px' },
+    { key: 'totalPaid', header: 'Đã trả', type: 'number', align: 'end', sortable: true, width: '110px' },
+    { key: 'remainingPrincipal', header: 'Còn lại', type: 'number', align: 'end', sortable: true, width: '110px' },
+    { key: 'pledgeStatus', header: 'Tình trạng', sortable: true, width: '110px' }
+  ];
 
-  constructor() {
-    this.filterForm = this.fb.group({
-      keyword: [''], loanStatus: ['dang_vay'], pledgeState: ['tat_ca'],
-      fromDate: [null], toDate: [null], follower: ['']
-    });
+  rowActions: SmartTableAction<PledgeRow>[] = [
+    { icon: 'visibility', tooltip: 'Xem', handler: (row) => this.onView(row) },
+    { icon: 'edit', tooltip: 'Sửa', color: 'primary', handler: (row) => this.onEdit(row) },
+    { icon: 'print', tooltip: 'In', handler: (row) => this.onPrint(row) },
+    { icon: 'history', tooltip: 'Lịch sử', handler: (row) => this.onShowHistory(row) },
+    { icon: 'delete', tooltip: 'Xoá', color: 'warn', handler: (row) => this.onDelete(row) },
+  ];
+
+  /** ✅ fetch 1-2 dòng: dùng common pagePagedResult */
+  fetch = (q: TableQuery): Observable<PagedResult<PledgeRow>> => {
+    const fv = this.filterForm.value;
+    const params: Record<string, any> = {
+      page: q.page, size: q.size, sort: q.sort, order: q.order,
+      keyword: (fv.keyword ?? '').trim() || q.keyword || undefined,
+      loanStatus: fv.loanStatus || undefined,
+      pledgeState: fv.pledgeState || undefined,
+      follower: fv.follower || undefined,
+      storeId: this.selectedStoreId || undefined,
+      fromDate: this.toISO(fv.fromDate),
+      toDate: this.toISO(fv.toDate),
+    };
+    return this.resources.of<PledgeRow>('/v1/pledges').pagePagedResult(params);
+  };
+
+  ngOnInit(): void {
+    this.loadStoreDropdown();
   }
 
-  ngOnInit(): void { this.loadStoreDropdown(); }
-
   private loadStoreDropdown(): void {
-    this.storeList$ = this.storeService.getStoreDropdownList().pipe(
-      map((res: any) => res?.data?.map((s: ApiStore) => ({ storeId: s.id.toString(), storeName: s.name })) || []),
-      catchError(err => { console.error(err); this.notification.showError('Lỗi tải cửa hàng'); return of([]); })
-    );
+    this.storeList$ = this.resources
+      .of<ApiStore>('/v1/stores/dropdown')
+      .list()
+      .pipe(
+        map((res: ApiListResponse<ApiStore>) => (res?.data ?? []).map(s => ({
+          storeId: String(s.id),
+          storeName: s.name
+        })) as StoreItem[]),
+        catchError(err => {
+          console.error(err);
+          this.notify.showError('Lỗi tải cửa hàng');
+          return of<StoreItem[]>([]);
+        })
+      );
 
     this.storeList$.pipe(take(1)).subscribe(stores => {
       if (stores.length > 0 && !this.selectedStoreId) {
         this.selectedStoreId = stores[0].storeId;
-        this.loadFollowers(); this.loadPledges();
+        this.loadFollowers();
+        this.reloadTable(true);
       }
     });
   }
 
   private loadFollowers(): void {
-    if (!this.selectedStoreId) return;
-    this.followerList$ = this.apiService.get<ApiResponse<UserStore[]>>(`/v1/stores/${this.selectedStoreId}/staffs`).pipe(
-      map(res => res.data ?? []),
-      catchError(err => { console.error(err); this.notification.showError('Lỗi tải người theo dõi'); return of([]); })
-    );
+    if (!this.selectedStoreId) { this.followerList$ = of([]); return; }
+
+    this.followerList$ = this.api
+      .get<ApiResponse<UserStore[] | ApiPage<UserStore>>>(`/users-stores/store/${this.selectedStoreId}`)
+      .pipe(
+        map(res => {
+          const d = unwrapData(res);
+          if (isApiPage<UserStore>(d)) return d.content;
+          if (Array.isArray(d)) return d;
+          return [];
+        }),
+        catchError(err => {
+          console.error(err);
+          this.notify.showError('Lỗi tải người theo dõi');
+          return of<UserStore[]>([]);
+        })
+      );
   }
 
-  onStoreChange(): void { this.loadFollowers(); this.paginator.pageIndex = 0; this.loadPledges(); }
-  onFollowerChange(value: string): void { this.applyFilters(); }
-
-  ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;
-    merge(this.sort.sortChange, this.paginator.page, this.refreshTrigger).pipe(
-      startWith({}), delay(0),
-      switchMap(() => {
-        this.isLoading = true;
-        const fv = this.filterForm.value;
-        const fromDate = fv.fromDate ? this.datePipe.transform(fv.fromDate, 'yyyy-MM-dd') || undefined : undefined;
-        const toDate = fv.toDate ? this.datePipe.transform(fv.toDate, 'yyyy-MM-dd') || undefined : undefined;
-
-        const filters: PledgeSearchFilters = {
-          keyword: fv.keyword || undefined,
-          loanStatus: fv.loanStatus || undefined,
-          pledgeStatus: fv.pledgeState || undefined,
-          storeId: this.selectedStoreId || undefined,
-          fromDate, toDate,
-          follower: fv.follower || undefined
-        };
-
-        (Object.keys(filters) as (keyof PledgeSearchFilters)[]).forEach(k => {
-          if (filters[k] === '' || filters[k] == null) delete filters[k];
-        });
-
-        return this.pledgeService.getPledgeList(this.paginator.pageIndex, this.paginator.pageSize, filters).pipe(
-          catchError(err => { this.notification.showError('Lỗi tải dữ liệu'); this.isLoading = false; return of(null); })
-        );
-      }),
-      map(data => { this.isLoading = false; if (!data) return []; this.totalElements = data.totalElements; return data.content; })
-    ).subscribe(data => this.dataSource.data = data);
+  onStoreChange(): void {
+    this.loadFollowers();
+    this.filterForm.patchValue({ follower: '' }, { emitEvent: false });
+    this.reloadTable(true);
   }
 
-  loadPledges(): void { this.refreshTrigger.next(); }
-  applyFilters(): void { this.paginator.pageIndex = 0; this.loadPledges(); }
-  resetFilters(): void { this.filterForm.reset({ keyword: '', loanStatus: 'dang_vay', pledgeState: 'tat_ca', fromDate: null, toDate: null, follower: '' }); this.applyFilters(); }
+  applyFilters(): void { this.reloadTable(true); }
 
-  openPledgeDialog(row?: PledgeContractListResponse): void {
-    if (!this.selectedStoreId) { this.notification.showError('Chọn cửa hàng'); return; }
-    this.dialog.open(PledgeDialogComponent, { width: '90%', maxWidth: '1200px', disableClose: true, data: { contract: row || null, storeId: row?.storeId || this.selectedStoreId } })
-      .afterClosed().subscribe(r => { if (r) this.loadPledges(); });
+  resetFilters(): void {
+    this.filterForm.reset({
+      keyword: '',
+      loanStatus: '',
+      pledgeState: '',
+      fromDate: null,
+      toDate: null,
+      follower: ''
+    });
+    this.reloadTable(true);
   }
 
-  onEdit(row: PledgeContractListResponse): void { this.openPledgeDialog(row); }
-  onPrint(row: PledgeContractListResponse): void { this.notification.showInfo(`In hợp đồng ${row.id}`); }
-  onShowHistory(row: PledgeContractListResponse): void { this.notification.showInfo(`Lịch sử ${row.id}`); }
-  onDelete(row: PledgeContractListResponse): void { this.notification.showWarning(`Xóa ${row.id}?`); }
-  openLiquidationAssets(): void { this.notification.showInfo('Tài sản cần thanh lý...'); }
+  onFollowerChange(_: any): void { this.reloadTable(true); }
+
+  onView(row: PledgeRow): void { this.openPledgeDialog(row, true); }
+  onEdit(row: PledgeRow): void { this.openPledgeDialog(row, false); }
+
+  onPrint(_row: PledgeRow): void { this.notify.show('Tính năng In đang phát triển'); }
+  onShowHistory(_row: PledgeRow): void { this.notify.show('Tính năng Lịch sử đang phát triển'); }
+
+  onDelete(row: PledgeRow): void {
+    if (!confirm(`Xoá hợp đồng ${row.contractCode}?`)) return;
+    this.notify.showSuccess('Đã xoá (demo)');
+  }
+
+  openPledgeDialog(row?: PledgeRow, viewMode = false): void {
+    const ref = this.dialog.open(PledgeDialogComponent, {
+      width: '1080px',
+      maxWidth: '98vw',
+      data: {
+        contractId: row?.id ?? null,
+        storeId: row?.storeId ?? this.selectedStoreId ?? null,
+        viewMode
+      }
+    });
+    ref.afterClosed().subscribe(changed => { if (changed) this.reloadTable(); });
+  }
+
+  private reloadTable(resetToFirst = false): void {
+    if (!this.table) return;
+    const t: any = this.table;
+    if (resetToFirst && typeof t.firstPage === 'function') t.firstPage();
+    if (typeof t.reload === 'function') t.reload();
+  }
+
+  private toISO(d: any): string | undefined {
+    if (!d) return undefined;
+    const date = d instanceof Date ? d : new Date(d);
+    return isNaN(+date) ? undefined : date.toISOString();
+  }
 }

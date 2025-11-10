@@ -1,0 +1,253 @@
+/* ===========================
+   SmartTable — Premium Style
+   =========================== */
+
+/* ---------- Theme tokens (dễ chỉnh) ---------- */
+:root {
+  --st-bg: #ffffff;
+  --st-surface: #f7f9fc;
+  --st-border: #e9eef5;
+  --st-text: #1f2937;
+  --st-subtext: #6b7280;
+
+  --st-primary: #2563eb;
+  --st-primary-weak: rgba(37, 99, 235, 0.08);
+  --st-accent: #06b6d4;
+
+  --st-header-from: rgba(255, 255, 255, 0.7);
+  --st-header-to: rgba(255, 255, 255, 0.45);
+  --st-header-text: #0f172a;
+
+  --st-row-hover: rgba(37, 99, 235, 0.06);
+  --st-row-zebra: #fbfdff;
+
+  --st-chip-ok: #10b981;
+  --st-chip-warn: #f59e0b;
+  --st-chip-err: #ef4444;
+
+  --st-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --st-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --st-bg: #0b0f1a;
+    --st-surface: #0f1524;
+    --st-border: #1f2740;
+    --st-text: #e5e7eb;
+    --st-subtext: #9ca3af;
+
+    --st-primary: #60a5fa;
+    --st-primary-weak: rgba(96, 165, 250, 0.12);
+    --st-accent: #22d3ee;
+
+    --st-header-from: rgba(17, 24, 39, 0.7);
+    --st-header-to: rgba(17, 24, 39, 0.35);
+    --st-header-text: #e5e7eb;
+
+    --st-row-hover: rgba(96, 165, 250, 0.12);
+    --st-row-zebra: #0c1220;
+
+    --st-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    --st-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ---------- Host ---------- */
+:host {
+  display: block;
+  width: 100%;
+  background: transparent;
+}
+
+/* ---------- Card container (table wrapper) ---------- */
+.smart-table-card {
+  background: var(--st-bg);
+  border: 1px solid var(--st-border);
+  border-radius: 16px;
+  overflow: clip;
+  box-shadow: var(--st-shadow);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+  backdrop-filter: saturate(140%) blur(6px);
+}
+.smart-table-card:hover {
+  box-shadow: var(--st-shadow-hover);
+}
+
+/* ---------- Table as block (for horizontal scroll) ---------- */
+.mat-table {
+  display: block;
+  overflow: auto;
+  background: var(--st-bg);
+}
+
+/* ---------- Sticky header & first column ---------- */
+th.mat-mdc-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background:
+    linear-gradient(180deg, var(--st-header-from), var(--st-header-to)),
+    radial-gradient(1200px 80px at 10% 0%, rgba(37, 99, 235, 0.18), transparent 60%),
+    radial-gradient(900px 60px at 80% -10%, rgba(34, 211, 238, 0.16), transparent 60%);
+  color: var(--st-header-text) !important;
+  backdrop-filter: blur(8px);
+  padding: 14px 16px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  font-size: 12px;
+  border-bottom: 1px solid var(--st-border);
+}
+th.mat-mdc-header-cell:first-child,
+td.mat-mdc-cell:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--st-bg);
+  box-shadow: 1px 0 0 var(--st-border);
+}
+
+/* ---------- Row & cells ---------- */
+td.mat-mdc-cell {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--st-text);
+  border-bottom: 1px solid var(--st-border);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell {
+  background: var(--st-row-zebra);
+}
+
+tr.mat-mdc-row:hover td.mat-mdc-cell {
+  background: var(--st-row-hover);
+}
+
+/* Align helpers if you add classes from column config */
+td.mat-mdc-cell.text-end { text-align: end; }
+td.mat-mdc-cell.text-center { text-align: center; }
+
+/* ---------- Sort header arrow color ---------- */
+::ng-deep .mat-sort-header-arrow {
+  color: var(--st-header-text);
+}
+
+/* ---------- Action column ---------- */
+th.mat-mdc-header-cell.__actions,
+td.mat-mdc-cell.__actions {
+  text-align: center;
+  width: 220px;
+}
+td.mat-mdc-cell.__actions .action-group {
+  display: inline-flex;
+  gap: 8px;
+}
+td.mat-mdc-cell.__actions button[mat-icon-button] {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: var(--st-surface);
+  border: 1px solid var(--st-border);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+td.mat-mdc-cell.__actions button[mat-icon-button]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+  background: var(--st-primary-weak);
+}
+td.mat-mdc-cell.__actions mat-icon {
+  font-variation-settings: 'opsz' 20, 'wght' 600;
+}
+
+/* ---------- “Chip” trạng thái ---------- */
+.st-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  border: 1px solid var(--st-border);
+  background: var(--st-surface);
+  color: var(--st-text);
+}
+.st-chip--ok {
+  border-color: rgba(16, 185, 129, .35);
+  background: rgba(16, 185, 129, .12);
+  color: var(--st-text);
+}
+.st-chip--warn {
+  border-color: rgba(245, 158, 11, .35);
+  background: rgba(245, 158, 11, .12);
+}
+.st-chip--err {
+  border-color: rgba(239, 68, 68, .35);
+  background: rgba(239, 68, 68, .12);
+}
+
+/* ---------- “Money” style ---------- */
+.st-money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: .02em;
+}
+
+/* ---------- Header badges (optional) ---------- */
+.st-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--st-primary);
+  background: var(--st-primary-weak);
+  border: 1px solid var(--st-border);
+  border-radius: 999px;
+}
+
+/* ---------- Paginator ---------- */
+::ng-deep .mat-mdc-paginator {
+  border-top: 1px solid var(--st-border);
+  background: var(--st-bg);
+}
+
+/* ---------- “No data” state ---------- */
+.no-data {
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  margin: 12px 0 0;
+  color: var(--st-subtext);
+  background: repeating-linear-gradient(
+      -45deg,
+      transparent 0 6px,
+      rgba(2, 132, 199, 0.03) 6px 12px
+  );
+  border: 1px dashed var(--st-border);
+  border-radius: 12px;
+}
+
+/* ---------- Compact density modifier ---------- */
+:host(.compact) td.mat-mdc-cell { padding: 8px 12px; font-size: 13px; }
+:host(.compact) th.mat-mdc-header-cell { padding: 10px 12px; font-size: 11px; }
+
+/* ---------- Optional: highlight selected row (if you add a selected class) ---------- */
+tr.mat-mdc-row.selected td.mat-mdc-cell {
+  background: var(--st-primary-weak);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .15);
+}
+
+/* ---------- Subtle divider above header (nice in cards) ---------- */
+.smart-table-divider {
+  height: 10px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.05));
+  opacity: .5;
+}

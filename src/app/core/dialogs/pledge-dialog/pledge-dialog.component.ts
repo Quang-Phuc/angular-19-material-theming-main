@@ -984,10 +984,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.selectedCollateralIndex !== null) {
           this.collateralList[this.selectedCollateralIndex] = newAsset;
           this.selectedCollateralIndex = null;
-          this.notification.showInfo('Đã cập nhật tài sản đang chỉnh sửa.');
+          this.notification.show('Đã cập nhật tài sản đang chỉnh sửa.');
         } else {
           this.collateralList = [...this.collateralList, newAsset];
-          this.notification.showInfo('Đã tự động thêm tài sản đang nhập vào danh sách.');
+          this.notification.show('Đã tự động thêm tài sản đang nhập vào danh sách.');
         }
 
         this.resetCollateralForm();

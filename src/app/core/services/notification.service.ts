@@ -84,6 +84,10 @@ export class NotificationService {
     this.snackBar.open(message, 'Đóng', config);
   }
 
+  show(message: string, action = 'Đóng', duration = 2500) {
+    this.snackBar.open(message, action, { duration });
+  }
+
   /**
    * Hiển thị thông báo cảnh báo (màu cam/vàng)
    */

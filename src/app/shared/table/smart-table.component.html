@@ -1,0 +1,54 @@
+<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2 w-full">
+
+  <!-- Cột dữ liệu -->
+  <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
+    <th mat-header-cell *matHeaderCellDef [mat-sort-header]="col.sortable ? col.key : ''">
+      {{ col.header }}
+    </th>
+
+    <td mat-cell *matCellDef="let row; let i = index" [style.text-align]="col.align || 'start'">
+      <!-- Nếu không có templateRef thì in text -->
+      <ng-container *ngIf="!col.templateRef">
+        {{ row[col.key] || '' }}
+      </ng-container>
+
+      <!-- Nếu có templateRef thì render bằng ngTemplateOutlet -->
+      <ng-container *ngIf="col.templateRef">
+        <ng-container
+          *ngTemplateOutlet="col.templateRef!; context: { $implicit: row, index: i }">
+        </ng-container>
+      </ng-container>
+    </td>
+  </ng-container>
+
+  <!-- Cột thao tác -->
+  <ng-container *ngIf="actions?.length" matColumnDef="__actions">
+    <th mat-header-cell *matHeaderCellDef style="text-align:center;width:120px">Thao tác</th>
+    <td mat-cell *matCellDef="let row" style="text-align:center">
+      <ng-container *ngFor="let act of actions">
+        <button *ngIf="!act.visible || act.visible(row)"
+                mat-icon-button
+                [matTooltip]="act.tooltip || ''"
+                [color]="act.color"
+                (click)="act.handler(row)"
+                style="margin-right:4px">
+          <mat-icon>{{ act.icon || 'more_horiz' }}</mat-icon>
+        </button>
+      </ng-container>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<div *ngIf="!dataSource.length && !loading" class="no-data">
+  {{ placeholder }}
+</div>
+
+<mat-paginator *ngIf="usePaginator"
+               [length]="total"
+               [pageSize]="pageSize"
+               [pageSizeOptions]="pageSizeOptions"
+               (page)="onPage($event)">
+</mat-paginator>
