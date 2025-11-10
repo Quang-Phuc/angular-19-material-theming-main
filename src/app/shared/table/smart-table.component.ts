@@ -18,6 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Observable } from 'rxjs';
 import { SmartTableColumn, SmartTableAction, TableQuery, PagedResult } from './smart-table.types';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-smart-table',
@@ -30,6 +31,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
     MatIconModule,
     MatTooltipModule,
     MatButtonModule,
+    MatMenuModule,
     MatProgressBarModule, // ✅ quan trọng
   ],
   templateUrl: './smart-table.component.html',
