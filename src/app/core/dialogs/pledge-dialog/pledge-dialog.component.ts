@@ -1,4 +1,3 @@
-// src/app/core/dialogs/pledge-dialog/pledge-dialog.component.ts
 import {
   Component, OnInit, inject, Inject, ViewChild, ElementRef,
   OnDestroy, ChangeDetectorRef, AfterViewInit,
@@ -21,9 +20,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import {MatTabGroup, MatTabsModule} from '@angular/material/tabs';
+import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
+import { MatTableModule } from '@angular/material/table';
 import { NotificationService } from '../../services/notification.service';
 import { CustomerService } from '../../services/customer.service';
 import { PledgeService, PledgeContract } from '../../services/pledge.service';
@@ -31,17 +31,14 @@ import { ApiService } from '../../services/api.service';
 import { Observable, of, BehaviorSubject, fromEvent } from 'rxjs';
 import { map, tap, catchError, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AddWarehouseDialogComponent } from './add-warehouse-dialog.component';
-import { MatTableModule } from '@angular/material/table';
-
-// Thêm import các thành phần mới
 import { CurrencyFormatDirective } from '../../utils/currency-format.directive';
 import { VndPipe } from '../../utils/currency.pipe';
 import { CurrencyService } from '../../services/currency.service';
-import {ConfirmDialogComponent} from '../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 interface DropdownOption { id: string; name: string; }
 interface AssetTypeAttribute {
-  id?: number;        // ← Thêm id
+  id?: number;
   label: string;
   value?: string;
   required?: boolean;
@@ -53,8 +50,12 @@ interface AssetType {
   attributes: AssetTypeAttribute[];
 }
 interface ApiResponse<T> {
-  timeStamp: string; securityVersion: string; result: string;
-  message: string; errorCode: string; data?: T;
+  timeStamp: string;
+  securityVersion: string;
+  result: string;
+  message: string;
+  errorCode: string;
+  data?: T;
 }
 interface AssetTypeItem {
   id: number;
@@ -193,10 +194,8 @@ export class AddAssetTypeDialogComponent {
     MatInputModule, MatIconModule, MatButtonModule, MatSelectModule,
     MatDatepickerModule, MatNativeDateModule, MatExpansionModule,
     MatAutocompleteModule, MatProgressBarModule, MatTabsModule, MatRadioModule,
-    MatListModule, MatTableModule, AddWarehouseDialogComponent,AddAssetTypeDialogComponent,
-    CurrencyFormatDirective,
-    VndPipe
-
+    MatListModule, MatTableModule, AddWarehouseDialogComponent,
+    CurrencyFormatDirective, VndPipe
   ],
   templateUrl: './pledge-dialog.component.html',
   styleUrl: './pledge-dialog.component.scss',
@@ -209,7 +208,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   showWebcam = false;
   displayedColumns: string[] = ['assetName', 'assetType', 'assetCode', 'valuation', 'view', 'actions'];
   collateralList: any[] = [];
-  selectedCollateralIndex: number | null = null;  // Để edit item
+  selectedCollateralIndex: number | null = null;
   private lastSelectedAssetType: string | null = null;
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
@@ -217,8 +216,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('collateralDetailDialog') collateralDetailDialog!: TemplateRef<any>;
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
-
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
+
   private el: ElementRef = inject(ElementRef);
 
   assetTypes$ = new BehaviorSubject<AssetTypeOption[]>([]);
@@ -236,11 +235,16 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     { id: 'BAD_DEBT', name: 'Nợ xấu' }
   ]);
   partnerTypeList$: Observable<DropdownOption[]> = of([
-    { id: 'chu_no', name: 'Chủ nợ' }, { id: 'khach_hang', name: 'Khách hàng' },
-    { id: 'nguoi_theo_doi', name: 'Người theo dõi' }, { id: 'all', name: 'Tất cả' }
+    { id: 'chu_no', name: 'Chủ nợ' },
+    { id: 'khach_hang', name: 'Khách hàng' },
+    { id: 'nguoi_theo_doi', name: 'Người theo dõi' },
+    { id: 'all', name: 'Tất cả' }
   ]);
   followerList$ = new BehaviorSubject<DropdownOption[]>([]);
-  customerSourceList$: Observable<DropdownOption[]> = of([{ id: 'all', name: 'Tất cả' }, { id: 'ctv', name: 'CTV' }]);
+  customerSourceList$: Observable<DropdownOption[]> = of([
+    { id: 'all', name: 'Tất cả' },
+    { id: 'ctv', name: 'CTV' }
+  ]);
   warehouseList$ = new BehaviorSubject<DropdownOption[]>([]);
 
   uploadedFiles: { name: string; url: string; file: File }[] = [];
@@ -250,6 +254,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private activeStoreId: number | null = null;
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<PledgeDialogComponent>);
+
   @Inject(MAT_DIALOG_DATA)
   public dialogData: {
     contract?: PledgeContract | null;
@@ -266,8 +271,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private matDialog = inject(MatDialog);
   private stream: MediaStream | null = null;
-
-  // Inject CurrencyService
   private currencyService = inject(CurrencyService);
 
   assetAttributes: AssetTypeAttribute[] = [];
@@ -286,7 +289,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor() {
     console.log('Phuc', JSON.stringify(this.dialogData, null, 2));
-    this.isEditMode = !!this.dialogData.contract;
+    this.isEditMode = this.dialogData.mode === 'edit' || !!this.dialogData.contract;
     this.activeStoreId = Number(
       this.dialogData.contract?.storeId ??
       this.dialogData.storeId ??
@@ -303,12 +306,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         phoneNumber: ['', [Validators.required, Validators.minLength(10), Validators.pattern(/^\d{10,11}$/)]],
         permanentAddress: [''],
         issueDate: [null],
-        issuePlace: [''],
-
-        portraitInfo: this.fb.group({
-          idUrl: [''],
-          base64Data: [''],
-        }),
+        issuePlace: ['']
       }),
       customerExtraInfo: this.fb.group({
         customerCode: [''], occupation: [''], workplace: [''], householdRegistration: [''],
@@ -323,10 +321,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
       loanInfo: this.fb.group({
         loanDate: [new Date(), Validators.required],
-        contractCode: [''], loanAmount: [0, [Validators.required, Validators.min(1000)]],
-        interestTermValue: [1, Validators.required], interestTermUnit: ['MONTH', Validators.required],
-        interestRateValue: [0, Validators.required], interestRateUnit: ['INTEREST_PER_MILLION_PER_DAY', Validators.required],
-        paymentCount: [1, Validators.required], interestPaymentType: ['PERIODIC_INTEREST', Validators.required], note: [''],
+        loanAmount: [0, [Validators.required, Validators.min(1000)]],
+        interestTermValue: [1, Validators.required],
+        interestTermUnit: ['MONTH', Validators.required],
+        interestRateValue: [0, Validators.required],
+        interestRateUnit: ['INTEREST_PER_MILLION_PER_DAY', Validators.required],
+        paymentCount: [1, Validators.required],
+        interestPaymentType: ['PERIODIC_INTEREST', Validators.required],
+        note: [''],
         loanStatus: [''],
         follower: ['']
       }),
@@ -341,7 +343,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         warehouseId: [''],
         assetCode: [''],
         assetNote: [''],
-        attributes: this.fb.array([]),
+        attributes: this.fb.array([])
       }),
       attachments: this.fb.group({})
     });
@@ -356,13 +358,17 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadFollowerList();
     this.loadWarehouseList();
 
-    if (!this.activeStoreId) {
+    if (!this.activeStoreId || isNaN(this.activeStoreId)) {
       this.notification.showError('Lỗi: Không xác định được cửa hàng. Vui lòng đóng và thử lại.');
       this.dialogRef.close(false);
       return;
     }
 
-    if (this.isEditMode && this.dialogData.contract) {
+    // 🟢 Load dữ liệu nếu có pledgeData
+    if (this.dialogData.pledgeData) {
+      console.log('🟢 Patching dữ liệu pledgeData:', this.dialogData.pledgeData);
+      this.patchFormData(this.dialogData.pledgeData);
+    } else if (this.isEditMode && this.dialogData.contract) {
       this.patchFormData(this.dialogData.contract);
     }
 
@@ -371,7 +377,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         this.clearAttributes();
         return;
       }
-
       const selectedType = this.assetTypes$.value.find(t => t.id.toString() === selectedId.toString());
       if (selectedType?.attributes) {
         this.assetAttributes = selectedType.attributes.map(attr => ({ ...attr }));
@@ -381,14 +386,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.cdr.detectChanges();
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.setupAutoSearchOnBlur();
-  }
-
-  ngOnDestroy(): void {
-    this.stopWebcam();
   }
 
   private buildAttributeFormControls(): void {
@@ -409,6 +406,8 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private patchFormData(contract: PledgeContract): void {
+    if (!contract) return;
+
     this.pledgeForm.patchValue({
       customerInfo: {
         fullName: contract.customer?.fullName,
@@ -422,8 +421,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       customerExtraInfo: contract.customer,
       familyInfo: contract.customer,
       loanInfo: {
-        assetName: contract.loan?.assetName,
-        assetType: contract.loan?.assetTypeId?.toString(),
         loanDate: contract.loan?.loanDate,
         loanAmount: contract.loan?.loanAmount,
         interestTermValue: contract.loan?.interestTermValue,
@@ -432,19 +429,19 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         interestRateUnit: contract.loan?.interestRateUnit,
         paymentCount: contract.loan?.paymentCount,
         interestPaymentType: contract.loan?.interestPaymentType,
-        note: contract.loan?.note
+        note: contract.loan?.note,
+        loanStatus: contract.loan?.loanStatus,
+        follower: contract.loan?.follower
       },
       loanExtraInfo: contract.loan,
       feesInfo: contract.fees
     });
 
-    // Patch portrait
     if (contract.customer?.idUrl) {
       this.pledgeForm.get('portraitInfo.idUrl')?.setValue(contract.customer.idUrl);
     }
 
-    // Patch collateral list (mảng)
-    if (contract.collateral && contract.collateral.length > 0) {
+    if (contract.collateral?.length) {
       this.collateralList = contract.collateral.map(c => ({
         assetName: c.assetName,
         assetType: c.assetType,
@@ -452,13 +449,16 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         warehouseId: c.warehouseId,
         assetCode: c.assetCode,
         assetNote: c.assetNote,
-        attributes: c.attributes ? c.attributes.map(a => ({ ...a })) : []
+        attributes: c.attributes || []
       }));
     }
 
-    // Sau khi patch, format lại các trường tiền tệ
     requestAnimationFrame(() => this.formatCurrencyFields());
   }
+
+  ngAfterViewInit(): void { this.setupAutoSearchOnBlur(); }
+  ngOnDestroy(): void { this.stopWebcam(); }
+
 
   private loadAssetTypes(): void {
     if (!this.activeStoreId) return;
