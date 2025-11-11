@@ -1,0 +1,69 @@
+/* src/app/features/interest/close-interest-dialog/close-interest-dialog.component.scss */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+
+    .spacer { width: 16px; }
+  }
+}
+
+.summary {
+  margin: 12px 0 20px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+
+  .card {
+    padding: 12px;
+    border-radius: 8px;
+    background: #f7f9fb;
+    border: 1px solid #e6eef6;
+
+    .label { color: #667; font-size: 12px; }
+    .value { font-weight: 700; font-size: 16px; margin-top: 4px; }
+    .sub { color: #666; font-size: 12px; margin-top: 4px; }
+    .highlight { color: #0b6; }
+    .warn { color: #c62828; }
+  }
+}
+
+.tab-toolbar {
+  padding: 8px 0 12px;
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+}
+
+mat-paginator {
+  margin-top: 8px;
+}
+
+.contract {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 16px;
+  padding: 8px 0;
+
+  .row {
+    display: flex; justify-content: space-between;
+    span { color: #666; }
+  }
+}

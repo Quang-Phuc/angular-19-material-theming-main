@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
+import { CloseInterestDialogComponent } from '../interest/close-interest-dialog/close-interest-dialog.component'; // điều chỉnh path đúng dự án m
 
 import { Observable, of } from 'rxjs';
 import { catchError, map, take } from 'rxjs/operators';
@@ -116,6 +117,7 @@ export class PledgeListComponent implements OnInit {
     { icon: 'edit', tooltip: 'Sửa', color: 'primary', handler: (row) => this.editPledge(row.id) },
     { icon: 'print', tooltip: 'In', handler: (row) => this.onPrint(row) },
     { icon: 'history', tooltip: 'Lịch sử', handler: (row) => this.onShowHistory(row) },
+    { icon: 'payments', tooltip: 'Đóng lãi', color: 'accent', handler: (row) => this.onCloseInterest(row.id) }, // ✅ thêm dòng này
     { icon: 'delete', tooltip: 'Xoá', color: 'warn', handler: (row) => this.onDelete(row) },
   ];
 
@@ -237,6 +239,15 @@ export class PledgeListComponent implements OnInit {
     });
   }
 
+  onCloseInterest(id: number): void {
+    // Gọi service để lấy dữ liệu nếu cần kiểm tra trước
+    // Ở đây chỉ cần pledgeId nên mở thẳng dialog
+    this.dialog.open(CloseInterestDialogComponent, {
+      width: '1200px',
+      maxWidth: '98vw',
+      data: { pledgeId: id },
+    });
+  }
   onPrint(_row: PledgeRow): void { this.notify.show('Tính năng In đang phát triển'); }
   onShowHistory(_row: PledgeRow): void { this.notify.show('Tính năng Lịch sử đang phát triển'); }
 
