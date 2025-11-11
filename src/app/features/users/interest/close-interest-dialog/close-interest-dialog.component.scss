@@ -1,69 +1,164 @@
-/* src/app/features/interest/close-interest-dialog/close-interest-dialog.component.scss */
+:host {
+  display: block;
+  background: #f9fafb;
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+/* ===== HEADER ===== */
 .header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 18px;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-
-    .spacer { width: 16px; }
-  }
-}
-
-.summary {
-  margin: 12px 0 20px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-
-  .card {
-    padding: 12px;
-    border-radius: 8px;
-    background: #f7f9fb;
-    border: 1px solid #e6eef6;
-
-    .label { color: #667; font-size: 12px; }
-    .value { font-weight: 700; font-size: 16px; margin-top: 4px; }
-    .sub { color: #666; font-size: 12px; margin-top: 4px; }
-    .highlight { color: #0b6; }
-    .warn { color: #c62828; }
-  }
-}
-
-.tab-toolbar {
-  padding: 8px 0 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
   font-weight: 600;
+  font-size: 18px;
+  border-bottom: 2px solid #0f766e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-table {
+.header mat-icon {
+  margin-right: 6px;
+}
+
+/* ===== TABS ===== */
+.mat-mdc-tab-group {
+  margin: 0 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.mat-mdc-tab-labels {
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mat-mdc-tab-label {
+  padding: 14px 24px;
+  font-weight: 500;
+  color: #475569;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.25s ease;
+}
+
+.mat-mdc-tab-label:hover {
+  background: #e0f2f1;
+  color: #0d9488;
+}
+
+.mat-mdc-tab-label.mat-mdc-tab-label-active {
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 #0f766e;
+}
+
+/* ===== ACTION BAR ===== */
+.actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.actions-bar button[mat-stroked-button] {
+  border-radius: 24px;
+  padding: 6px 16px;
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.2s ease;
+}
+
+.actions-bar button[mat-stroked-button]:hover {
+  background: #0d9488;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.actions-bar button[mat-icon-button]:hover {
+  background: #e0f2f1;
+  color: #0d9488;
+}
+
+/* ===== TABLE ===== */
+.smart-table {
   width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 12px;
 }
 
-mat-paginator {
-  margin-top: 8px;
+.smart-table th {
+  background: #e0f7fa;
+  color: #0f766e;
+  font-weight: 600;
+  padding: 12px 10px;
+  text-transform: uppercase;
+  font-size: 13px;
 }
 
-.contract {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px 16px;
-  padding: 8px 0;
+.smart-table td {
+  padding: 12px 10px;
+  font-size: 14px;
+  color: #334155;
+  border-top: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
 
-  .row {
-    display: flex; justify-content: space-between;
-    span { color: #666; }
+.smart-table tr:hover {
+  background: #f0fdfa;
+  transform: scale(1.01);
+  box-shadow: 0 1px 4px rgba(13, 148, 136, 0.15);
+}
+
+/* ===== PAGINATOR ===== */
+.mat-mdc-paginator {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+}
+
+/* ===== EXPORT BUTTONS ===== */
+.export-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 20px 16px;
+}
+
+.export-buttons button {
+  border-radius: 8px;
+  font-weight: 500;
+  color: #0d9488;
+  border: 1px solid #0d9488;
+  transition: all 0.2s ease;
+}
+
+.export-buttons button:hover {
+  background: #0d9488;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .actions-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .smart-table th, .smart-table td {
+    font-size: 12px;
+    padding: 8px;
   }
 }
