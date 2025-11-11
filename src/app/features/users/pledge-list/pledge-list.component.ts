@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
-import { CloseInterestDialogComponent } from '../interest/close-interest-dialog/close-interest-dialog.component'; // điều chỉnh path đúng dự án m
+import { CloseInterestDialogComponent } from '../interest/close-interest-dialog/close-interest-dialog/close-interest-dialog.component'; // điều chỉnh path đúng dự án m
 
 import { Observable, of } from 'rxjs';
 import { catchError, map, take } from 'rxjs/operators';

@@ -1,4 +1,3 @@
-// src/app/features/interest/close-interest-dialog/additional-loan-dialog.component.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef, MatDialog } from '@angular/material/dialog';
@@ -6,9 +5,10 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { InterestService, InterestSummary } from '../../../../core/services/interest.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { ConfirmDialogComponent } from '../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
+import { InterestService, InterestSummary } from '../../../../../core/services/interest.service';
+import { NotificationService } from '../../../../../core/services/notification.service';
+import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-additional-loan-dialog',
@@ -19,44 +19,11 @@ import { ConfirmDialogComponent } from '../../../../core/dialogs/confirm-dialog/
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
-  template: `
-    <h2 mat-dialog-title>Vay thêm</h2>
-
-    <mat-dialog-content>
-      <div class="summary" *ngIf="data.summary">
-        <div>Gốc còn lại: <b>{{ data.summary.remainingPrincipal | number:'1.0-0' }} đ</b></div>
-        <div>Lãi đến hôm nay: <b>{{ data.summary.interestToday | number:'1.0-0' }} đ</b></div>
-      </div>
-
-      <form [formGroup]="form" class="form">
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Số tiền vay thêm</mat-label>
-          <input matInput type="number" formControlName="amount" placeholder="Nhập số tiền">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Ngày vay</mat-label>
-          <input matInput type="date" formControlName="date">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Ghi chú</mat-label>
-          <textarea matInput formControlName="note"></textarea>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Hủy</button>
-      <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">Xác nhận</button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    .summary { margin-bottom: 8px; }
-    .form .full { width: 100%; }
-  `]
+  templateUrl: './additional-loan-dialog.component.html',
+  styleUrls: ['./additional-loan-dialog.component.scss']
 })
 export class AdditionalLoanDialogComponent implements OnInit {
   form!: FormGroup;

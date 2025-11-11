@@ -1,29 +1,49 @@
 // src/app/features/interest/close-interest-dialog/close-interest-dialog.component.ts
-import {ChangeDetectorRef, Component, Inject, inject, OnInit, ViewChild} from '@angular/core';
-import {CommonModule, DatePipe} from '@angular/common';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/paginator';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {
-  CloseInterestDetailRow, ContractInfo, InterestHistoryRow, InterestService, InterestSummary, OneTimeFeeRow
-} from '../../../../core/services/interest.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import { ChangeDetectorRef, Component, Inject, inject, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-// 4 popup actions
-import {SettleContractDialogComponent} from './settle-contract-dialog.component';
-import {ExtendTermDialogComponent} from './extend-term-dialog.component';
-import {PartialPrincipalDialogComponent} from './partial-principal-dialog.component';
-import {AdditionalLoanDialogComponent} from './additional-loan-dialog.component';
+import {
+  CloseInterestDetailRow,
+  ContractInfo,
+  InterestHistoryRow,
+  InterestService,
+  InterestSummary,
+  OneTimeFeeRow
+} from '../../../../../core/services/interest.service';
+import {NotificationService} from '../../../../../core/services/notification.service';
+
+// ✅ 4 popup actions: sửa lại import path đúng sau khi tách thư mục
+import { SettleContractDialogComponent } from '../settle-contract-dialog/settle-contract-dialog.component';
+import { ExtendTermDialogComponent } from '../extend-term-dialog/extend-term-dialog.component';
+import { PartialPrincipalDialogComponent } from '../partial-principal-dialog/partial-principal-dialog.component';
+import { AdditionalLoanDialogComponent } from '../additional-loan-dialog/additional-loan-dialog.component';
 
 @Component({
   selector: 'app-close-interest-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatTabsModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule, MatProgressBarModule, MatTooltipModule, SettleContractDialogComponent, ExtendTermDialogComponent, PartialPrincipalDialogComponent, AdditionalLoanDialogComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatTabsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    SettleContractDialogComponent,
+    ExtendTermDialogComponent,
+    PartialPrincipalDialogComponent,
+    AdditionalLoanDialogComponent
+  ],
   templateUrl: './close-interest-dialog.component.html',
   styleUrls: ['./close-interest-dialog.component.scss'],
   providers: [DatePipe]

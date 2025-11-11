@@ -1,4 +1,3 @@
-// src/app/features/interest/close-interest-dialog/extend-term-dialog.component.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef, MatDialog } from '@angular/material/dialog';
@@ -6,9 +5,10 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { InterestService } from '../../../../core/services/interest.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { ConfirmDialogComponent } from '../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
+import { InterestService } from '../../../../../core/services/interest.service';
+import { NotificationService } from '../../../../../core/services/notification.service';
+import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-extend-term-dialog',
@@ -19,38 +19,11 @@ import { ConfirmDialogComponent } from '../../../../core/dialogs/confirm-dialog/
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
-  template: `
-    <h2 mat-dialog-title>Gia hạn kỳ</h2>
-
-    <mat-dialog-content>
-      <form [formGroup]="form" class="form">
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Kỳ cần gia hạn</mat-label>
-          <input matInput type="number" formControlName="termNumber" placeholder="VD: 1">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Số ngày gia hạn</mat-label>
-          <input matInput type="number" formControlName="extendDays" placeholder="VD: 5">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Lý do</mat-label>
-          <textarea matInput formControlName="reason"></textarea>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Hủy</button>
-      <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">Xác nhận</button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    .form .full { width: 100%; }
-  `]
+  templateUrl: './extend-term-dialog.component.html',
+  styleUrls: ['./extend-term-dialog.component.scss']
 })
 export class ExtendTermDialogComponent implements OnInit {
   form!: FormGroup;
@@ -95,10 +68,10 @@ export class ExtendTermDialogComponent implements OnInit {
         reason: v.reason || ''
       }).subscribe({
         next: () => {
-          this.notify.showSuccess('Gia hạn thành công');
+          this.notify.showSuccess('Gia hạn kỳ thành công');
           this.dialogRef.close(true);
         },
-        error: () => this.notify.showError('Gia hạn thất bại')
+        error: () => this.notify.showError('Gia hạn kỳ thất bại')
       });
     });
   }

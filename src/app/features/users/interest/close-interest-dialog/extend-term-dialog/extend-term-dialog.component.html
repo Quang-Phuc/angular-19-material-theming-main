@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>
+  <mat-icon color="primary" class="title-icon">update</mat-icon>
+  Gia hạn kỳ
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Kỳ cần gia hạn</mat-label>
+      <input matInput type="number" formControlName="termNumber" placeholder="VD: 1">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Số ngày gia hạn</mat-label>
+      <input matInput type="number" formControlName="extendDays" placeholder="VD: 5">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Lý do</mat-label>
+      <textarea matInput rows="2" formControlName="reason" placeholder="Nhập lý do (nếu có)"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close color="warn">
+    <mat-icon>close</mat-icon> Hủy
+  </button>
+  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">
+    <mat-icon>check_circle</mat-icon> Xác nhận
+  </button>
+</mat-dialog-actions>
