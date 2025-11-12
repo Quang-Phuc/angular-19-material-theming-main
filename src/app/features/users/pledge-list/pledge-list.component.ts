@@ -240,14 +240,16 @@ export class PledgeListComponent implements OnInit {
   }
 
   onCloseInterest(id: number): void {
-    // Gọi service để lấy dữ liệu nếu cần kiểm tra trước
-    // Ở đây chỉ cần pledgeId nên mở thẳng dialog
     this.dialog.open(CloseInterestDialogComponent, {
-      width: '1200px',
-      maxWidth: '98vw',
+      width: '95vw',        // ✅ 95% chiều rộng viewport
+      maxWidth: '95vw',     // ✅ đảm bảo không vượt quá màn hình
+      height: '90vh',       // ✅ thêm chiều cao nếu muốn full hơn
+      maxHeight: '90vh',
+      panelClass: 'interest-dialog', // ✅ có thể custom CSS riêng
       data: { pledgeId: id },
     });
   }
+
   onPrint(_row: PledgeRow): void { this.notify.show('Tính năng In đang phát triển'); }
   onShowHistory(_row: PledgeRow): void { this.notify.show('Tính năng Lịch sử đang phát triển'); }
 

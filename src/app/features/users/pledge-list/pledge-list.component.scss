@@ -209,3 +209,16 @@ td.mat-mdc-cell.actions-cell {
     }
   }
 }
+::ng-deep .interest-dialog .mat-dialog-container {
+  padding: 0; /* gọn hơn */
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep .interest-dialog .mat-dialog-content {
+  flex: 1;
+  overflow: auto;
+  max-height: calc(90vh - 100px);
+}
