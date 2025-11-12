@@ -17,6 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable } from 'rxjs';
 
+
 import {
   CloseInterestDetailRow,
   InterestService,
@@ -25,8 +26,8 @@ import {
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ResourceFactory } from '../../../../../core/services/resource-factory.service';
 import { SmartTableComponent } from '../../../../../shared/table/smart-table.component';
-import { SmartTableAction, SmartTableColumn } from '../../../../../shared/table/smart-table.types';
-import { PagedResult, TableQuery } from '../../../../../core/models/paging.model';
+import { SmartTableColumn, SmartTableAction,TableQuery,PagedResult } from '../../../../../shared/table/smart-table.types';
+import { PledgeService, PledgeContract } from '../../../../../core/services/pledge.service';
 
 // ✅ Các dialog popup
 import { SettleContractDialogComponent } from '../settle-contract-dialog/settle-contract-dialog.component';
@@ -62,6 +63,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
   private interest = inject(InterestService);
   private cdr = inject(ChangeDetectorRef);
   private resources = inject(ResourceFactory);
+  private pledgeService = inject(PledgeService);
 
   /** TemplateRefs cho SmartTable */
   @ViewChild('sttTpl', { static: true }) sttTpl!: TemplateRef<any>;
@@ -69,8 +71,10 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('lastDateTpl', { static: true }) lastDateTpl!: TemplateRef<any>;
   @ViewChild('statusTpl', { static: true }) statusTpl!: TemplateRef<any>;
 
+  @ViewChild('table') table!: SmartTableComponent<CloseInterestDetailRow>;
+
   /** Tóm tắt hợp đồng */
-  summary?: InterestSummary;
+  pledge?: PledgeContract;
   loadingSummary = false;
   activeTab = 0;
 
@@ -96,9 +100,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       order: q.order,
       pledgeId: this.data.pledgeId
     };
-    return this.resources
-      .of<CloseInterestDetailRow>('/v1/interests/details')
-      .pagePagedResult(params);
+    return this.resources.of<CloseInterestDetailRow>('/v1/interests/details').pagePagedResult(params);
   };
 
   constructor(
@@ -113,7 +115,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       this.dialogRef.close();
       return;
     }
-    this.loadSummary();
+    this.loadContractInfo();
   }
 
   /** Khởi tạo cột sau khi ViewChild sẵn sàng */
@@ -153,14 +155,6 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         type: 'number'
       },
       {
-        key: 'otherFee',
-        header: 'Phí khác',
-        sortable: true,
-        align: 'end',
-        width: '100px',
-        type: 'number'
-      },
-      {
         key: 'totalAmount',
         header: 'Tổng kỳ',
         sortable: true,
@@ -169,16 +163,8 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         type: 'number'
       },
       {
-        key: 'paidAmount',
-        header: 'Đã trả',
-        sortable: true,
-        align: 'end',
-        width: '120px',
-        type: 'number'
-      },
-      {
-        key: 'lastPaidDate',
-        header: 'Ngày trả gần nhất',
+        key: 'paidDate',
+        header: 'Ngày thanh toán',
         sortable: true,
         align: 'center',
         width: '140px',
@@ -199,21 +185,18 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
+
   /** Tải tổng quan hợp đồng */
-  loadSummary() {
-    this.loadingSummary = true;
-    this.interest.getSummary(this.data.pledgeId).subscribe({
-      next: (res) => {
-        this.summary = res.data;
-        this.loadingSummary = false;
+  loadContractInfo() {
+    this.pledgeService.getPledgeById(this.data.pledgeId).subscribe({
+      next: (data) => {
+        this.pledge = data;
         this.cdr.markForCheck();
       },
-      error: () => {
-        this.loadingSummary = false;
-        this.notify.showError('Không tải được tổng quan hợp đồng.');
-      }
+      error: () => this.notify.showError('Không tải được thông tin hợp đồng.')
     });
   }
+
 
   /** Popup Đóng lãi */
   openPayInterestDialog(row: CloseInterestDetailRow) {
@@ -223,7 +206,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         data: { pledgeId: this.data.pledgeId, periodNumber: row.periodNumber }
       })
       .afterClosed()
-      .subscribe((ok) => ok && this.loadSummary());
+      .subscribe((ok) => ok && this.loadContractInfo());
   }
 
   /** Xuất PDF/Excel */
@@ -252,7 +235,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
   /** 4 Action chung (mở popup) */
   openSettleDialog() {
     this.dialog.open(SettleContractDialogComponent, {
-      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.summary}
+      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.pledge}
     }).afterClosed().subscribe(ok => ok && this.reloadCurrentTab());
   }
 
@@ -264,18 +247,18 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
   openPartialPrincipalDialog() {
     this.dialog.open(PartialPrincipalDialogComponent, {
-      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.summary}
+      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.pledge}
     }).afterClosed().subscribe(ok => ok && this.reloadCurrentTab());
   }
 
   openAdditionalLoanDialog() {
     this.dialog.open(AdditionalLoanDialogComponent, {
-      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.summary}
+      width: '520px', data: {pledgeId: this.data.pledgeId, summary: this.pledge}
     }).afterClosed().subscribe(ok => ok && this.reloadCurrentTab());
   }
   /** Reload tab sau khi POST thành công */
   private reloadCurrentTab() {
-    this.loadSummary();
+    this.loadContractInfo();
     this.loadTab(this.activeTab);
   }
   loadTab(index: number): void {

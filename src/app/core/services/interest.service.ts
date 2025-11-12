@@ -58,13 +58,15 @@ export interface InterestSummary {
 }
 
 export interface CloseInterestDetailRow {
+  id: number;
+  contractId: number;
   periodNumber: number;
-  dueDate: string;    // yyyy-MM-dd
-  interestAmount: number;
-  principalAmount: number;
-  totalAmount: number;
-  status: 'PENDING' | 'PAID' | string;
-  paidDate?: string | null;
+  dueDate: string;              // yyyy-MM-dd
+  interestAmount: number;       // BigDecimal -> number
+  principalAmount: number;      // BigDecimal -> number
+  totalAmount: number;          // BigDecimal -> number
+  status: 'PENDING' | 'PAID' | 'OVERDUE' | string;
+  paidDate?: string | null;     // yyyy-MM-dd | null
 }
 
 export interface ContractInfo {

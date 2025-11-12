@@ -36,24 +36,24 @@
 <mat-progress-bar *ngIf="loadingSummary" mode="indeterminate"></mat-progress-bar>
 
 <!-- Summary cards -->
-<div class="summary" *ngIf="summary">
+<div class="summary" *ngIf="pledge">
   <div class="card">
     <div class="label">Hợp đồng</div>
-    <div class="value">{{ summary.contractCode }}</div>
-    <div class="sub">{{ summary.customerName }} ({{ summary.phoneNumber }})</div>
+    <div class="value">{{ pledge.contractCode }}</div>
+    <div class="sub">{{ pledge.customer.fullName }} ({{ pledge.customer.phoneNumber }})</div>
   </div>
-  <div class="card">
-    <div class="label">Gốc còn lại</div>
-    <div class="value highlight">{{ summary.remainingPrincipal | number:'1.0-0' }} đ</div>
-  </div>
-  <div class="card">
-    <div class="label">Lãi đến hôm nay</div>
-    <div class="value warn">{{ summary.interestToday | number:'1.0-0' }} đ</div>
-  </div>
-  <div class="card">
-    <div class="label">Đã thu</div>
-    <div class="value">{{ summary.totalPaid | number:'1.0-0' }} đ</div>
-  </div>
+<!--  <div class="card">-->
+<!--    <div class="label">Gốc còn lại</div>-->
+<!--    <div class="value highlight">{{ summary.remainingPrincipal | number:'1.0-0' }} đ</div>-->
+<!--  </div>-->
+<!--  <div class="card">-->
+<!--    <div class="label">Lãi đến hôm nay</div>-->
+<!--    <div class="value warn">{{ summary.interestToday | number:'1.0-0' }} đ</div>-->
+<!--  </div>-->
+<!--  <div class="card">-->
+<!--    <div class="label">Đã thu</div>-->
+<!--    <div class="value">{{ summary.totalPaid | number:'1.0-0' }} đ</div>-->
+<!--  </div>-->
 </div>
 
 <!-- TAB GROUP -->
@@ -63,10 +63,11 @@
     <div class="tab-toolbar">Danh sách kỳ phải đóng</div>
 
     <app-smart-table
+      #table
       [columns]="columns"
       [fetch]="fetch"
       [actions]="rowActions"
-      [pageSizeOptions]="[5,10,20,50]"
+      [pageSizeOptions]="[10,25,50,100]"
       [initialPageSize]="10"
       placeholder="Không có kỳ đóng lãi"
     >
@@ -94,11 +95,11 @@
   <!-- TAB 2: Thông tin hợp đồng -->
   <mat-tab label="Thông tin hợp đồng">
     <div class="tab-toolbar">Thông tin cấu hình lãi & điều khoản</div>
-    <div class="contract" *ngIf="summary">
-      <div class="row"><span>Ngày vay:</span><b>{{ summary.loanDate | date:'dd/MM/yyyy' }}</b></div>
-      <div class="row"><span>Mã hợp đồng:</span><b>{{ summary.contractCode }}</b></div>
-      <div class="row"><span>Người theo dõi:</span><b>{{ summary.follower || '-' }}</b></div>
-      <div class="row"><span>Tình trạng:</span><b>{{ summary.pledgeStatus || '-' }}</b></div>
+    <div class="contract" *ngIf="pledge">
+      <div class="row"><span>Ngày vay:</span><b>{{ pledge.loan.loanDate | date:'dd/MM/yyyy' }}</b></div>
+      <div class="row"><span>Mã hợp đồng:</span><b>{{ pledge.contractCode }}</b></div>
+      <div class="row"><span>Người theo dõi:</span><b>{{ pledge.loan.follower || '-' }}</b></div>
+      <div class="row"><span>Tình trạng:</span><b>{{ pledge.status || '-' }}</b></div>
     </div>
   </mat-tab>
 
