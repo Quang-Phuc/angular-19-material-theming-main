@@ -15,7 +15,9 @@
       <td mat-cell *matCellDef="let row; let i = index" [style.text-align]="col.align || 'start'">
         <!-- Nếu có templateRef thì render bằng ngTemplateOutlet -->
         <ng-container *ngIf="col.templateRef; else defaultCell">
-          <ng-container *ngTemplateOutlet="col.templateRef!; context: { $implicit: row, index: i }"></ng-container>
+          <ng-container
+            *ngTemplateOutlet="col.templateRef; context: { $implicit: row, col: col, index: i }">
+          </ng-container>
         </ng-container>
 
         <!-- Nếu không có templateRef -->

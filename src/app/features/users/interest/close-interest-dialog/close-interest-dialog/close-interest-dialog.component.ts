@@ -70,6 +70,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('dateTpl', { static: true }) dateTpl!: TemplateRef<any>;
   @ViewChild('statusTpl', { static: true }) statusTpl!: TemplateRef<any>;
   @ViewChild('totalTpl', { static: true }) totalTpl!: TemplateRef<any>;
+  @ViewChild('moneyTpl', { static: true }) moneyTpl!: TemplateRef<any>;
 
 
   @ViewChild('table') table!: SmartTableComponent<CloseInterestDetailRow>;
@@ -147,7 +148,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         sortable: true,
         align: 'end',
         width: '120px',
-        type: 'number'
+        templateRef: this.moneyTpl
       },
       {
         key: 'principalAmount',
@@ -155,15 +156,15 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         sortable: true,
         align: 'end',
         width: '120px',
-        type: 'number'
+        templateRef: this.moneyTpl
       },
       {
         key: 'totalAmount',
-        header: 'Số tiền cần thanh toán', // ✅ Đổi label hiển thị
+        header: 'Số tiền cần thanh toán',
         sortable: true,
         align: 'end',
-        width: '140px', // ✅ nên tăng nhẹ cho vừa text
-        type: 'number'
+        width: '150px',
+        templateRef: this.moneyTpl
       },
       {
         key: 'totalAndDate',

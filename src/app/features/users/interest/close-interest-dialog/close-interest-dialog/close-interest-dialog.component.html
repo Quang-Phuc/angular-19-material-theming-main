@@ -80,6 +80,11 @@
         {{ row.dueDate | date:'dd/MM/yyyy' }}
       </ng-template>
 
+      <ng-template #moneyTpl let-row let-col="col">
+        <span class="money-cell"> {{ formatMoney(row[col.key]) }}</span>
+      </ng-template>
+
+
       <!-- ✅ Cột ĐÃ THANH TOÁN -->
       <ng-template #totalTpl let-row>
       <span [ngClass]="row.status === 'PAID' ? 'paid-cell' : 'pending-cell'">
