@@ -305,11 +305,13 @@ tr.mat-mdc-row {
     background: linear-gradient(135deg, #9ca3af, #6b7280);
   }
 }
-.money-cell {
-  font-family: 'Poppins', 'Roboto', sans-serif;
+:host ::ng-deep td .money-cell {
+  font-family: 'Roboto', monospace;
   font-weight: 600;
+  color: #2e7d32;
   font-size: 15px;
   text-align: right;
-  color: #1b5e20; // xanh đậm sang trọng
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.1);
 }
+
