@@ -88,7 +88,7 @@
       <!-- ✅ Cột ĐÃ THANH TOÁN -->
       <ng-template #totalTpl let-row>
       <span [ngClass]="row.status === 'PAID' ? 'paid-cell' : 'pending-cell'">
-        {{ formatMoney(row.totalAmount) }}
+        {{ formatMoney(row.paidAmount) }}
         <small *ngIf="row.paidDate">
           ({{ row.paidDate | date:'dd/MM/yyyy' }})
         </small>

@@ -65,6 +65,7 @@ export interface CloseInterestDetailRow {
   interestAmount: number;       // BigDecimal -> number
   principalAmount: number;      // BigDecimal -> number
   totalAmount: number;          // BigDecimal -> number
+  paidAmount: number;          // BigDecimal -> number
   status: 'PENDING' | 'PAID' | 'OVERDUE' | string;
   paidDate?: string | null;     // yyyy-MM-dd | null
 }
