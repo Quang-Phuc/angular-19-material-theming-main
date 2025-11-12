@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable ,tap} from 'rxjs';
-
+import { formatCurrency } from '../../../../../core/utils/format.util';
 
 import {
   CloseInterestDetailRow,
@@ -68,11 +68,12 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
   /** TemplateRefs cho SmartTable */
   @ViewChild('sttTpl', { static: true }) sttTpl!: TemplateRef<any>;
   @ViewChild('dateTpl', { static: true }) dateTpl!: TemplateRef<any>;
-  @ViewChild('lastDateTpl', { static: true }) lastDateTpl!: TemplateRef<any>;
   @ViewChild('statusTpl', { static: true }) statusTpl!: TemplateRef<any>;
+  @ViewChild('totalTpl', { static: true }) totalTpl!: TemplateRef<any>;
+
 
   @ViewChild('table') table!: SmartTableComponent<CloseInterestDetailRow>;
-
+  formatMoney = formatCurrency;
   /** Tóm tắt hợp đồng */
   pledge?: PledgeContract;
   loadingSummary = false;
@@ -158,21 +159,21 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       },
       {
         key: 'totalAmount',
-        header: 'Tổng kỳ',
+        header: 'Số tiền cần thanh toán', // ✅ Đổi label hiển thị
         sortable: true,
         align: 'end',
-        width: '120px',
+        width: '140px', // ✅ nên tăng nhẹ cho vừa text
         type: 'number'
       },
       {
-        key: 'paidDate',
-        header: 'Ngày thanh toán',
+        key: 'totalAndDate',
+        header: 'Đã thanh toán',
         sortable: true,
         align: 'center',
-        width: '140px',
-        type: 'date',
-        templateRef: this.lastDateTpl
+        width: '200px',
+        templateRef: this.totalTpl
       },
+
       {
         key: 'status',
         header: 'Trạng thái',
