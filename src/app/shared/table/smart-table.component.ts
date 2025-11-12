@@ -1,24 +1,19 @@
 import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-  ViewChild
+  Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges,
+  ViewChild, ChangeDetectorRef, ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { SmartTableColumn, SmartTableAction, TableQuery, PagedResult } from './smart-table.types';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-smart-table',
@@ -32,22 +27,21 @@ import {MatMenuModule} from '@angular/material/menu';
     MatTooltipModule,
     MatButtonModule,
     MatMenuModule,
-    MatProgressBarModule, // ✅ quan trọng
+    MatProgressBarModule
   ],
   templateUrl: './smart-table.component.html',
-  styleUrls: ['./smart-table.component.scss']
+  styleUrls: ['./smart-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SmartTableComponent<T> implements OnInit, OnChanges {
   @Input() columns: SmartTableColumn<T>[] = [];
   @Input() actions: SmartTableAction<T>[] = [];
   @Input() fetch!: (query: TableQuery) => Observable<PagedResult<T>>;
-
   @Input() initialPageSize = 10;
   @Input() pageSize = 10;
   @Input() pageSizeOptions = [10, 25, 50, 100];
   @Input() usePaginator = true;
   @Input() placeholder = 'Không có dữ liệu';
-  @Input() loading = false;
 
   @Output() pageChange = new EventEmitter<PageEvent>();
 
@@ -56,34 +50,39 @@ export class SmartTableComponent<T> implements OnInit, OnChanges {
 
   dataSource: T[] = [];
   total = 0;
+  loading = false;
   displayedColumns: string[] = [];
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  // ✅ Khởi tạo bảng
   ngOnInit() {
-    this.pageSize = this.initialPageSize || this.pageSize;
-    this.displayedColumns = this.columns.map(c => c.key);
-    if (this.actions?.length) this.displayedColumns.push('__actions');
-    this.loadPage();
+    this.setupDisplayedColumns();
+    this.loadPage(0, this.initialPageSize);
   }
 
+  // ✅ Khi input thay đổi (vd. columns, fetch)
   ngOnChanges(changes: SimpleChanges) {
     if (changes['columns'] && this.columns?.length) {
-      // 🔹 cập nhật lại cột hiển thị khi columns thay đổi
-      this.displayedColumns = this.columns.map(c => c.key);
-      if (this.actions?.length) this.displayedColumns.push('__actions');
+      this.setupDisplayedColumns();
     }
-
     if (changes['fetch']?.currentValue) {
-      this.loadPage();
+      this.reload();
     }
   }
 
+  private setupDisplayedColumns() {
+    this.displayedColumns = this.columns.map(c => c.key);
+    if (this.actions?.length) this.displayedColumns.push('__actions');
+  }
 
   onPage(event: PageEvent) {
     this.pageChange.emit(event);
     this.loadPage(event.pageIndex, event.pageSize);
   }
 
-  loadPage(pageIndex = 0, pageSize = this.pageSize) {
+  // ✅ Load dữ liệu + detectChanges() để hiển thị ngay
+  loadPage(pageIndex = 0, pageSize = this.initialPageSize) {
     if (!this.fetch) return;
 
     const query: TableQuery = {
@@ -94,33 +93,39 @@ export class SmartTableComponent<T> implements OnInit, OnChanges {
     };
 
     this.loading = true;
-    this.fetch(query).subscribe({
-      next: (res) => {
-        this.dataSource = res.items || [];
-        this.total = res.total || 0;
+    this.cdr.markForCheck(); // hiển thị progress bar ngay
+
+    this.fetch(query)
+      .pipe(finalize(() => {
         this.loading = false;
-      },
-      error: (err) => {
-        console.error('Fetch error:', err);
-        this.dataSource = [];
-        this.total = 0;
-        this.loading = false;
-      }
-    });
+        this.cdr.detectChanges(); // ép Angular render lại lập tức
+      }))
+      .subscribe({
+        next: (res) => {
+          this.dataSource = res.items ?? [];
+          this.total = res.total ?? 0;
+        },
+        error: (err) => {
+          console.error('Fetch error:', err);
+          this.dataSource = [];
+          this.total = 0;
+        }
+      });
   }
 
   reload() {
     const pageIndex = this.paginator?.pageIndex ?? 0;
-    const pageSize = this.paginator?.pageSize ?? this.pageSize;
+    const pageSize = this.paginator?.pageSize ?? this.initialPageSize;
     this.loadPage(pageIndex, pageSize);
   }
+
+  // ✅ Helper cho status (nếu cần)
   getStatusClass(status: string | null | undefined): string {
     if (!status) return 'status-default';
     const s = status.toLowerCase();
-    if (s.includes('binh_thuong') || s.includes('đang vay')) return 'status-normal';
-    if (s.includes('quá hạn') || s.includes('overdue')) return 'status-warning';
-    if (s.includes('hủy') || s.includes('cancel')) return 'status-danger';
-    if (s.includes('mới') || s.includes('new')) return 'status-info';
+    if (s.includes('paid')) return 'status-done';
+    if (s.includes('pending')) return 'status-pending';
+    if (s.includes('overdue')) return 'status-warning';
     return 'status-default';
   }
 
