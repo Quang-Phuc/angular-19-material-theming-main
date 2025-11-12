@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Đóng lãi kỳ {{ data.periodNumber }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Ngày đóng</mat-label>
+      <input matInput type="date" formControlName="payDate">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Số tiền khách đóng</mat-label>
+      <input matInput type="number" formControlName="amount" placeholder="Nhập số tiền">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Ghi chú</mat-label>
+      <textarea matInput rows="2" formControlName="note" placeholder="Thêm ghi chú (nếu có)"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Hủy</button>
+  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">Xác nhận</button>
+</mat-dialog-actions>

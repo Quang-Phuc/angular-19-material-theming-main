@@ -159,4 +159,16 @@ export class InterestService {
     const endpoint = `/v1/interests/${pledgeId}/export/${tab}`;
     return this.api.download(endpoint, { type });
   }
+
+  /** Đóng lãi một kỳ cụ thể */
+  payInterest(
+    pledgeId: number,
+    body: { periodNumber: number; payDate: string; amount: number; note?: string }
+  ): Observable<ApiResponse<any>> {
+    return this.api.post<ApiResponse<any>>(
+      `/v1/interests/${pledgeId}/pay-interest`,
+      body
+    );
+  }
+
 }

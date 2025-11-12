@@ -4,6 +4,7 @@
     <mat-icon>request_quote</mat-icon>
     <span>Đóng lãi / Quản lý hợp đồng</span>
   </div>
+
   <div class="header-actions">
     <button mat-stroked-button color="primary" (click)="openSettleDialog()">
       <mat-icon>done_all</mat-icon> Tất toán
@@ -42,10 +43,6 @@
     <div class="sub">{{ summary.customerName }} ({{ summary.phoneNumber }})</div>
   </div>
   <div class="card">
-    <div class="label">Gốc ban đầu</div>
-    <div class="value">{{ summary.loanAmount | number:'1.0-0' }} đ</div>
-  </div>
-  <div class="card">
     <div class="label">Gốc còn lại</div>
     <div class="value highlight">{{ summary.remainingPrincipal | number:'1.0-0' }} đ</div>
   </div>
@@ -59,162 +56,61 @@
   </div>
 </div>
 
-<mat-tab-group [selectedIndex]="activeTab" (selectedIndexChange)="loadTab($event)">
-  <!-- Tab 1: Chi tiết đóng lãi -->
+<!-- TAB GROUP -->
+<mat-tab-group [selectedIndex]="activeTab" (selectedIndexChange)="activeTab = $event">
+  <!-- TAB 1: Chi tiết đóng lãi -->
   <mat-tab label="Chi tiết đóng lãi">
     <div class="tab-toolbar">Danh sách kỳ phải đóng</div>
-    <mat-progress-bar *ngIf="detailsLoading" mode="indeterminate"></mat-progress-bar>
 
-    <table mat-table [dataSource]="details" class="mat-elevation-z1">
-      <ng-container matColumnDef="periodNumber">
-        <th mat-header-cell *matHeaderCellDef>Kỳ</th>
-        <td mat-cell *matCellDef="let r">{{ r.periodNumber }}</td>
-      </ng-container>
+    <app-smart-table
+      [columns]="columns"
+      [fetch]="fetch"
+      [actions]="rowActions"
+      [pageSizeOptions]="[5,10,20,50]"
+      [initialPageSize]="10"
+      placeholder="Không có kỳ đóng lãi"
+    >
+      <!-- Templates -->
+      <ng-template #sttTpl let-index="index">{{ index + 1 }}</ng-template>
 
-      <ng-container matColumnDef="dueDate">
-        <th mat-header-cell *matHeaderCellDef>Hạn</th>
-        <td mat-cell *matCellDef="let r">{{ r.dueDate | date:'dd/MM/yyyy' }}</td>
-      </ng-container>
+      <ng-template #dateTpl let-row>
+        {{ row.dueDate | date:'dd/MM/yyyy' }}
+      </ng-template>
 
-      <ng-container matColumnDef="interestAmount">
-        <th mat-header-cell *matHeaderCellDef>Lãi</th>
-        <td mat-cell *matCellDef="let r">{{ r.interestAmount | number:'1.0-0' }}</td>
-      </ng-container>
+      <ng-template #lastDateTpl let-row>
+        {{ row.lastPaidDate ? (row.lastPaidDate | date:'dd/MM/yyyy') : '–' }}
+      </ng-template>
 
-      <ng-container matColumnDef="principalAmount">
-        <th mat-header-cell *matHeaderCellDef>Gốc</th>
-        <td mat-cell *matCellDef="let r">{{ r.principalAmount | number:'1.0-0' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="totalAmount">
-        <th mat-header-cell *matHeaderCellDef>Tổng</th>
-        <td mat-cell *matCellDef="let r">{{ r.totalAmount | number:'1.0-0' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Trạng thái</th>
-        <td mat-cell *matCellDef="let r">{{ r.status }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="paidDate">
-        <th mat-header-cell *matHeaderCellDef>Ngày đóng</th>
-        <td mat-cell *matCellDef="let r">{{ r.paidDate ? (r.paidDate | date:'dd/MM/yyyy') : '-' }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="detailsColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: detailsColumns;"></tr>
-    </table>
-
-    <mat-paginator #detailsPaginator
-                   [length]="detailsTotal"
-                   [pageSize]="detailsSize"
-                   [pageIndex]="detailsPage"
-                   [pageSizeOptions]="[5,10,20,50]"
-                   (page)="onDetailsPage($event)">
-    </mat-paginator>
+      <ng-template #statusTpl let-row>
+        <span class="status-chip" [ngClass]="row.status === 'PAID' ? 'done' : 'pending'">
+          <mat-icon *ngIf="row.status === 'PAID'">check_circle</mat-icon>
+          <mat-icon *ngIf="row.status !== 'PAID'">hourglass_empty</mat-icon>
+          {{ row.status === 'PAID' ? 'Đã đóng' : 'Chưa đóng' }}
+        </span>
+      </ng-template>
+    </app-smart-table>
   </mat-tab>
 
-  <!-- Tab 2: Thông tin hợp đồng -->
+  <!-- TAB 2: Thông tin hợp đồng -->
   <mat-tab label="Thông tin hợp đồng">
     <div class="tab-toolbar">Thông tin cấu hình lãi & điều khoản</div>
-    <mat-progress-bar *ngIf="contractLoading" mode="indeterminate"></mat-progress-bar>
-
-    <div class="contract" *ngIf="!contractLoading && contract">
-      <div class="row"><span>Ngày vay:</span><b>{{ contract.loanDate | date:'dd/MM/yyyy' }}</b></div>
-      <div class="row"><span>Gốc vay:</span><b>{{ contract.loanAmount | number:'1.0-0' }} đ</b></div>
-      <div class="row"><span>Kỳ hạn:</span><b>{{ contract.interestTermValue }} {{ contract.interestTermUnit === 'MONTH' ? 'tháng' : 'ngày' }}</b></div>
-      <div class="row"><span>Lãi suất:</span><b>{{ contract.interestRateValue }} ({{ contract.interestRateUnit }})</b></div>
-      <div class="row"><span>Số kỳ thanh toán:</span><b>{{ contract.paymentCount }}</b></div>
-      <div class="row"><span>Hình thức:</span><b>{{ contract.interestPaymentType }}</b></div>
-      <div class="row"><span>Ghi chú:</span><b>{{ contract.note || '-' }}</b></div>
+    <div class="contract" *ngIf="summary">
+      <div class="row"><span>Ngày vay:</span><b>{{ summary.loanDate | date:'dd/MM/yyyy' }}</b></div>
+      <div class="row"><span>Mã hợp đồng:</span><b>{{ summary.contractCode }}</b></div>
+      <div class="row"><span>Người theo dõi:</span><b>{{ summary.follower || '-' }}</b></div>
+      <div class="row"><span>Tình trạng:</span><b>{{ summary.pledgeStatus || '-' }}</b></div>
     </div>
   </mat-tab>
 
-  <!-- Tab 3: Lịch sử đóng lãi -->
+  <!-- TAB 3: Lịch sử đóng lãi -->
   <mat-tab label="Lịch sử đóng lãi">
     <div class="tab-toolbar">Các lần thu lãi</div>
-    <mat-progress-bar *ngIf="payHistLoading" mode="indeterminate"></mat-progress-bar>
-
-    <table mat-table [dataSource]="payHist" class="mat-elevation-z1">
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Thời gian</th>
-        <td mat-cell *matCellDef="let r">{{ r.createdAt | date:'dd/MM/yyyy, HH:mm' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="periodNumber">
-        <th mat-header-cell *matHeaderCellDef>Kỳ</th>
-        <td mat-cell *matCellDef="let r">{{ r.periodNumber || '-' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef>Số tiền</th>
-        <td mat-cell *matCellDef="let r">{{ r.amount | number:'1.0-0' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="note">
-        <th mat-header-cell *matHeaderCellDef>Ghi chú</th>
-        <td mat-cell *matCellDef="let r">{{ r.note || '-' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="cashier">
-        <th mat-header-cell *matHeaderCellDef>Thu ngân</th>
-        <td mat-cell *matCellDef="let r">{{ r.cashier || '-' }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="payHistColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: payHistColumns;"></tr>
-    </table>
-
-    <mat-paginator #payHistPaginator
-                   [length]="payHistTotal"
-                   [pageSize]="payHistSize"
-                   [pageIndex]="payHistPage"
-                   [pageSizeOptions]="[5,10,20,50]"
-                   (page)="onPayHistPage($event)">
-    </mat-paginator>
+    <p class="placeholder">Đang phát triển...</p>
   </mat-tab>
 
-  <!-- Tab 4: Lịch sử thu phí 1 lần -->
+  <!-- TAB 4: Lịch sử thu phí 1 lần -->
   <mat-tab label="Lịch sử thu phí 1 lần">
     <div class="tab-toolbar">Các khoản phí 1 lần</div>
-    <mat-progress-bar *ngIf="feeHistLoading" mode="indeterminate"></mat-progress-bar>
-
-    <table mat-table [dataSource]="feeHist" class="mat-elevation-z1">
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Thời gian</th>
-        <td mat-cell *matCellDef="let r">{{ r.createdAt | date:'dd/MM/yyyy, HH:mm' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="feeType">
-        <th mat-header-cell *matHeaderCellDef>Loại phí</th>
-        <td mat-cell *matCellDef="let r">{{ r.feeType }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="amount">
-        <th mat-header-cell *matHeaderCellDef>Số tiền</th>
-        <td mat-cell *matCellDef="let r">{{ r.amount | number:'1.0-0' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="note">
-        <th mat-header-cell *matHeaderCellDef>Ghi chú</th>
-        <td mat-cell *matCellDef="let r">{{ r.note || '-' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="cashier">
-        <th mat-header-cell *matHeaderCellDef>Thu ngân</th>
-        <td mat-cell *matCellDef="let r">{{ r.cashier || '-' }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="feeHistColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: feeHistColumns;"></tr>
-    </table>
-
-    <mat-paginator #feeHistPaginator
-                   [length]="feeHistTotal"
-                   [pageSize]="feeHistSize"
-                   [pageIndex]="feeHistPage"
-                   [pageSizeOptions]="[5,10,20,50]"
-                   (page)="onFeeHistPage($event)">
-    </mat-paginator>
+    <p class="placeholder">Đang phát triển...</p>
   </mat-tab>
 </mat-tab-group>
