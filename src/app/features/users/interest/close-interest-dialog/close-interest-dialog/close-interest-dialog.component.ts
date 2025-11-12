@@ -15,7 +15,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable } from 'rxjs';
+import { Observable ,tap} from 'rxjs';
 
 
 import {
@@ -100,7 +100,9 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       order: q.order,
       pledgeId: this.data.pledgeId
     };
-    return this.resources.of<CloseInterestDetailRow>('/v1/interests/details').pagePagedResult(params);
+    return this.resources.of<CloseInterestDetailRow>('/v1/interests/details').pagePagedResult(params).pipe(
+      tap(res => console.log('🔍 DATA FETCHED:', res.items))
+    );
   };
 
   constructor(
@@ -183,6 +185,8 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
     // cập nhật lại view sau khi set cột
     this.cdr.detectChanges();
+
+    setTimeout(() => this.table.reload(), 0);
   }
 
 

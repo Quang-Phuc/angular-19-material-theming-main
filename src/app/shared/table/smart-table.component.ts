@@ -66,8 +66,17 @@ export class SmartTableComponent<T> implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['fetch']?.currentValue) this.loadPage();
+    if (changes['columns'] && this.columns?.length) {
+      // 🔹 cập nhật lại cột hiển thị khi columns thay đổi
+      this.displayedColumns = this.columns.map(c => c.key);
+      if (this.actions?.length) this.displayedColumns.push('__actions');
+    }
+
+    if (changes['fetch']?.currentValue) {
+      this.loadPage();
+    }
   }
+
 
   onPage(event: PageEvent) {
     this.pageChange.emit(event);
