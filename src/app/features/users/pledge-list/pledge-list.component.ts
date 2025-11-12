@@ -1,6 +1,6 @@
 // src/app/features/users/pledge-list/pledge-list.component.ts
 import {
-  Component, ChangeDetectionStrategy, OnInit, ViewChild, inject
+  Component, ChangeDetectionStrategy, OnInit, ViewChild, inject, TemplateRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -38,6 +38,7 @@ import {
 import { NotificationService } from '../../../core/services/notification.service';
 import { PledgeDialogComponent } from '../../../core/dialogs/pledge-dialog/pledge-dialog.component';
 import { PledgeService } from '../../../core/services/pledge.service';
+import {formatCurrency} from '../../../core/utils/format.util';
 
 interface StoreItem { storeId: string; storeName: string; }
 interface ApiStore { id: number | string; name: string; }
@@ -85,6 +86,8 @@ export class PledgeListComponent implements OnInit {
   private notify = inject(NotificationService);
 
   @ViewChild('table') table!: SmartTableComponent<PledgeRow>;
+  @ViewChild('moneyTpl', { static: true }) moneyTpl!: TemplateRef<any>;
+
 
   filterForm: FormGroup = this.fb.group({
     keyword: [''],
@@ -98,19 +101,48 @@ export class PledgeListComponent implements OnInit {
   constructor(private pledgeService: PledgeService) {}
 
   selectedStoreId: string | null = null;
+  columns: SmartTableColumn<PledgeRow>[] = [];
 
   storeList$!: Observable<StoreItem[]>;
   followerList$!: Observable<UserStore[]>;
 
-  columns: SmartTableColumn<PledgeRow>[] = [
-    { key: 'contractCode', header: 'Mã HĐ', sortable: true, width: '140px' },
-    { key: 'customerName', header: 'Khách hàng', sortable: true },
-    { key: 'assetName', header: 'Tài sản', sortable: true },
-    { key: 'loanAmount', header: 'Số tiền vay', type: 'number', align: 'end', sortable: true, width: '120px' },
-    { key: 'totalPaid', header: 'Đã trả', type: 'number', align: 'end', sortable: true, width: '110px' },
-    { key: 'remainingPrincipal', header: 'Còn lại', type: 'number', align: 'end', sortable: true, width: '110px' },
-    { key: 'pledgeStatus', header: 'Tình trạng', sortable: true, width: '110px' }
-  ];
+  ngAfterViewInit(): void {
+    this.columns = [
+      { key: 'contractCode', header: 'Mã HĐ', sortable: true, width: '140px' },
+      { key: 'customerName', header: 'Khách hàng', sortable: true },
+      { key: 'assetName', header: 'Tài sản', sortable: true },
+      {
+        key: 'loanAmount',
+        header: 'Số tiền vay',
+        align: 'end',
+        sortable: true,
+        width: '120px',
+        templateRef: this.moneyTpl
+      },
+      {
+        key: 'totalPaid',
+        header: 'Đã trả',
+        align: 'end',
+        sortable: true,
+        width: '110px',
+        templateRef: this.moneyTpl
+      },
+      {
+        key: 'remainingPrincipal',
+        header: 'Còn lại',
+        align: 'end',
+        sortable: true,
+        width: '110px',
+        templateRef: this.moneyTpl
+      },
+      { key: 'pledgeStatus', header: 'Tình trạng', sortable: true, width: '110px' }
+    ];
+
+    // ép change detection cập nhật bảng
+    setTimeout(() => this.table.reload(), 0);
+  }
+
+
 
   rowActions: SmartTableAction<PledgeRow>[] = [
     { icon: 'visibility', tooltip: 'Xem', handler: (row) => this.viewPledge(row.id) },
@@ -287,4 +319,5 @@ export class PledgeListComponent implements OnInit {
     return date.toISOString().split('.')[0]; // "2025-11-23T17:00:00"
   }
 
+  protected readonly formatMoney = formatCurrency;
 }

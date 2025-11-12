@@ -106,5 +106,10 @@
     placeholder="Tìm kiếm hợp đồng"
   >
     <div table-actions></div>
+    <!-- Template định dạng tiền -->
+    <ng-template #moneyTpl let-row let-col="col">
+      <span class="money-cell"> {{ formatMoney(row[col.key]) }}</span>
+    </ng-template>
+
   </app-smart-table>
 </div>

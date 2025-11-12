@@ -222,3 +222,11 @@ td.mat-mdc-cell.actions-cell {
   overflow: auto;
   max-height: calc(90vh - 100px);
 }
+.money-cell {
+  font-family: 'Poppins', 'Roboto', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: right;
+  color: #1b5e20; // xanh đậm sang trọng
+  letter-spacing: 0.3px;
+}
