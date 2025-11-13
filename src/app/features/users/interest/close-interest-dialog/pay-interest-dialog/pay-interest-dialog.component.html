@@ -31,28 +31,50 @@
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
           <mat-label>Hình thức thanh toán</mat-label>
           <mat-select formControlName="paymentMethod" required panelClass="custom-select-panel">
+
+            <!-- Các lựa chọn -->
             <mat-option *ngFor="let method of paymentMethods" [value]="method.value" class="payment-option">
               <div class="option-content">
-                <div class="method-badge" [style.background-color]="method.color">
-                  <mat-icon>{{ method.icon }}</mat-icon>
-                </div>
+                <mat-icon class="method-icon" [style.color]="method.color">{{ method.icon }}</mat-icon>
                 <span class="method-label">{{ method.label }}</span>
               </div>
             </mat-option>
+
+            <!-- TÙY CHỈNH HIỂN THỊ KHI ĐÃ CHỌN -->
+            <mat-select-trigger>
+              <div class="trigger-content" *ngIf="form.get('paymentMethod')?.value as selectedValue">
+                <mat-icon class="method-icon" [style.color]="getSelectedMethod(selectedValue)?.color">
+                  {{ getSelectedMethod(selectedValue)?.icon }}
+                </mat-icon>
+                <span class="method-label">{{ getSelectedMethod(selectedValue)?.label }}</span>
+              </div>
+              <span *ngIf="!form.get('paymentMethod')?.value" class="placeholder">
+    Chọn hình thức
+  </span>
+            </mat-select-trigger>
+
           </mat-select>
+
           <mat-error>Vui lòng chọn phương thức</mat-error>
         </mat-form-field>
 
         <!-- Số tiền -->
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
           <mat-label>Số tiền khách đóng</mat-label>
-          <span matPrefix class="currency-prefix">₫</span>
-          <input matInput type="number" formControlName="amount" placeholder="0" required>
+          <input
+            matInput
+            type="text"
+            formControlName="amount"
+            appCurrencyFormat
+            [allowZero]="false"
+            placeholder="0"
+            required>
+
           <mat-error *ngIf="form.get('amount')?.hasError('required')">
             Vui lòng nhập số tiền
           </mat-error>
           <mat-error *ngIf="form.get('amount')?.hasError('min')">
-            Số tiền phải > 0
+            Số tiền phải lớn hơn 0
           </mat-error>
         </mat-form-field>
 

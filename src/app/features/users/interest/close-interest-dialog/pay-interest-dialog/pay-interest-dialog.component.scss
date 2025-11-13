@@ -252,3 +252,111 @@ $success: #4caf50;
     padding: 16px;
   }
 }
+::ng-deep .mat-mdc-select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.method-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.method-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
+::ng-deep .mat-mdc-form-field-has-value .mat-mdc-floating-label {
+  opacity: 0;
+  transform: translateY(-1.2em) scale(0.75);
+}
+// Trong pay-interest-dialog.component.scss
+
+::ng-deep .payment-option {
+  padding: 0 !important;
+  height: auto !important;
+  min-height: 48px;
+}
+
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(63, 81, 181, 0.08);
+  }
+}
+
+.method-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.method-label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Hover ripple effect
+::ng-deep .payment-option:hover .option-content {
+  background: rgba(63, 81, 181, 0.1);
+}
+
+// Selected state
+::ng-deep .mat-mdc-option.mat-selected .option-content {
+  background: rgba(63, 81, 181, 0.15);
+  font-weight: 600;
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}

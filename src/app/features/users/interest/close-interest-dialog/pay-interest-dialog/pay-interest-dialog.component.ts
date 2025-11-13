@@ -15,6 +15,8 @@ import { InterestService } from '../../../../../core/services/interest.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 import {animate, style, transition, trigger} from '@angular/animations';
+import {CurrencyFormatDirective} from '../../../../../core/utils/currency-format.directive';
+import {VndPipe} from '../../../../../core/utils/currency.pipe';
 
 interface PaymentMethod {
   label: string;
@@ -37,7 +39,8 @@ interface PaymentMethod {
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    CurrencyFormatDirective, VndPipe
   ],
   templateUrl: './pay-interest-dialog.component.html',
   styleUrls: ['./pay-interest-dialog.component.scss'],
@@ -74,11 +77,15 @@ export class PayInterestDialogComponent implements OnInit {
     this.form = this.fb.group({
       payDate: [new Date(), Validators.required],
       paymentMethod: ['', Validators.required],
-      amount: [0, [Validators.required, Validators.min(1)]],
+      amount: [null, [Validators.required, Validators.min(1)]], // Dùng null thay vì 0
       note: ['']
     });
   }
+// pay-interest-dialog.component.ts
 
+  getSelectedMethod(value: string): PaymentMethod | undefined {
+    return this.paymentMethods.find(m => m.value === value);
+  }
   confirm(): void {
     if (this.form.invalid || this.isSubmitting) return;
 
