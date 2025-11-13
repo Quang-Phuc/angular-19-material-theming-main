@@ -35,6 +35,7 @@ import { ExtendTermDialogComponent } from '../extend-term-dialog/extend-term-dia
 import { PartialPrincipalDialogComponent } from '../partial-principal-dialog/partial-principal-dialog.component';
 import { AdditionalLoanDialogComponent } from '../additional-loan-dialog/additional-loan-dialog.component';
 import { PayInterestDialogComponent } from '../pay-interest-dialog/pay-interest-dialog.component';
+import {animate, style, transition, trigger} from '@angular/animations';
 
 @Component({
   selector: 'app-close-interest-dialog',
@@ -52,6 +53,14 @@ import { PayInterestDialogComponent } from '../pay-interest-dialog/pay-interest-
     ExtendTermDialogComponent,
     PartialPrincipalDialogComponent,
     AdditionalLoanDialogComponent
+  ],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
   ],
   templateUrl: './close-interest-dialog.component.html',
   styleUrls: ['./close-interest-dialog.component.scss'],

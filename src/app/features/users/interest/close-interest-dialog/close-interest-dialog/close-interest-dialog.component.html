@@ -1,132 +1,130 @@
-<!-- src/app/features/interest/close-interest-dialog/close-interest-dialog.component.html -->
-<div class="header">
-  <div class="title">
-    <mat-icon>request_quote</mat-icon>
-    <span>Đóng lãi / Quản lý hợp đồng</span>
-  </div>
+<div class="dialog-container" [@fadeIn]>
 
-  <div class="header-actions">
-    <button mat-stroked-button color="primary" (click)="openSettleDialog()">
-      <mat-icon>done_all</mat-icon>
-      Tất toán
-    </button>
-    <button mat-stroked-button color="accent" (click)="openExtendTermDialog()">
-      <mat-icon>update</mat-icon>
-      Gia hạn kỳ
-    </button>
-    <button mat-stroked-button color="warn" (click)="openPartialPrincipalDialog()">
-      <mat-icon>money_off</mat-icon>
-      Trả bớt gốc
-    </button>
-    <button mat-stroked-button color="primary" (click)="openAdditionalLoanDialog()">
-      <mat-icon>add_card</mat-icon>
-      Vay thêm
-    </button>
+  <!-- HEADER GRADIENT -->
+  <div class="header-gradient">
+    <div class="header-content">
+      <div class="title-group">
+        <div class="icon-circle">
+          <mat-icon>request_quote</mat-icon>
+        </div>
+        <div class="title-text">
+          <h2>Đóng lãi / Quản lý hợp đồng</h2>
+          <p class="contract-id">HĐ: {{ pledge?.contractCode || '...' }}</p>
+        </div>
+      </div>
 
-    <span class="spacer"></span>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" class="action-btn" (click)="openSettleDialog()">
+          <mat-icon>done_all</mat-icon> Tất toán
+        </button>
+        <button mat-raised-button color="accent" class="action-btn" (click)="openExtendTermDialog()">
+          <mat-icon>update</mat-icon> Gia hạn
+        </button>
+        <button mat-raised-button color="warn" class="action-btn" (click)="openPartialPrincipalDialog()">
+          <mat-icon>money_off</mat-icon> Trả bớt
+        </button>
+        <button mat-raised-button class="action-btn add-loan" (click)="openAdditionalLoanDialog()">
+          <mat-icon>add_card</mat-icon> Vay thêm
+        </button>
 
-    <button mat-icon-button matTooltip="Xuất PDF" (click)="exportFile('pdf')">
-      <mat-icon>picture_as_pdf</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Xuất Excel" (click)="exportFile('excel')">
-      <mat-icon>grid_on</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Đóng" (click)="close()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-</div>
-
-<mat-progress-bar *ngIf="loadingSummary" mode="indeterminate"></mat-progress-bar>
-
-<!-- Summary cards -->
-<div class="summary" *ngIf="pledge">
-  <div class="card">
-    <div class="label">Hợp đồng</div>
-    <div class="value">{{ pledge.contractCode }}</div>
-    <div class="sub">{{ pledge.customer.fullName }} ({{ pledge.customer.phoneNumber }})</div>
-  </div>
-  <!--  <div class="card">-->
-  <!--    <div class="label">Gốc còn lại</div>-->
-  <!--    <div class="value highlight">{{ summary.remainingPrincipal | number:'1.0-0' }} đ</div>-->
-  <!--  </div>-->
-  <!--  <div class="card">-->
-  <!--    <div class="label">Lãi đến hôm nay</div>-->
-  <!--    <div class="value warn">{{ summary.interestToday | number:'1.0-0' }} đ</div>-->
-  <!--  </div>-->
-  <!--  <div class="card">-->
-  <!--    <div class="label">Đã thu</div>-->
-  <!--    <div class="value">{{ summary.totalPaid | number:'1.0-0' }} đ</div>-->
-  <!--  </div>-->
-</div>
-
-<!-- TAB GROUP -->
-<mat-tab-group [selectedIndex]="activeTab" (selectedIndexChange)="activeTab = $event">
-  <!-- TAB 1: Chi tiết đóng lãi -->
-  <mat-tab label="Chi tiết đóng lãi">
-    <app-smart-table
-      #table
-      [columns]="columns"
-      [fetch]="fetch"
-      [actions]="rowActions"
-      [pageSizeOptions]="[10,25,50,100]"
-      [initialPageSize]="10"
-      placeholder="Không có kỳ đóng lãi"
-    >
-      <!-- Templates -->
-      <ng-template #sttTpl let-index="index">{{ index + 1 }}</ng-template>
-
-      <ng-template #dateTpl let-row>
-        {{ row.dueDate | date:'dd/MM/yyyy' }}
-      </ng-template>
-
-      <ng-template #moneyTpl let-row let-col="col">
-        <span class="money-cell"> {{ formatMoney(row[col.key]) }}</span>
-      </ng-template>
-
-
-      <!-- ✅ Cột ĐÃ THANH TOÁN -->
-      <ng-template #totalTpl let-row>
-      <span [ngClass]="row.status === 'PAID' ? 'paid-cell' : 'pending-cell'">
-        {{ formatMoney(row.paidAmount) }}
-        <small *ngIf="row.paidDate">
-          ({{ row.paidDate | date:'dd/MM/yyyy' }})
-        </small>
-      </span>
-      </ng-template>
-
-      <!-- ✅ Cột TRẠNG THÁI -->
-      <ng-template #statusTpl let-row>
-      <span class="status-chip" [ngClass]="row.status === 'PAID' ? 'done' : 'pending'">
-        <mat-icon *ngIf="row.status === 'PAID'">check_circle</mat-icon>
-        <mat-icon *ngIf="row.status !== 'PAID'">hourglass_empty</mat-icon>
-        {{ row.status === 'PAID' ? 'Đã đóng' : 'Chưa đóng' }}
-      </span>
-      </ng-template>
-    </app-smart-table>
-  </mat-tab>
-
-
-  <!-- TAB 2: Thông tin hợp đồng -->
-  <mat-tab label="Thông tin hợp đồng">
-    <div class="tab-toolbar">Thông tin cấu hình lãi & điều khoản</div>
-    <div class="contract" *ngIf="pledge">
-      <div class="row"><span>Ngày vay:</span><b>{{ pledge.loan.loanDate | date:'dd/MM/yyyy' }}</b></div>
-      <div class="row"><span>Mã hợp đồng:</span><b>{{ pledge.contractCode }}</b></div>
-      <div class="row"><span>Người theo dõi:</span><b>{{ pledge.loan.follower || '-' }}</b></div>
-      <div class="row"><span>Tình trạng:</span><b>{{ pledge.status || '-' }}</b></div>
+        <div class="export-group">
+          <button mat-icon-button matTooltip="PDF" (click)="exportFile('pdf')" class="export-btn">
+            <mat-icon>picture_as_pdf</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Excel" (click)="exportFile('excel')" class="export-btn">
+            <mat-icon>grid_on</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Đóng" (click)="close()" class="close-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
-  </mat-tab>
+  </div>
 
-  <!-- TAB 3: Lịch sử đóng lãi -->
-  <mat-tab label="Lịch sử đóng lãi">
-    <div class="tab-toolbar">Các lần thu lãi</div>
-    <p class="placeholder">Đang phát triển...</p>
-  </mat-tab>
+  <!-- PROGRESS BAR -->
+  <mat-progress-bar *ngIf="loadingSummary" mode="indeterminate" class="progress-thin"></mat-progress-bar>
 
-  <!-- TAB 4: Lịch sử thu phí 1 lần -->
-  <mat-tab label="Lịch sử thu phí 1 lần">
-    <div class="tab-toolbar">Các khoản phí 1 lần</div>
-    <p class="placeholder">Đang phát triển...</p>
-  </mat-tab>
-</mat-tab-group>
+  <!-- SUMMARY CARDS -->
+  <div class="summary-cards" *ngIf="pledge">
+    <div class="summary-card glass">
+      <div class="card-icon"><mat-icon>person</mat-icon></div>
+      <div class="card-label">Khách hàng</div>
+      <div class="card-value">{{ pledge.customer.fullName }}</div>
+      <div class="card-sub">{{ pledge.customer.phoneNumber }}</div>
+    </div>
+
+    <!-- <div class="summary-card glass highlight">
+      <div class="card-icon"><mat-icon>savings</mat-icon></div>
+      <div class="card-label">Gốc còn lại</div>
+      <div class="card-value">{{ summary.remainingPrincipal | number:'1.0-0' }} đ</div>
+    </div>
+
+    <div class="summary-card glass warn">
+      <div class="card-icon"><mat-icon>currency_exchange</mat-icon></div>
+      <div class="card-label">Lãi hôm nay</div>
+      <div class="card-value">{{ summary.interestToday | number:'1.0-0' }} đ</div>
+    </div> -->
+  </div>
+
+  <!-- TAB GROUP -->
+  <mat-tab-group
+    [selectedIndex]="activeTab"
+    (selectedIndexChange)="activeTab = $event"
+    class="custom-tab-group"
+    animationDuration="300ms">
+
+    <!-- TAB 1: Chi tiết đóng lãi -->
+    <mat-tab label="Chi tiết đóng lãi">
+      <div class="tab-content">
+        <app-smart-table
+          #table
+          [columns]="columns"
+          [fetch]="fetch"
+          [actions]="rowActions"
+          [pageSizeOptions]="[10,25,50]"
+          [initialPageSize]="10"
+          placeholder="Không có kỳ đóng lãi"
+          class="modern-table">
+
+          <!-- Templates giữ nguyên -->
+          <ng-template #sttTpl let-index="index">{{ index + 1 }}</ng-template>
+          <ng-template #dateTpl let-row>{{ row.dueDate | date:'dd/MM/yyyy' }}</ng-template>
+          <ng-template #moneyTpl let-row let-col="col">
+            <span class="money-cell">{{ formatMoney(row[col.key]) }}</span>
+          </ng-template>
+          <ng-template #totalTpl let-row>
+            <div class="paid-wrapper" [class.paid]="row.status === 'PAID'" [class.pending]="row.status !== 'PAID'">
+              <span class="amount">{{ formatMoney(row.paidAmount) }}</span>
+              <small *ngIf="row.paidDate" class="date">({{ row.paidDate | date:'dd/MM' }})</small>
+            </div>
+          </ng-template>
+          <ng-template #statusTpl let-row>
+            <div class="status-badge" [class.done]="row.status === 'PAID'" [class.pending]="row.status !== 'PAID'">
+              <mat-icon>{{ row.status === 'PAID' ? 'check_circle' : 'schedule' }}</mat-icon>
+              <span>{{ row.status === 'PAID' ? 'Đã đóng' : 'Chưa đóng' }}</span>
+            </div>
+          </ng-template>
+        </app-smart-table>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 2: Thông tin hợp đồng -->
+    <mat-tab label="Thông tin hợp đồng">
+      <div class="tab-content info-grid" *ngIf="pledge">
+        <div class="info-item"><span>Ngày vay</span><b>{{ pledge.loan.loanDate | date:'dd/MM/yyyy' }}</b></div>
+        <div class="info-item"><span>Mã HĐ</span><b>{{ pledge.contractCode }}</b></div>
+        <div class="info-item"><span>Người theo dõi</span><b>{{ pledge.loan.follower || '-' }}</b></div>
+        <div class="info-item"><span>Tình trạng</span><b>{{ pledge.status || '-' }}</b></div>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 3 & 4: Coming soon -->
+    <mat-tab label="Lịch sử đóng lãi">
+      <div class="tab-content placeholder">Đang phát triển...</div>
+    </mat-tab>
+    <mat-tab label="Lịch sử thu phí">
+      <div class="tab-content placeholder">Đang phát triển...</div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
