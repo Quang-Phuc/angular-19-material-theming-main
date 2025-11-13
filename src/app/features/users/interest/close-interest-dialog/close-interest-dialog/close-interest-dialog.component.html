@@ -111,11 +111,134 @@
 
     <!-- TAB 2: Thông tin hợp đồng -->
     <mat-tab label="Thông tin hợp đồng">
-      <div class="tab-content info-grid" *ngIf="pledge">
-        <div class="info-item"><span>Ngày vay</span><b>{{ pledge.loan.loanDate | date:'dd/MM/yyyy' }}</b></div>
-        <div class="info-item"><span>Mã HĐ</span><b>{{ pledge.contractCode }}</b></div>
-        <div class="info-item"><span>Người theo dõi</span><b>{{ pledge.loan.follower || '-' }}</b></div>
-        <div class="info-item"><span>Tình trạng</span><b>{{ pledge.status || '-' }}</b></div>
+      <div class="contract-tab-dashboard" *ngIf="pledge">
+
+        <!-- 1. KHÁCH HÀNG -->
+        <div class="contract-tab-block">
+          <div class="contract-tab-header">
+            <mat-icon class="header-icon">person</mat-icon>
+            <h3>Thông tin khách hàng</h3>
+          </div>
+          <div class="contract-tab-content">
+            <div class="contract-tab-customer-row">
+              <div class="contract-tab-avatar">
+                <mat-icon>account_circle</mat-icon>
+              </div>
+              <div class="contract-tab-customer-details">
+                <div class="name">{{ pledge.customer.fullName }}</div>
+                <div class="info-line">
+                  <mat-icon fontSet="material-icons-outlined">credit_card</mat-icon>
+                  <span>CCCD: {{ pledge.customer.identityNumber || 'Chưa cập nhật' }}</span>
+                </div>
+                <div class="info-line">
+                  <mat-icon fontSet="material-icons-outlined">phone</mat-icon>
+                  <span>SĐT: {{ pledge.customer.phoneNumber }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. TÀI SẢN -->
+        <div class="contract-tab-block">
+          <div class="contract-tab-header">
+            <mat-icon class="header-icon">directions_car</mat-icon>
+            <h3>Thông tin tài sản</h3>
+          </div>
+          <div class="contract-tab-content">
+            <div class="contract-tab-asset-row">
+              <div class="contract-tab-thumbnail">
+                <div class="placeholder-img">
+                  <mat-icon>image</mat-icon>
+                </div>
+              </div>
+              <div class="contract-tab-asset-details">
+                <div class="asset-name">10000000</div>
+                <div class="info-line">
+                  <mat-icon fontSet="material-icons-outlined">confirmation_number</mat-icon>
+                  <span>Biển số: 10000000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. VAY -->
+        <div class="contract-tab-block">
+          <div class="contract-tab-header">
+            <mat-icon class="header-icon">monetization_on</mat-icon>
+            <h3>Thông tin vay</h3>
+          </div>
+          <div class="contract-tab-content">
+            <div class="contract-tab-loan-grid">
+              <div class="contract-tab-loan-item">
+                <div class="label">Số tiền vay</div>
+                <div class="value highlight">10000000</div>
+              </div>
+              <div class="contract-tab-loan-item">
+                <div class="label">Lãi suất</div>
+                <div class="value">10000000 đ/triệu/ngày</div>
+              </div>
+              <div class="contract-tab-loan-item">
+                <div class="label">Kỳ hạn</div>
+                <div class="value">10000000 ngày/kỳ</div>
+              </div>
+              <div class="contract-tab-loan-item">
+                <div class="label">Lãi mỗi kỳ</div>
+                <div class="value success">10000000</div>
+              </div>
+              <div class="contract-tab-loan-item">
+                <div class="label">Tổng kỳ</div>
+                <div class="value">10000000 kỳ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. THANH TOÁN -->
+        <div class="contract-tab-block">
+          <div class="contract-tab-header">
+            <mat-icon class="header-icon">receipt_long</mat-icon>
+            <h3>Tình trạng thanh toán</h3>
+          </div>
+          <div class="contract-tab-content">
+            <div class="contract-tab-payment-summary">
+              <div class="contract-tab-summary-item">
+                <div class="label">Đã thanh toán</div>
+                <div class="value success">{{ formatMoney(summary?.totalPaid || 10400000) }}</div>
+              </div>
+              <div class="contract-tab-summary-item">
+                <div class="label">Còn lại</div>
+                <div class="value warn">{{ formatMoney(summary?.remainingAmount || 3600000) }}</div>
+              </div>
+            </div>
+
+            <div class="contract-tab-progress-section">
+              <div class="progress-label">
+                <span>Kỳ đã đóng: 10000000</span>
+                <span class="current-term">Kỳ hiện tại: 10000000</span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="10000000"
+                class="contract-tab-progress">
+              </mat-progress-bar>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="contract-tab-footer">
+          <button mat-stroked-button class="contract-tab-btn">
+            <mat-icon>history</mat-icon> Xem lịch sử đóng lãi
+          </button>
+          <button mat-stroked-button class="contract-tab-btn" >
+            <mat-icon>print</mat-icon> In hợp đồng
+          </button>
+          <button mat-flat-button color="primary" class="contract-tab-btn primary" >
+            <mat-icon>payments</mat-icon> Đóng lãi kỳ hiện tại
+          </button>
+        </div>
       </div>
     </mat-tab>
 

@@ -63,7 +63,7 @@ import {animate, style, transition, trigger} from '@angular/animations';
     ])
   ],
   templateUrl: './close-interest-dialog.component.html',
-  styleUrls: ['./close-interest-dialog.component.scss'],
+  styleUrls: ['./close-interest-dialog.component.scss','./contract-info-tab.scss'],
   providers: [DatePipe]
 })
 export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
@@ -83,6 +83,16 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
 
   @ViewChild('table') table!: SmartTableComponent<CloseInterestDetailRow>;
+
+  // Trong component
+  summary = {
+    totalPaid: 10400000,
+    remainingAmount: 3600000,
+    paidTerms: 12,
+    currentTerm: 13,
+    nextMade: '2026-02-29'
+  };
+
   formatMoney = formatCurrency;
   /** Tóm tắt hợp đồng */
   pledge?: PledgeContract;
