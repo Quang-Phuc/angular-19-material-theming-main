@@ -5,9 +5,23 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { InterestService, InterestSummary } from '../../../../../core/services/interest.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { InterestService } from '../../../../../core/services/interest.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
+import {animate, style, transition, trigger} from '@angular/animations';
+
+interface PaymentMethod {
+  label: string;
+  value: string;
+  icon: string;
+  color: string;
+}
 
 @Component({
   selector: 'app-pay-interest-dialog',
@@ -18,13 +32,34 @@ import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dial
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSelectModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './pay-interest-dialog.component.html',
-  styleUrls: ['./pay-interest-dialog.component.scss']
+  styleUrls: ['./pay-interest-dialog.component.scss'],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateY(-20px)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class PayInterestDialogComponent implements OnInit {
   form!: FormGroup;
+  isSubmitting = false;
+
+  paymentMethods: PaymentMethod[] = [
+    { label: 'Tiền mặt', value: 'cash', icon: 'payments', color: '#4caf50' },
+    { label: 'Chuyển khoản', value: 'bank_transfer', icon: 'account_balance', color: '#2196f3' },
+    { label: 'Ví điện tử', value: 'ewallet', icon: 'account_balance_wallet', color: '#9c27b0' },
+    { label: 'Thẻ tín dụng', value: 'credit_card', icon: 'credit_card', color: '#ff5722' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -37,20 +72,21 @@ export class PayInterestDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      payDate: [new Date().toISOString().substring(0, 10), Validators.required],
+      payDate: [new Date(), Validators.required],
+      paymentMethod: ['', Validators.required],
       amount: [0, [Validators.required, Validators.min(1)]],
       note: ['']
     });
   }
 
   confirm(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.isSubmitting) return;
 
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Xác nhận đóng lãi',
-        content: 'Bạn có chắc chắn muốn đóng lãi cho kỳ này?',
+        content: `Xác nhận đóng lãi kỳ <strong>${this.data.periodNumber}</strong> với số tiền <strong>${this.formatCurrency(this.form.value.amount)}</strong>?`,
         confirmText: 'Đồng ý',
         cancelText: 'Hủy'
       }
@@ -59,19 +95,34 @@ export class PayInterestDialogComponent implements OnInit {
     ref.afterClosed().subscribe(ok => {
       if (!ok) return;
 
+      this.isSubmitting = true;
       const v = this.form.getRawValue();
+
       this.interest.payInterest(this.data.pledgeId, {
         periodNumber: this.data.periodNumber,
-        payDate: v.payDate,
+        payDate: this.formatDate(v.payDate),
         amount: Number(v.amount),
-        note: v.note || ''
+        paymentMethod: v.paymentMethod,
+        note: v.note?.trim() || ''
       }).subscribe({
         next: () => {
           this.notify.showSuccess('Đóng lãi thành công!');
           this.dialogRef.close(true);
         },
-        error: () => this.notify.showError('Đóng lãi thất bại.')
+        error: (err) => {
+          this.notify.showError('Đóng lãi thất bại. Vui lòng thử lại.');
+          this.isSubmitting = false;
+        },
+        complete: () => this.isSubmitting = false
       });
     });
+  }
+
+  private formatDate(date: Date | string): string {
+    return new Date(date).toISOString().split('T')[0];
+  }
+
+  private formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
   }
 }

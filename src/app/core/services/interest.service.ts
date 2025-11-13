@@ -164,9 +164,16 @@ export class InterestService {
   }
 
   /** Đóng lãi một kỳ cụ thể */
+  // interest.service.ts
   payInterest(
     pledgeId: number,
-    body: { periodNumber: number; payDate: string; amount: number; note?: string }
+    body: {
+      periodNumber: number;
+      payDate: string;
+      amount: number;
+      paymentMethod: string;  // Thêm field
+      note?: string;
+    }
   ): Observable<ApiResponse<any>> {
     return this.api.post<ApiResponse<any>>(
       `/v1/interests/${pledgeId}/pay-interest`,
