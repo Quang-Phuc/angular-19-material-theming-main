@@ -118,6 +118,7 @@ export interface PledgeCollateral {
   warehouseId?: string;
   assetCode?: string;
   assetNote?: string;
+  warehouseDailyFee?: string;
   attributes?: CollateralAttribute[];
 }
 

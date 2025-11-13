@@ -354,15 +354,20 @@ $border: #e2e8f0;
 
 .payment-line {
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
+  justify-content: flex-end;   // Căn phải
+  align-items: center;
+  gap: 8px;                    // Khoảng cách nhỏ, đều
+  font-size: 15px;
+  padding: 2px 0;
 }
 
 .amount {
   font-weight: 600;
-  color: var(--primary-color);
+  color: #10b981;              // Xanh lá
 }
 
 .date {
   opacity: 0.7;
+  font-size: 0.9em;
+  color: #ff182a;
 }

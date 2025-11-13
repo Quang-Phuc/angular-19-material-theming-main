@@ -228,7 +228,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
     this.dialog
       .open(PayInterestDialogComponent, {
         width: '480px',
-        data: { pledgeId: this.data.pledgeId, periodNumber: row.periodNumber }
+        data: { pledgeId: this.data.pledgeId, periodNumber: row.periodNumber, id: row.id }
       })
       .afterClosed()
       .subscribe((ok) => ok && this.loadContractInfo());

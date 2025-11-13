@@ -183,6 +183,7 @@ export class InterestService {
       payDate: string;
       amount: number;
       paymentMethod: string;  // Thêm field
+      id: number;  // Thêm field
       note?: string;
     }
   ): Observable<ApiResponse<any>> {

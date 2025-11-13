@@ -264,8 +264,8 @@
             <mat-form-field appearance="outline">
               <mat-label>Hình thức trả lãi</mat-label>
               <mat-select formControlName="interestPaymentType">
-                <mat-option value="PERIODIC_INTEREST">Trả lãi định kỳ</mat-option>
-                <mat-option value="END_OF_TERM">Cuối kỳ</mat-option>
+                <mat-option value="INSTALLMENT">Trả góp gốc + lãi hằng kỳ</mat-option>
+                <mat-option value="PERIODIC_INTEREST">Trả lãi định kỳ –  Gốc cuối kỳ</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -303,32 +303,9 @@
         </mat-expansion-panel-header>
 
         <div formGroupName="feesInfo">
-          <div class="fee-grid" formGroupName="warehouseFee">
-            <label>Phí kho</label>
-            <mat-form-field appearance="outline">
-              <mat-label>Giá trị</mat-label>
-              <input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0">
-            </mat-form-field>
-            <mat-radio-group formControlName="type">
-              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
-              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
-            </mat-radio-group>
-          </div>
 
-          <div class="fee-grid" formGroupName="storageFee">
-            <label>Phí lưu trữ</label>
-            <mat-form-field appearance="outline">
-              <mat-label>Giá trị</mat-label>
-              <input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0">
-            </mat-form-field>
-            <mat-radio-group formControlName="type">
-              <mat-radio-button value="AMOUNT">Nhập Tiền</mat-radio-button>
-              <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
-            </mat-radio-group>
-          </div>
-
-          <div class="fee-grid" formGroupName="riskFee">
-            <label>Phí rủi ro</label>
+          <div class="fee-grid" formGroupName="appraisalFee">
+            <label>Phí thẩm định tài sản</label>
             <mat-form-field appearance="outline">
               <mat-label>Giá trị</mat-label>
               <input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0">
@@ -340,7 +317,7 @@
           </div>
 
           <div class="fee-grid" formGroupName="managementFee">
-            <label>Phí quản lí</label>
+            <label>Phí quản lý</label>
             <mat-form-field appearance="outline">
               <mat-label>Giá trị</mat-label>
               <input matInput type="text" formControlName="value" appCurrencyFormat [allowZero]="true" placeholder="0">
@@ -350,7 +327,9 @@
               <mat-radio-button value="PERCENT">Nhập %</mat-radio-button>
             </mat-radio-group>
           </div>
+
         </div>
+
       </mat-expansion-panel>
 
       <!-- 4. Thông tin tài sản thế chấp (CẬP NHẬT ĐỘNG) -->
@@ -425,6 +404,20 @@
             </div>
           </div>
 
+          <div class="form-grid-asset-with-button">
+            <mat-form-field appearance="outline">
+              <mat-label>Phí kho / ngày</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="warehouseDailyFee"
+                appCurrencyFormat
+                [allowZero]="true"
+                placeholder="0">
+            </mat-form-field>
+          </div>
+
+
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Ghi Chú (Tài sản)</mat-label>
             <textarea matInput formControlName="assetNote" rows="2"></textarea>
@@ -457,6 +450,12 @@
               <ng-container matColumnDef="valuation">
                 <th mat-header-cell *matHeaderCellDef> Định giá</th>
                 <td mat-cell *matCellDef="let item"> {{ item.valuation | vnd }}</td>
+              </ng-container>
+
+              <!-- Phí kho / ngày -->
+              <ng-container matColumnDef="warehouseDailyFee">
+                <th mat-header-cell *matHeaderCellDef> Phí kho / ngày</th>
+                <td mat-cell *matCellDef="let item"> {{ item.warehouseDailyFee | vnd}}</td>
               </ng-container>
 
               <!-- Cột Xóa -->
@@ -592,14 +591,14 @@
       <div><strong>Loại tài sản:</strong></div>
       <div>{{ getAssetTypeName(data.assetType) }}</div>
 
-      <div><strong>Mã tài sản:</strong></div>
-      <div>{{ data.assetCode || '-' }}</div>
-
       <div><strong>Định giá:</strong></div>
       <div>{{ data.valuation | vnd }} VNĐ</div>
 
       <div><strong>Kho lưu trữ:</strong></div>
       <div>{{ getWarehouseName(data.warehouseId) || '-' }}</div>
+
+      <div><strong>Phí kho / ngày:</strong></div>
+      <div>{{ data.warehouseDailyFee || '-' }}</div>
 
       <div><strong>Ghi chú:</strong></div>
       <div class="note">{{ data.assetNote || '-' }}</div>

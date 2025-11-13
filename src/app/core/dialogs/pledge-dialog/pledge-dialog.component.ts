@@ -206,7 +206,15 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   isEditMode = false;
   isLoading = false;
   showWebcam = false;
-  displayedColumns: string[] = ['assetName', 'assetType', 'assetCode', 'valuation', 'view', 'actions'];
+  displayedColumns = [
+    'assetName',
+    'assetType',
+    'valuation',
+    'warehouseDailyFee',
+    'actions',
+    'view'
+  ];
+
   collateralList: any[] = [];
   selectedCollateralIndex: number | null = null;
   private lastSelectedAssetType: string | null = null;
@@ -336,15 +344,14 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         follower: ['']
       }),
       feesInfo: this.fb.group({
-        warehouseFee: this.createFeeGroup(), storageFee: this.createFeeGroup(),
-        riskFee: this.createFeeGroup(), managementFee: this.createFeeGroup()
+        appraisalFee: this.createFeeGroup(), managementFee: this.createFeeGroup()
       }),
       collateralInfo: this.fb.group({
         assetName: [''],
         assetType: [''],
         valuation: [0],
         warehouseId: [''],
-        assetCode: [''],
+        warehouseDailyFee: [0],
         assetNote: [''],
         attributes: this.fb.array([])
       }),
@@ -457,10 +464,11 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         assetType: c.assetType,
         valuation: c.valuation,
         warehouseId: c.warehouseId,
-        assetCode: c.assetCode,
+        warehouseDailyFee: c.warehouseDailyFee,
         assetNote: c.assetNote,
         attributes: c.attributes || []
       }));
+
     }
 
     requestAnimationFrame(() => this.formatCurrencyFields());
@@ -730,10 +738,10 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const assetItem = {
       assetName: raw.assetName,
       assetType: raw.assetType,
-      assetCode: raw.assetCode ?? '',
       // ÉP CHUỖI "5.656" → 5656
       valuation: this.currencyService.parse(raw.valuation),
       warehouseId: raw.warehouseId ?? '',
+      warehouseDailyFee: this.currencyService.parse(raw.warehouseDailyFee) ?? 0,
       assetNote: raw.assetNote?.trim() ?? '',
       attributes: this.assetAttributes.map((attr, i) => ({
         id: attr.id,
@@ -892,7 +900,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const assetItem = {
       assetName: raw.assetName,
       assetType: raw.assetType,
-      assetCode: raw.assetCode,
       valuation: raw.valuation,
       warehouseId: raw.warehouseId,
       assetNote: raw.assetNote,
@@ -927,7 +934,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       assetType: item.assetType,
       valuation: item.valuation,
       warehouseId: item.warehouseId,
-      assetCode: item.assetCode,
       assetNote: item.assetNote
     });
 
@@ -959,7 +965,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     collateralGroup.reset({
       assetName: '',
       assetType: this.lastSelectedAssetType || '',
-      assetCode: '',
       valuation: 0,
       warehouseId: '',
       assetNote: ''
@@ -1068,7 +1073,6 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         const newAsset = {
           assetName: raw.assetName?.trim(),
           assetType: raw.assetType,
-          assetCode: raw.assetCode ?? '',
           valuation: this.currencyService.parse(raw.valuation),
           warehouseId: raw.warehouseId ?? '',
           assetNote: raw.assetNote?.trim() ?? '',

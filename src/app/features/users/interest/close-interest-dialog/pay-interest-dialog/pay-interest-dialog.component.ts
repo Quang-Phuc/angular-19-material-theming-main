@@ -70,7 +70,7 @@ export class PayInterestDialogComponent implements OnInit {
     private notify: NotificationService,
     private dialogRef: MatDialogRef<PayInterestDialogComponent>,
     private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: { pledgeId: number; periodNumber: number }
+    @Inject(MAT_DIALOG_DATA) public data: { pledgeId: number; periodNumber: number; id:number }
   ) {}
 
   ngOnInit(): void {
@@ -110,6 +110,7 @@ export class PayInterestDialogComponent implements OnInit {
         payDate: this.formatDate(v.payDate),
         amount: Number(v.amount),
         paymentMethod: v.paymentMethod,
+        id: this.data.id,
         note: v.note?.trim() || ''
       }).subscribe({
         next: () => {
