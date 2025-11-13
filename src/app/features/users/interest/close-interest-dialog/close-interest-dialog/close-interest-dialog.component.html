@@ -94,9 +94,13 @@
             <span class="money-cell">{{ formatMoney(row[col.key]) }}</span>
           </ng-template>
           <ng-template #totalTpl let-row>
-            <div class="paid-wrapper" [class.paid]="row.status === 'PAID'" [class.pending]="row.status !== 'PAID'">
-              <span class="amount">{{ formatMoney(row.paidAmount) }}</span>
-              <small *ngIf="row.paidDate" class="date">({{ row.paidDate | date:'dd/MM' }})</small>
+            <div class="multi-payments">
+              <div *ngIf="row.transactions?.length === 0">—</div>
+
+              <div class="payment-line" *ngFor="let t of row.transactions">
+                <span class="amount">{{ formatMoney(t.amount) }}</span>
+                <small class="date">({{ t.paymentDate | date:'dd/MM/yyyy' }})</small>
+              </div>
             </div>
           </ng-template>
           <ng-template #statusTpl let-row>
