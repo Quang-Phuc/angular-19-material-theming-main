@@ -232,7 +232,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   interestRateUnits$: Observable<DropdownOption[]> = of([
     { id: 'INTEREST_PER_MILLION_PER_DAY', name: 'Lãi/Triệu/Ngày' },
     { id: 'INTEREST_PERCENT_PER_MONTH', name: 'Lãi%/Tháng' },
-    { id: 'INTEREST_PER_DAY', name: 'Lãi/Ngày' }
+    { id: 'INTEREST_PER_DAY', name: 'Lãi%/Ngày' }
   ]);
   loanStatuses$: Observable<DropdownOption[]> = of([
     { id: 'NORMAL', name: 'Bình Thường' },
@@ -903,6 +903,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       valuation: raw.valuation,
       warehouseId: raw.warehouseId,
       assetNote: raw.assetNote,
+      warehouseDailyFee: this.currencyService.parse(raw.warehouseDailyFee) ?? 0,
       attributes: this.assetAttributes.map((attr, i) => ({
         label: attr.label,
         value: (this.attributesFormArray.at(i)?.value || '').trim(),
@@ -1076,6 +1077,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           valuation: this.currencyService.parse(raw.valuation),
           warehouseId: raw.warehouseId ?? '',
           assetNote: raw.assetNote?.trim() ?? '',
+          warehouseDailyFee: this.currencyService.parse(raw.warehouseDailyFee) ?? 0,
           attributes: this.assetAttributes.map((attr, i) => ({
             id: attr.id,
             label: attr.label,
@@ -1151,6 +1153,7 @@ export class PledgeDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       collateral: this.collateralList.map(c => ({
         ...c,
         valuation: this.currencyService.parse(c.valuation),
+        warehouseDailyFee: this.currencyService.parse(c.warehouseDailyFee),
         assetNote: c.assetNote?.trim() ?? ''
       }))
     };

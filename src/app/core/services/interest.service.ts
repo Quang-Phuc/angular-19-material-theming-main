@@ -63,6 +63,7 @@ export interface CloseInterestDetailRow {
   periodNumber: number;
   dueDate: string;              // yyyy-MM-dd
   interestAmount: number;       // BigDecimal -> number
+  warehouseDailyFee: number;       // BigDecimal -> number
   principalAmount: number;      // BigDecimal -> number
   totalAmount: number;          // BigDecimal -> number
   paidAmount: number;          // BigDecimal -> number

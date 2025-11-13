@@ -152,23 +152,19 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         width: '60px',
         templateRef: this.sttTpl
       },
+
+      // 1️⃣ Ngày trả lãi
       {
         key: 'dueDate',
-        header: 'Ngày đến hạn',
+        header: 'Ngày trả lãi',
         sortable: true,
         align: 'center',
         width: '120px',
         type: 'date',
         templateRef: this.dateTpl
       },
-      {
-        key: 'interestAmount',
-        header: 'Tiền lãi',
-        sortable: true,
-        align: 'end',
-        width: '120px',
-        templateRef: this.moneyTpl
-      },
+
+      // 2️⃣ Tiền gốc
       {
         key: 'principalAmount',
         header: 'Tiền gốc',
@@ -177,14 +173,38 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         width: '120px',
         templateRef: this.moneyTpl
       },
+
+      // 3️⃣ Phí kho (CỘT MỚI)
+      {
+        key: 'warehouseDailyFee',
+        header: 'Phí kho',
+        sortable: true,
+        align: 'end',
+        width: '120px',
+        templateRef: this.moneyTpl
+      },
+
+      // 4️⃣ Tiền lãi
+      {
+        key: 'interestAmount',
+        header: 'Tiền lãi',
+        sortable: true,
+        align: 'end',
+        width: '120px',
+        templateRef: this.moneyTpl
+      },
+
+      // 5️⃣ Số tiền cần thanh toán
       {
         key: 'totalAmount',
-        header: 'Số tiền cần thanh toán',
+        header: 'Cần thanh toán',
         sortable: true,
         align: 'end',
         width: '150px',
         templateRef: this.moneyTpl
       },
+
+      // 6️⃣ Đã thanh toán
       {
         key: 'totalAndDate',
         header: 'Đã thanh toán',
@@ -194,6 +214,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         templateRef: this.totalTpl
       },
 
+      // 7️⃣ Trạng thái
       {
         key: 'status',
         header: 'Trạng thái',
@@ -204,11 +225,10 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       }
     ];
 
-    // cập nhật lại view sau khi set cột
     this.cdr.detectChanges();
-
     setTimeout(() => this.table.reload(), 0);
   }
+
 
 
   /** Tải tổng quan hợp đồng */
