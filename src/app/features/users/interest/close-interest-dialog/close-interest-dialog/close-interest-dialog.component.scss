@@ -285,29 +285,49 @@ $border: #e2e8f0;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 
-    &.done {
-      background: #dcfce7;
-      color: $success;
-      box-shadow: 0 2px 8px rgba($success, 0.15);
-    }
-
-    &.pending {
-      background: #fef3c7;
-      color: #d97706;
-      box-shadow: 0 2px 8px rgba(#f59e0b, 0.15);
-    }
-
-    mat-icon {
+    .status-icon {
       font-size: 16px;
       width: 16px;
       height: 16px;
     }
+
+    &.paid {
+      background: #d1fae5;
+      color: #065f46;
+      .status-icon { color: #10b981; }
+    }
+
+    &.partial {
+      background: #fef3c7;
+      color: #92400e;
+      .status-icon { color: #f59e0b; }
+    }
+
+    &.pending {
+      background: #f3f4f6;
+      color: #4b5563;
+      .status-icon { color: #6b7280; }
+    }
+
+    &.overdue {
+      background: #fee2e2;
+      color: #991b1b;
+      .status-icon { color: #ef4444; }
+      animation: pulse 2s infinite;
+    }
+  }
+
+  // Hiệu ứng nhấp nháy nhẹ khi quá hạn
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
   }
 }
 

@@ -104,9 +104,21 @@
             </div>
           </ng-template>
           <ng-template #statusTpl let-row>
-            <div class="status-badge" [class.done]="row.status === 'PAID'" [class.pending]="row.status !== 'PAID'">
-              <mat-icon>{{ row.status === 'PAID' ? 'check_circle' : 'schedule' }}</mat-icon>
-              <span>{{ row.status === 'PAID' ? 'Đã đóng' : 'Chưa đóng' }}</span>
+            <div class="status-badge"
+                 [class.paid]="row.status === 'PAID'"
+                 [class.partial]="row.status === 'PARTIAL'"
+                 [class.pending]="row.status !== 'PAID' && row.status !== 'PARTIAL' && !isOverdue(row)"
+                 [class.overdue]="row.status !== 'PAID' && row.status !== 'PARTIAL' && isOverdue(row)">
+
+              <!-- ICON -->
+              <mat-icon class="status-icon">
+                {{ getStatusIcon(row) }}
+              </mat-icon>
+
+              <!-- TEXT -->
+              <span class="status-text">
+      {{ getStatusText(row) }}
+    </span>
             </div>
           </ng-template>
         </app-smart-table>

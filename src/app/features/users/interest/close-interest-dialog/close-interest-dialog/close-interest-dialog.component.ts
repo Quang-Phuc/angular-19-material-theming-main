@@ -271,6 +271,30 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
       }
     });
   }
+  isOverdue(row: CloseInterestDetailRow): boolean {
+    if (!row.dueDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(row.dueDate);
+    due.setHours(0, 0, 0, 0);
+    return today > due;
+  }
+
+// Lấy icon
+  getStatusIcon(row: CloseInterestDetailRow): string {
+    if (row.status === 'PAID') return 'check_circle';
+    if (row.status === 'PARTIAL') return 'indeterminate_check_box';
+    if (this.isOverdue(row)) return 'error';
+    return 'schedule';
+  }
+
+// Lấy text
+  getStatusText(row: CloseInterestDetailRow): string {
+    if (row.status === 'PAID') return 'Đã đóng';
+    if (row.status === 'PARTIAL') return 'Đóng 1 phần';
+    if (this.isOverdue(row)) return 'Quá hạn';
+    return 'Chưa đóng';
+  }
 
   /** Xuất PDF/Excel */
   exportFile(type: 'pdf' | 'excel') {
