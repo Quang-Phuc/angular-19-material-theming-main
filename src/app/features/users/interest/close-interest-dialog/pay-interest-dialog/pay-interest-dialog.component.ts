@@ -81,10 +81,12 @@ export class PayInterestDialogComponent implements OnInit {
       note: ['']
     });
 
-    // GÁN GIÁ TRỊ TỪ totalAmount → ĐÃ ĐỊNH DẠNG
+    // CHỜ FORM SẴN SÀNG RỒI MỚI GÁN
     if (this.data.totalAmount != null) {
-      const formatted = formatCurrency(this.data.totalAmount); // "1.500.000 ₫"
-      this.form.patchValue({ amount: formatted });
+      setTimeout(() => {
+        const formatted = formatCurrency(this.data.totalAmount);
+        this.form.patchValue({ amount: formatted });
+      }, 0);
     }
   }
 // pay-interest-dialog.component.ts
@@ -92,21 +94,33 @@ export class PayInterestDialogComponent implements OnInit {
   getSelectedMethod(value: string): PaymentMethod | undefined {
     return this.paymentMethods.find(m => m.value === value);
   }
-  private parseCurrencyString(value: string): number {
-    // "1.500.000 ₫" → 1500000
-    return Number(value.replace(/[^\d]/g, '')); // Xóa hết ký tự không phải số
+  private parseCurrencyString(value: any): number {
+    // 1. Chuyển về string
+    const str = String(value ?? '0').trim();
+
+    // 2. Xóa mọi ký tự không phải số
+    const clean = str.replace(/[^\d]/g, '');
+
+    // 3. Chuyển về số, nếu rỗng → 0
+    return clean ? Number(clean) : 0;
   }
   confirm(): void {
     if (this.form.invalid || this.isSubmitting) return;
 
-    const amountStr = this.form.get('amount')?.value || '0';
+    const amountStr = this.form.get('amount')?.value;
     const amountNumber = this.parseCurrencyString(amountStr);
+
+    // Kiểm tra số tiền hợp lệ
+    if (amountNumber <= 0) {
+      this.notify.showError('Số tiền phải lớn hơn 0');
+      return;
+    }
 
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Xác nhận đóng lãi',
-        content: `Xác nhận đóng lãi kỳ <strong>${this.data.periodNumber}</strong> với số tiền <strong>${amountStr}</strong>?`,
+        content: `Xác nhận đóng lãi kỳ <strong>${this.data.periodNumber}</strong> với số tiền <strong>${this.formatMoney(amountNumber)}</strong>?`,
         confirmText: 'Đồng ý',
         cancelText: 'Hủy'
       }
@@ -116,15 +130,14 @@ export class PayInterestDialogComponent implements OnInit {
       if (!ok) return;
 
       this.isSubmitting = true;
-      const v = this.form.getRawValue();
 
       this.interest.payInterest(this.data.pledgeId, {
         periodNumber: this.data.periodNumber,
-        payDate: this.formatDate(v.payDate),
+        payDate: this.formatDate(this.form.value.payDate),
         amount: amountNumber,
-        paymentMethod: v.paymentMethod,
+        paymentMethod: this.form.value.paymentMethod,
         id: this.data.id,
-        note: v.note?.trim() || ''
+        note: this.form.value.note?.trim() || ''
       }).subscribe({
         next: () => {
           this.notify.showSuccess('Đóng lãi thành công!');
