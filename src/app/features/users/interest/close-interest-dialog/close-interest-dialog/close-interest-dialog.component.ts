@@ -245,13 +245,22 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
   /** Popup Đóng lãi */
   openPayInterestDialog(row: CloseInterestDetailRow) {
-    this.dialog
-      .open(PayInterestDialogComponent, {
-        width: '480px',
-        data: { pledgeId: this.data.pledgeId, periodNumber: row.periodNumber, id: row.id,totalAmount: row.totalAmount }
-      })
-      .afterClosed()
-      .subscribe((ok) => ok && this.loadContractInfo());
+    const dialogRef = this.dialog.open(PayInterestDialogComponent, {
+      width: '480px',
+      data: {
+        pledgeId: this.data.pledgeId,
+        periodNumber: row.periodNumber,
+        id: row.id,
+        totalAmount: row.totalAmount
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        // GỌI LẠI FETCH → TẢI LẠI BẢNG TỪ API
+        this.table.reload();
+      }
+    });
   }
 
   /** Xuất PDF/Excel */
