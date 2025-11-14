@@ -295,6 +295,23 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
     if (this.isOverdue(row)) return 'Quá hạn';
     return 'Chưa đóng';
   }
+  getDaysLeft(row: CloseInterestDetailRow): string {
+    if (row.status === 'PAID' || row.status === 'PARTIAL') return '';
+    if (!row.dueDate) return '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(row.dueDate);
+    due.setHours(0, 0, 0, 0);
+
+    const diff = due.getTime() - today.getTime();
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+
+    if (days < 0) return `Quá ${Math.abs(days)} ngày`;
+    if (days === 0) return 'Hôm nay';
+    if (days === 1) return 'Còn 1 ngày';
+    return `Còn ${days} ngày`;
+  }
 
   /** Xuất PDF/Excel */
   exportFile(type: 'pdf' | 'excel') {

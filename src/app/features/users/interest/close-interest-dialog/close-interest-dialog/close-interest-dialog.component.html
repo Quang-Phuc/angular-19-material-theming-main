@@ -116,9 +116,8 @@
               </mat-icon>
 
               <!-- TEXT -->
-              <span class="status-text">
-      {{ getStatusText(row) }}
-    </span>
+              <span class="status-text">{{ getStatusText(row) }}</span>
+              <small class="days-left" *ngIf="getDaysLeft(row)">({{ getDaysLeft(row) }})</small>
             </div>
           </ng-template>
         </app-smart-table>
