@@ -194,8 +194,8 @@ export class PayInterestDialogComponent implements OnInit {
         this.notify.showSuccess('Đóng lãi thành công!');
         this.dialogRef.close(true);
       },
-      error: () => {
-        this.notify.showError('Đóng lãi thất bại.');
+      error: (error) => {
+        this.notify.showError(error);  // ĐÃ ĐỦ – KHÔNG CẦN GÌ KHÁC
         this.isSubmitting = false;
       },
       complete: () => this.isSubmitting = false
