@@ -230,3 +230,37 @@ td.mat-mdc-cell.actions-cell {
   color: #1b5e20; // xanh đậm sang trọng
   letter-spacing: 0.3px;
 }
+// pledge-list.component.scss
+// pledge-list.component.scss
+.money-cell {
+  display: inline-flex;
+  align-items: baseline;        // QUAN TRỌNG: căn baseline
+  white-space: nowrap;          // Không xuống dòng
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+
+  .amount {
+    color: inherit;
+  }
+
+  .currency {
+    font-size: 0.9em;
+    margin-left: 2px;
+    color: #666;
+    font-weight: normal;
+  }
+
+  // Khi còn nợ → đỏ đậm
+  &.text-danger,
+  .text-danger & {
+    .amount { color: #d32f2f; font-weight: 600; }
+    .currency { color: #d32f2f; }
+  }
+
+  // Khi đã trả hết → xanh
+  &.text-success,
+  .text-success & {
+    .amount { color: #2e7d32; }
+    .currency { color: #2e7d32; }
+  }
+}

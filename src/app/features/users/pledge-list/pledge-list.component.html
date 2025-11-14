@@ -106,9 +106,12 @@
     placeholder="Tìm kiếm hợp đồng"
   >
     <div table-actions></div>
-    <!-- Template định dạng tiền -->
     <ng-template #moneyTpl let-row let-col="col">
-      <span class="money-cell"> {{ formatMoney(row[col.key]) }}</span>
+  <span class="money-cell"
+        [class.text-danger]="col.key === 'remainingAmount' && row[col.key] > 0"
+        [class.text-success]="col.key === 'remainingAmount' && row[col.key] === 0">
+    <span class="amount">{{ formatMoney(row[col.key]) }}</span>
+  </span>
     </ng-template>
 
   </app-smart-table>

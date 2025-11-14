@@ -44,6 +44,7 @@ interface StoreItem { storeId: string; storeName: string; }
 interface ApiStore { id: number | string; name: string; }
 interface UserStore { id: string | number; fullName: string; }
 
+// pledge-list.component.ts
 interface PledgeRow {
   id: number;
   storeId?: string | number;
@@ -55,13 +56,25 @@ interface PledgeRow {
   loanDate?: string | Date;
   dueDate?: string | Date;
   loanAmount?: number;
+
+  // MỚI: TỔNG LÃI, KHO, PHÍ
+  totalInterest?: number;
+  totalWarehouseFee?: number;
+  totalServiceFee?: number;
+  totalReceivable?: number;
+
+  // ĐÃ THU (gốc + lãi + kho)
   totalPaid?: number;
-  remainingPrincipal?: number;
+
+  // CÒN NỢ (tổng phải thu - đã thu)
+  remainingAmount?: number;
+
+  // CŨ: KHÔNG CẦN NỮA (SAI NGHIỆP VỤ)
+  // remainingPrincipal?: number;
+
   status?: string;
   follower?: string;
   pledgeStatus?: string;
-
-  // các field có thể có thêm tuỳ backend
 }
 
 @Component({
@@ -91,8 +104,8 @@ export class PledgeListComponent implements OnInit {
 
   filterForm: FormGroup = this.fb.group({
     keyword: [''],
-    loanStatus: [''],
-    pledgeState: [''],
+    loanStatus: [''],        // → backend: status
+    pledgeState: [''],       // → backend: pledgeStatus
     fromDate: [null],
     toDate: [null],
     follower: ['']
@@ -111,30 +124,77 @@ export class PledgeListComponent implements OnInit {
       { key: 'contractCode', header: 'Mã HĐ', sortable: true, width: '140px' },
       { key: 'customerName', header: 'Khách hàng', sortable: true },
       { key: 'assetName', header: 'Tài sản', sortable: true },
+
+      // TIỀN VAY
       {
         key: 'loanAmount',
-        header: 'Số tiền vay',
+        header: 'Tiền vay',
         align: 'end',
         sortable: true,
         width: '120px',
         templateRef: this.moneyTpl
       },
+
+      // TỔNG LÃI
+      {
+        key: 'totalInterest',
+        header: 'Tổng lãi',
+        align: 'end',
+        sortable: true,
+        width: '110px',
+        templateRef: this.moneyTpl
+      },
+
+      // PHÍ KHO
+      {
+        key: 'totalWarehouseFee',
+        header: 'Phí kho',
+        align: 'end',
+        sortable: true,
+        width: '110px',
+        templateRef: this.moneyTpl
+      },
+
+      // PHÍ DỊCH VỤ
+      {
+        key: 'totalServiceFee',
+        header: 'Phí DV',
+        align: 'end',
+        sortable: true,
+        width: '100px',
+        templateRef: this.moneyTpl
+      },
+
+      // TỔNG PHẢI THU
+      {
+        key: 'totalReceivable',
+        header: 'Tổng phải thu',
+        align: 'end',
+        sortable: true,
+        width: '130px',
+        templateRef: this.moneyTpl,
+      },
+
+      // ĐÃ THU
       {
         key: 'totalPaid',
-        header: 'Đã trả',
+        header: 'Đã thu',
         align: 'end',
         sortable: true,
         width: '110px',
         templateRef: this.moneyTpl
       },
+
+      // CÒN NỢ (THAY remainingPrincipal)
       {
-        key: 'remainingPrincipal',
-        header: 'Còn lại',
+        key: 'remainingAmount',
+        header: 'Còn nợ',
         align: 'end',
         sortable: true,
         width: '110px',
-        templateRef: this.moneyTpl
+        templateRef: this.moneyTpl,
       },
+
       { key: 'pledgeStatus', header: 'Tình trạng', sortable: true, width: '110px' }
     ];
 
@@ -157,10 +217,13 @@ export class PledgeListComponent implements OnInit {
   fetch = (q: TableQuery): Observable<PagedResult<PledgeRow>> => {
     const fv = this.filterForm.value;
     const params: Record<string, any> = {
-      page: q.page, size: q.size, sort: q.sort, order: q.order,
+      page: q.page,
+      size: q.size,
+      sort: q.sort,
+      order: q.order,
       keyword: (fv.keyword ?? '').trim() || q.keyword || undefined,
-      loanStatus: fv.loanStatus || undefined,
-      pledgeState: fv.pledgeState || undefined,
+      status: fv.loanStatus || undefined,           // loanStatus → status
+      pledgeStatus: fv.pledgeState || undefined,    // pledgeState → pledgeStatus
       follower: fv.follower || undefined,
       storeId: this.selectedStoreId || undefined,
       fromDate: this.toISO(fv.fromDate),
