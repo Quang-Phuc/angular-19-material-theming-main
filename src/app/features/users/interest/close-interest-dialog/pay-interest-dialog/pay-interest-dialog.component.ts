@@ -70,7 +70,15 @@ export class PayInterestDialogComponent implements OnInit {
     private notify: NotificationService,
     private dialogRef: MatDialogRef<PayInterestDialogComponent>,
     private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: { pledgeId: number; periodNumber: number; id:number,totalAmount: number; }
+    // pay-interest-dialog.component.ts
+    @Inject(MAT_DIALOG_DATA) public data: {
+      pledgeId: number;
+      periodNumber: number;
+      id: number;
+      totalAmount: number;
+      paidSoFar: number;
+      remainingAmount: number;
+    }
   ) {}
 
   ngOnInit(): void {
@@ -81,13 +89,17 @@ export class PayInterestDialogComponent implements OnInit {
       note: ['']
     });
 
-    // CHỜ FORM SẴN SÀNG RỒI MỚI GÁN
-    if (this.data.totalAmount != null) {
+    // TỰ ĐỘNG ĐIỀN SỐ TIỀN CÒN THIẾU
+    if (this.data.remainingAmount > 0) {
       setTimeout(() => {
-        const formatted = formatCurrency(this.data.totalAmount);
+        const formatted = formatCurrency(this.data.remainingAmount);
         this.form.patchValue({ amount: formatted });
       }, 0);
     }
+  }
+  // pay-interest-dialog.component.ts
+  parseAmount(): number {
+    return this.parseCurrencyString(this.form.get('amount')?.value);
   }
 // pay-interest-dialog.component.ts
 
@@ -116,6 +128,31 @@ export class PayInterestDialogComponent implements OnInit {
       return;
     }
 
+    const excess = amountNumber - this.data.remainingAmount;
+
+    // === TRƯỜNG HỢP 1: ĐÓNG DƯ ===
+    if (excess > 0) {
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Xác nhận đóng dư',
+          content: `
+          Khách đóng <strong>${this.formatMoney(amountNumber)}</strong><br>
+          Cần đóng: <strong>${this.formatMoney(this.data.remainingAmount)}</strong><br>
+          <strong class="text-warn">Dư ${this.formatMoney(excess)}</strong> sẽ được áp dụng cho kỳ sau.
+        `,
+          confirmText: 'Đồng ý',
+          cancelText: 'Hủy'
+        }
+      });
+
+      ref.afterClosed().subscribe(ok => {
+        if (ok) this.submitPayment(amountNumber);
+      });
+      return;
+    }
+
+    // === TRƯỜNG HỢP 2: ĐÓNG ĐỦ HOẶC THIẾU (CHO PHÉP) ===
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -127,28 +164,41 @@ export class PayInterestDialogComponent implements OnInit {
     });
 
     ref.afterClosed().subscribe(ok => {
-      if (!ok) return;
+      if (ok) this.submitPayment(amountNumber);
+    });
+  }
+  private submitPayment(amount: number): void {
+    this.isSubmitting = true;
 
-      this.isSubmitting = true;
+    // TÍNH TIỀN DƯ
+    const excess = amount - this.data.remainingAmount;
 
-      this.interest.payInterest(this.data.pledgeId, {
-        periodNumber: this.data.periodNumber,
-        payDate: this.formatDate(this.form.value.payDate),
-        amount: amountNumber,
-        paymentMethod: this.form.value.paymentMethod,
-        id: this.data.id,
-        note: this.form.value.note?.trim() || ''
-      }).subscribe({
-        next: () => {
-          this.notify.showSuccess('Đóng lãi thành công!');
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.notify.showError('Đóng lãi thất bại.');
-          this.isSubmitting = false;
-        },
-        complete: () => this.isSubmitting = false
-      });
+    // TẠO GHI CHÚ THÔNG MINH
+    let note = (this.form.value.note?.trim()) || '';
+
+    if (excess > 0) {
+      const excessText = `Dư ${this.formatMoney(excess)} áp dụng kỳ sau`;
+      note = note ? `${note} | ${excessText}` : excessText;
+    }
+
+    // GỌI API VỚI GHI CHÚ ĐÃ BỔ SUNG
+    this.interest.payInterest(this.data.pledgeId, {
+      periodNumber: this.data.periodNumber,
+      payDate: this.formatDate(this.form.value.payDate),
+      amount: amount,
+      paymentMethod: this.form.value.paymentMethod,
+      id: this.data.id,
+      note: note
+    }).subscribe({
+      next: () => {
+        this.notify.showSuccess('Đóng lãi thành công!');
+        this.dialogRef.close(true);
+      },
+      error: () => {
+        this.notify.showError('Đóng lãi thất bại.');
+        this.isSubmitting = false;
+      },
+      complete: () => this.isSubmitting = false
     });
   }
 

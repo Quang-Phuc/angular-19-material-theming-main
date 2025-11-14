@@ -392,3 +392,33 @@ $success: #4caf50;
 
 // Nếu bạn dùng màu xanh ngọc
 $primary: #2dd4bf;
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+
+  .label { color: #6b7280; font-weight: 500; }
+  .value { font-weight: 600; }
+
+  &.required {
+    background: #fefce8;
+    border-left: 4px solid #f59e0b;
+    .value {
+      color: #d97706;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .success { color: #10b981 !important; }
+  }
+
+  .total { color: #1f2937; }
+  .paid { color: #f59e0b; }
+
+  .text-success { color: #10b981; }
+  .text-warn { color: #f59e0b; }
+  .text-danger { color: #ef4444; }
+}

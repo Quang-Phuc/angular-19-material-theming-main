@@ -15,9 +15,27 @@
     <!-- Form -->
     <mat-dialog-content class="dialog-content">
       <form [formGroup]="form" class="form">
-        <div class="info-row required-amount">
-          <div class="label">Số tiền cần thanh toán</div>
-          <div class="value highlight">{{ formatMoney(data.totalAmount) }}</div>
+        <!-- 1. TỔNG LÃI KỲ -->
+        <div class="info-row">
+          <div class="label">Tổng lãi kỳ {{ data.periodNumber }}</div>
+          <div class="value total">{{ formatMoney(data.totalAmount) }}</div>
+        </div>
+
+        <!-- 2. ĐÃ ĐÓNG (nếu có) -->
+        <div class="info-row" *ngIf="data.paidSoFar > 0">
+          <div class="label">Đã đóng</div>
+          <div class="value paid">- {{ formatMoney(data.paidSoFar) }}</div>
+        </div>
+
+        <!-- 3. CÒN PHẢI ĐÓNG (NỔI BẬT) -->
+        <div class="info-row required">
+          <div class="label">
+            <span class="text-danger" *ngIf="data.remainingAmount > 0">Còn phải đóng</span>
+            <span class="text-success" *ngIf="data.remainingAmount === 0">Đã đóng đủ</span>
+          </div>
+          <div class="value highlight" [class.success]="data.remainingAmount === 0">
+            {{ formatMoney(data.remainingAmount) }}
+          </div>
         </div>
         <!-- Ngày đóng -->
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
@@ -80,15 +98,18 @@
             Số tiền phải lớn hơn 0
           </mat-error>
         </mat-form-field>
-        <div class="info-row required-amount" *ngIf="form.value.amount">
+        <!-- SO SÁNH S� ố tiền nhập vs CÒN THIẾU -->
+        <div class="info-row" *ngIf="form.value.amount">
           <div class="label">
-            <span *ngIf="form.value.amount < data.totalAmount">Thiếu</span>
-            <span *ngIf="form.value.amount > data.totalAmount">Dư</span>
-            <span *ngIf="form.value.amount === data.totalAmount">Đúng</span>
+            <span *ngIf="parseAmount() < data.remainingAmount" class="text-danger">Thiếu</span>
+            <span *ngIf="parseAmount() > data.remainingAmount" class="text-warn">Dư</span>
+            <span *ngIf="parseAmount() === data.remainingAmount" class="text-success">Đúng số</span>
           </div>
-          <div class="value" [class.success]="form.value.amount === data.totalAmount"
-               [class.warn]="form.value.amount !== data.totalAmount">
-            {{ formatMoney(Math.abs(form.value.amount - data.totalAmount)) }}
+          <div class="value"
+               [class.text-danger]="parseAmount() < data.remainingAmount"
+               [class.text-warn]="parseAmount() > data.remainingAmount"
+               [class.text-success]="parseAmount() === data.remainingAmount">
+            {{ formatMoney(Math.abs(parseAmount() - data.remainingAmount)) }}
           </div>
         </div>
         <!-- Ghi chú -->

@@ -244,20 +244,29 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
 
   /** Popup Đóng lãi */
+  // close-interest-dialog.component.ts
   openPayInterestDialog(row: CloseInterestDetailRow) {
+    // TÍNH TIỀN ĐÃ ĐÓNG
+    const paidSoFar = (row.transactions || [])
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // TÍNH TIỀN CÒN THIẾU
+    const remainingAmount = row.totalAmount - paidSoFar;
+
     const dialogRef = this.dialog.open(PayInterestDialogComponent, {
       width: '480px',
       data: {
         pledgeId: this.data.pledgeId,
         periodNumber: row.periodNumber,
         id: row.id,
-        totalAmount: row.totalAmount
+        totalAmount: row.totalAmount,        // Tổng lãi kỳ
+        paidSoFar: paidSoFar,                // Đã đóng
+        remainingAmount: remainingAmount > 0 ? remainingAmount : 0  // CÒN THIẾU
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
-        // GỌI LẠI FETCH → TẢI LẠI BẢNG TỪ API
         this.table.reload();
       }
     });
