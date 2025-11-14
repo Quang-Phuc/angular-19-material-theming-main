@@ -360,3 +360,35 @@ $success: #4caf50;
   display: flex;
   align-items: center;
 }
+// pay-interest-dialog.component.scss
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-left: 4px solid $primary;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  .label {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    &.highlight {
+      color: $primary;
+      font-size: 1.35rem;
+    }
+  }
+}
+
+// Nếu bạn dùng màu xanh ngọc
+$primary: #2dd4bf;

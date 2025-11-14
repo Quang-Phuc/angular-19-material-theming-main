@@ -15,7 +15,10 @@
     <!-- Form -->
     <mat-dialog-content class="dialog-content">
       <form [formGroup]="form" class="form">
-
+        <div class="info-row required-amount">
+          <div class="label">Số tiền cần thanh toán</div>
+          <div class="value highlight">{{ formatMoney(data.totalAmount) }}</div>
+        </div>
         <!-- Ngày đóng -->
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
           <mat-label>Ngày đóng</mat-label>
@@ -77,7 +80,17 @@
             Số tiền phải lớn hơn 0
           </mat-error>
         </mat-form-field>
-
+        <div class="info-row required-amount" *ngIf="form.value.amount">
+          <div class="label">
+            <span *ngIf="form.value.amount < data.totalAmount">Thiếu</span>
+            <span *ngIf="form.value.amount > data.totalAmount">Dư</span>
+            <span *ngIf="form.value.amount === data.totalAmount">Đúng</span>
+          </div>
+          <div class="value" [class.success]="form.value.amount === data.totalAmount"
+               [class.warn]="form.value.amount !== data.totalAmount">
+            {{ formatMoney(Math.abs(form.value.amount - data.totalAmount)) }}
+          </div>
+        </div>
         <!-- Ghi chú -->
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
           <mat-label>Ghi chú (không bắt buộc)</mat-label>
