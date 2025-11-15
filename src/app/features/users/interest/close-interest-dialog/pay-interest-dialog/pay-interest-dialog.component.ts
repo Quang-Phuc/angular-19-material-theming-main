@@ -90,10 +90,12 @@ export class PayInterestDialogComponent implements OnInit {
       note: ['']
     });
 
-    // TỰ ĐỘNG ĐIỀN SỐ TIỀN CÒN THIẾU
-    if (this.data.remainingAmount > 0) {
+    // TỰ ĐỘNG ĐIỀN: (lãi còn thiếu + phạt)
+    const autoFill = this.totalDebt;
+
+    if (autoFill > 0) {
       setTimeout(() => {
-        const formatted = formatCurrency(this.data.remainingAmount);
+        const formatted = formatCurrency(autoFill);
         this.form.patchValue({ amount: formatted });
       }, 0);
     }

@@ -104,19 +104,21 @@
           </mat-error>
         </mat-form-field>
         <!-- SO SÁNH S� ố tiền nhập vs CÒN THIẾU -->
-        <div class="info-row" *ngIf="form.value.amount">
+        <div class="info-row check-row">
           <div class="label">
-            <span *ngIf="parseAmount() < data.remainingAmount" class="text-danger">Thiếu</span>
-            <span *ngIf="parseAmount() > data.remainingAmount" class="text-warn">Dư</span>
-            <span *ngIf="parseAmount() === data.remainingAmount" class="text-success">Đúng số</span>
+            <span *ngIf="parseAmount() < totalDebt" class="text-danger">Thiếu</span>
+            <span *ngIf="parseAmount() > totalDebt" class="text-warn">Dư</span>
+            <span *ngIf="parseAmount() === totalDebt" class="text-success">Đúng số</span>
           </div>
+
           <div class="value"
-               [class.text-danger]="parseAmount() < data.remainingAmount"
-               [class.text-warn]="parseAmount() > data.remainingAmount"
-               [class.text-success]="parseAmount() === data.remainingAmount">
-            {{ formatMoney(Math.abs(parseAmount() - data.remainingAmount)) }}
+               [class.text-danger]="parseAmount() < totalDebt"
+               [class.text-warn]="parseAmount() > totalDebt"
+               [class.text-success]="parseAmount() === totalDebt">
+            {{ formatMoney(Math.abs(parseAmount() - totalDebt)) }}
           </div>
         </div>
+
         <!-- Ghi chú -->
         <mat-form-field appearance="outline" class="custom-field" floatLabel="always">
           <mat-label>Ghi chú (không bắt buộc)</mat-label>
