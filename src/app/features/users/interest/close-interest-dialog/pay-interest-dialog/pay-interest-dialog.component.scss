@@ -422,3 +422,29 @@ $primary: #2dd4bf;
   .text-warn { color: #f59e0b; }
   .text-danger { color: #ef4444; }
 }
+// pay-interest-dialog.component.scss
+.total-debt {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border: 2px solid #e57373;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+  .label {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d32f2f;
+  }
+}
+
+.text-danger { color: #d32f2f; }
+.text-warn { color: #f57c00; }
+.text-success { color: #388e3c; }
+
+.info-row.required .value.highlight {
+  font-size: 1.3rem;
+  font-weight: 600;
+}

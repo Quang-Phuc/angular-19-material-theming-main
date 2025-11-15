@@ -15,16 +15,20 @@
 
       <div class="header-actions">
         <button mat-raised-button color="primary" class="action-btn" (click)="openSettleDialog()">
-          <mat-icon>done_all</mat-icon> Tất toán
+          <mat-icon>done_all</mat-icon>
+          Tất toán
         </button>
         <button mat-raised-button color="accent" class="action-btn" (click)="openExtendTermDialog()">
-          <mat-icon>update</mat-icon> Gia hạn
+          <mat-icon>update</mat-icon>
+          Gia hạn
         </button>
         <button mat-raised-button color="warn" class="action-btn" (click)="openPartialPrincipalDialog()">
-          <mat-icon>money_off</mat-icon> Trả bớt
+          <mat-icon>money_off</mat-icon>
+          Trả bớt
         </button>
         <button mat-raised-button class="action-btn add-loan" (click)="openAdditionalLoanDialog()">
-          <mat-icon>add_card</mat-icon> Vay thêm
+          <mat-icon>add_card</mat-icon>
+          Vay thêm
         </button>
 
         <div class="export-group">
@@ -48,7 +52,9 @@
   <!-- SUMMARY CARDS -->
   <div class="summary-cards" *ngIf="pledge">
     <div class="summary-card glass">
-      <div class="card-icon"><mat-icon>person</mat-icon></div>
+      <div class="card-icon">
+        <mat-icon>person</mat-icon>
+      </div>
       <div class="card-label">Khách hàng</div>
       <div class="card-value">{{ pledge.customer.fullName }}</div>
       <div class="card-sub">{{ pledge.customer.phoneNumber }}</div>
@@ -245,13 +251,16 @@
         <!-- FOOTER -->
         <div class="contract-tab-footer">
           <button mat-stroked-button class="contract-tab-btn">
-            <mat-icon>history</mat-icon> Xem lịch sử đóng lãi
+            <mat-icon>history</mat-icon>
+            Xem lịch sử đóng lãi
           </button>
-          <button mat-stroked-button class="contract-tab-btn" >
-            <mat-icon>print</mat-icon> In hợp đồng
+          <button mat-stroked-button class="contract-tab-btn">
+            <mat-icon>print</mat-icon>
+            In hợp đồng
           </button>
-          <button mat-flat-button color="primary" class="contract-tab-btn primary" >
-            <mat-icon>payments</mat-icon> Đóng lãi kỳ hiện tại
+          <button mat-flat-button color="primary" class="contract-tab-btn primary">
+            <mat-icon>payments</mat-icon>
+            Đóng lãi kỳ hiện tại
           </button>
         </div>
       </div>

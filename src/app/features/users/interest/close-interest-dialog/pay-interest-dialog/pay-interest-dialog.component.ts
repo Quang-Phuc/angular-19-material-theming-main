@@ -78,6 +78,7 @@ export class PayInterestDialogComponent implements OnInit {
       totalAmount: number;
       paidSoFar: number;
       remainingAmount: number;
+      penaltyInterest: number;
     }
   ) {}
 
@@ -101,6 +102,10 @@ export class PayInterestDialogComponent implements OnInit {
   parseAmount(): number {
     return this.parseCurrencyString(this.form.get('amount')?.value);
   }
+
+  get totalDebt(): number {
+    return this.data.remainingAmount + (this.data.penaltyInterest || 0);
+  }
 // pay-interest-dialog.component.ts
 
   getSelectedMethod(value: string): PaymentMethod | undefined {
@@ -122,24 +127,24 @@ export class PayInterestDialogComponent implements OnInit {
     const amountStr = this.form.get('amount')?.value;
     const amountNumber = this.parseCurrencyString(amountStr);
 
-    // Kiểm tra số tiền hợp lệ
     if (amountNumber <= 0) {
       this.notify.showError('Số tiền phải lớn hơn 0');
       return;
     }
 
-    const excess = amountNumber - this.data.remainingAmount;
+    const totalDebt = this.totalDebt;
+    const excess = amountNumber - totalDebt;
 
     // === TRƯỜNG HỢP 1: ĐÓNG DƯ ===
     if (excess > 0) {
       const ref = this.dialog.open(ConfirmDialogComponent, {
-        width: '420px',
+        width: '440px',
         data: {
           title: 'Xác nhận đóng dư',
           content: `
           Khách đóng <strong>${this.formatMoney(amountNumber)}</strong><br>
-          Cần đóng: <strong>${this.formatMoney(this.data.remainingAmount)}</strong><br>
-          <strong class="text-warn">Dư ${this.formatMoney(excess)}</strong> sẽ được áp dụng cho kỳ sau.
+          Tổng phải đóng: <strong>${this.formatMoney(totalDebt)}</strong><br>
+          <strong class="text-warn">Dư ${this.formatMoney(excess)}</strong> sẽ áp dụng kỳ sau.
         `,
           confirmText: 'Đồng ý',
           cancelText: 'Hủy'
@@ -152,12 +157,18 @@ export class PayInterestDialogComponent implements OnInit {
       return;
     }
 
-    // === TRƯỜNG HỢP 2: ĐÓNG ĐỦ HOẶC THIẾU (CHO PHÉP) ===
+    // === TRƯỜNG HỢP 2: ĐÓNG ĐỦ HOẶC THIẾU ===
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Xác nhận đóng lãi',
-        content: `Xác nhận đóng lãi kỳ <strong>${this.data.periodNumber}</strong> với số tiền <strong>${this.formatMoney(amountNumber)}</strong>?`,
+        content: `
+        Tổng phải đóng: <strong class="text-danger">${this.formatMoney(totalDebt)}</strong><br>
+        (Lãi: ${this.formatMoney(this.data.remainingAmount)}
+        ${this.data.penaltyInterest > 0 ? '+ Phạt: ' + this.formatMoney(this.data.penaltyInterest) : ''})<br><br>
+        Khách đóng: <strong>${this.formatMoney(amountNumber)}</strong>
+        ${excess < 0 ? '<br><span class="text-danger">Thiếu ' + this.formatMoney(Math.abs(excess)) + '</span>' : ''}
+      `,
         confirmText: 'Đồng ý',
         cancelText: 'Hủy'
       }

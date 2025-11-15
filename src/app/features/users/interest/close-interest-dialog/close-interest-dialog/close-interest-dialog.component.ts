@@ -193,6 +193,14 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         width: '120px',
         templateRef: this.moneyTpl
       },
+      {
+        key: 'penaltyInterest',
+        header: 'Phạt quá hạn',
+        sortable: true,
+        align: 'end',
+        width: '130px',
+        templateRef: this.moneyTpl,
+      },
 
       // 5️⃣ Số tiền cần thanh toán
       {
@@ -252,6 +260,7 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
 
     // TÍNH TIỀN CÒN THIẾU
     const remainingAmount = row.totalAmount - paidSoFar;
+    const penalty = row.penaltyInterest || 0; // THÊM PHẠT
 
     const dialogRef = this.dialog.open(PayInterestDialogComponent, {
       width: '480px',
@@ -261,7 +270,8 @@ export class CloseInterestDialogComponent implements OnInit, AfterViewInit {
         id: row.id,
         totalAmount: row.totalAmount,        // Tổng lãi kỳ
         paidSoFar: paidSoFar,                // Đã đóng
-        remainingAmount: remainingAmount > 0 ? remainingAmount : 0  // CÒN THIẾU
+        remainingAmount: remainingAmount > 0 ? remainingAmount : 0,  // CÒN THIẾU
+        penaltyInterest: penalty, // THÊM
       }
     });
 

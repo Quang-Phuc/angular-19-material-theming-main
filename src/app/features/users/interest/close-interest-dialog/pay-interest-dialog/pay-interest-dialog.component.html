@@ -27,6 +27,11 @@
           <div class="value paid">- {{ formatMoney(data.paidSoFar) }}</div>
         </div>
 
+        <div class="info-row" *ngIf="data.penaltyInterest > 0">
+          <div class="label text-danger">Phạt quá hạn</div>
+          <div class="value text-danger font-bold">{{ formatMoney(data.penaltyInterest) }}</div>
+        </div>
+
         <!-- 3. CÒN PHẢI ĐÓNG (NỔI BẬT) -->
         <div class="info-row required">
           <div class="label">

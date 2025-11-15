@@ -69,6 +69,7 @@ export interface CloseInterestDetailRow {
   paidAmount: number;          // BigDecimal -> number
   status: 'PENDING' | 'PAID' | 'OVERDUE' | string;
   paidDate?: string | null;     // yyyy-MM-dd | null
+  penaltyInterest: number;
   /** Thêm để match API */
   transactions: PaymentScheduleTransaction[];
 }
