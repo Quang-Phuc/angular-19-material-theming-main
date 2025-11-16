@@ -165,6 +165,15 @@ export class PledgeListComponent implements OnInit {
         templateRef: this.moneyTpl
       },
 
+      {
+        key: 'totalInterest',
+        header: 'Phạt quá hạn',
+        sortable: true,
+        align: 'end',
+        width: '130px',
+        templateRef: this.moneyTpl,
+      },
+
       // TỔNG PHẢI THU
       {
         key: 'totalReceivable',
