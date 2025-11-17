@@ -1,43 +1,128 @@
-<h2 mat-dialog-title>
-  <mat-icon color="primary" style="vertical-align: middle; margin-right: 6px;">task_alt</mat-icon>
-  Tất toán hợp đồng
+<h2 mat-dialog-title class="title">
+  <mat-icon color="primary">task_alt</mat-icon>
+  Tất toán hợp đồng: <strong>{{ data.pledgeCode || 'CĐ251411-002' }}</strong>
 </h2>
 
-<mat-dialog-content>
-  <div class="summary" *ngIf="data.summary">
-    <div class="summary-item">
-      <span>Gốc còn lại</span>
-      <b>{{ data.summary.remainingPrincipal | number:'1.0-0' }} đ</b>
-    </div>
-    <div class="summary-item">
-      <span>Lãi đến hôm nay</span>
-      <b>{{ data.summary.interestToday | number:'1.0-0' }} đ</b>
+<mat-dialog-content class="content">
+
+  <!-- 1. THÔNG TIN HỢP ĐỒNG -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">description</mat-icon>
+      Thông tin hợp đồng
+    </h3>
+    <div class="grid-2">
+      <div class="info-item">
+        <span class="label">Số tiền vay</span>
+<!--        <strong class="value primary">{{ formatMoney(data.summary?.principal || 20000000) }}</strong>-->
+      </div>
+      <div class="info-item">
+        <span class="label">Lãi suất</span>
+        <strong class="value">2.000 đ/triệu/ngày</strong>
+      </div>
+      <div class="info-item">
+        <span class="label">Kiểu vay</span>
+        <strong class="value">Cầm đồ</strong>
+      </div>
+      <div class="info-item">
+        <span class="label">Thời gian vay</span>
+        <strong class="value">{{ data.summary?.loanDate || '14/11/2025' }} → {{ data.summary?.dueDate || '08/12/2025' }}</strong>
+      </div>
     </div>
   </div>
 
-  <form [formGroup]="form" class="form">
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Số tiền tất toán</mat-label>
-      <input matInput type="number" formControlName="amount" placeholder="Nhập số tiền">
-    </mat-form-field>
+  <!-- 2. CHI TIẾT ĐÓNG LÃI -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">calculator</mat-icon>
+      Chi tiết đóng lãi
+    </h3>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span>Tổng tiền phải trả</span>
+<!--        <b class="big">{{ formatMoney(data.summary?.totalDue || 20160000) }}</b>-->
+      </div>
+      <div class="summary-item">
+        <span>Số tiền đã trả</span>
+        <b class="big text-success">{{ formatMoney(data.summary?.totalPaid || 0) }}</b>
+      </div>
+      <div class="summary-item">
+        <span class="text-danger">Số tiền còn phải trả</span>
+        <b class="big text-danger">{{ formatMoney(data.summary?.remainingAmount || 20160000) }}</b>
+      </div>
+      <div class="summary-item">
+        <span>Số ngày đã vay</span>
+<!--        <b class="big">{{ data.summary?.days || 4 }} ngày</b>-->
+      </div>
+    </div>
+  </div>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Ngày tất toán</mat-label>
-      <input matInput type="date" formControlName="settleDate">
-    </mat-form-field>
+  <!-- 3. NỘI DUNG TẤT TOÁN -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">receipt_long</mat-icon>
+      Nội dung tất toán
+    </h3>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Ghi chú</mat-label>
-      <textarea matInput rows="2" formControlName="note"></textarea>
-    </mat-form-field>
-  </form>
+    <form [formGroup]="form" class="settle-form">
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Người thanh toán</mat-label>
+          <input matInput formControlName="payerName" placeholder="VD: Nguyễn Văn A">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Ngày thanh toán</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="settleDate" required>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Tiền tất toán (gốc + lãi)</mat-label>
+        <input matInput type="text" appCurrencyFormat formControlName="amount" required>
+        <span matTextSuffix>đ</span>
+        <mat-hint align="end">Còn thiếu: {{ formatMoney(getRemaining()) }}</mat-hint>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Phí kho</mat-label>
+          <input matInput type="text" appCurrencyFormat formControlName="storageFee">
+          <span matTextSuffix>đ</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Phí khác</mat-label>
+          <input matInput type="text" appCurrencyFormat formControlName="otherFee">
+          <span matTextSuffix>đ</span>
+        </mat-form-field>
+      </div>
+
+      <!-- TỔNG TIỀN THU -->
+      <div class="total-box">
+        <div class="total-label">TỔNG TIỀN THU</div>
+        <div class="total-amount">{{ formatMoney(getTotalCollect()) }}</div>
+      </div>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Ghi chú</mat-label>
+        <textarea matInput rows="3" formControlName="note" placeholder="VD: Khách thanh toán tiền mặt, trả xe SH + iPhone 11"></textarea>
+      </mat-form-field>
+
+    </form>
+  </div>
+
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-stroked-button mat-dialog-close color="warn">
+<mat-dialog-actions align="end" class="actions">
+  <button mat-stroked-button color="warn" mat-dialog-close>
     <mat-icon>close</mat-icon> Hủy
   </button>
-  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">
-    <mat-icon>check_circle</mat-icon> Xác nhận
+  <button mat-flat-button color="primary" class="confirm-btn" (click)="confirm()" [disabled]="form.invalid || getRemaining() > 0">
+    <mat-icon>check_circle</mat-icon>
+    Xác nhận tất toán
   </button>
 </mat-dialog-actions>

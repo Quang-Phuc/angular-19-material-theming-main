@@ -62,6 +62,7 @@ interface PledgeRow {
   totalWarehouseFee?: number;
   totalServiceFee?: number;
   totalReceivable?: number;
+  totalPenaltyInterest?: number;
 
   // ĐÃ THU (gốc + lãi + kho)
   totalPaid?: number;
@@ -166,7 +167,7 @@ export class PledgeListComponent implements OnInit {
       },
 
       {
-        key: 'totalInterest',
+        key: 'totalPenaltyInterest',
         header: 'Phạt quá hạn',
         sortable: true,
         align: 'end',
