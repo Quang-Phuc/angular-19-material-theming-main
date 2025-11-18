@@ -1,4 +1,4 @@
-// core/models/pledge-detail.model.ts
+// src/app/core/models/pledge-detail.model.ts
 export interface PledgeDetailResponse {
   // === THÔNG TIN HỢP ĐỒNG ===
   contractCode: string;
@@ -27,10 +27,16 @@ export interface PledgeDetailResponse {
   // === LỊCH SỬ TRẢ BỚT GỐC ===
   principalReductionHistory: PrincipalReductionHistoryItem[];
 
+  // === LỊCH SỬ GIA HẠN KỲ (MỚI) ===
+  extensionHistory: ExtensionHistoryItem[];
+
+  // === PHÍ GIA HẠN (MỚI) ===
+  extensionFee: number;                  // Phí gia hạn kỳ (nếu có)
+
   // === TÀI SẢN ===
   assets: AssetItem[];
 
-  // === PHÍ DỊCH VỤ CHI TIẾT (nếu cần) ===
+  // === PHÍ DỊCH VỤ CHI TIẾT ===
   serviceFees?: ServiceFeeItem[];
 }
 
@@ -41,7 +47,16 @@ export interface PrincipalReductionHistoryItem {
   newRate?: number | null;
   interestRateUnit: 'PER_MILLE' | 'PER_MILLION';
   otherFee: number;
-  totalPaid: number;
+  totalPaidThisTime: number;
+  createdBy: string;
+  note?: string;
+}
+
+export interface ExtensionHistoryItem {
+  date: string;
+  days: number;
+  oldDueDate: string;
+  newDueDate: string;
   createdBy: string;
   note?: string;
 }

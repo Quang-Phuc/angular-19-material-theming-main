@@ -42,3 +42,41 @@ button[mat-flat-button]:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2);
 }
+.title { font-size: 1.5rem; font-weight: 700; color: #0d9488; display: flex; align-items: center; gap: 8px; }
+
+.section { margin-bottom: 24px; background: #f8fffe; padding: 16px; border-radius: 12px; border: 1px solid #ccfbf1; }
+.section-title { display: flex; align-items: center; gap: 8px; color: #0f766e; font-weight: 600; margin: 0 0 12px; }
+.section-icon { font-size: 20px; width: 20px; height: 20px; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.info-item .label { font-size: 13px; color: #64748b; }
+.info-item .value { font-weight: 600; margin-top: 4px; }
+.primary { color: #0d9488; font-size: 1.1rem; }
+.warning { color: #d97706; }
+
+.form-row { display: flex; gap: 16px; margin-bottom: 12px; }
+.w-50 { flex: 1; }
+
+.new-due-date-box {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin: 20px 0;
+  .label { font-weight: 600; color: #065f46; }
+  .value { font-size: 1.8rem; font-weight: 900; color: #16a34a; margin: 8px 0; }
+  .hint { font-size: 0.9rem; color: #065f46; opacity: 0.9; }
+}
+
+.history-table {
+  max-height: 300px;
+  overflow: auto;
+  border-radius: 8px;
+}
+
+.text-success { color: #16a34a; }
+.text-warn { color: #f59e0b; }
+
+.actions { padding: 16px 0; background: #f0fdfa; border-top: 1px solid #ccfbf1; }
+.confirm-btn { min-width: 180px; font-weight: 600; }
