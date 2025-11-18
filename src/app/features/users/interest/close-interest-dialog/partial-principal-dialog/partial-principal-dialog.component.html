@@ -1,6 +1,6 @@
 <h2 mat-dialog-title class="title">
   <mat-icon color="primary" class="title-icon">account_balance_wallet</mat-icon>
-  Trả bớt gốc – Hợp đồng: <strong>{{ data.contractCode || 'CĐ251411-002' }}</strong>
+  Trả bớt gốc – Hợp đồng: <strong>{{ data.detail.contractCode || 'CĐ251411-002' }}</strong>
 </h2>
 
 <mat-dialog-content class="content">
@@ -14,24 +14,26 @@
     <div class="grid">
       <div class="info-item">
         <span class="label">Tên khách hàng</span>
-        <strong class="value">{{ data.customerName || 'Abc 123 000' }}</strong>
+        <strong class="value">{{ data.detail.customerName || 'Abc 123 000' }}</strong>
       </div>
       <div class="info-item">
         <span class="label">Số tiền vay</span>
-        <strong class="value primary">{{ formatMoney(data.summary?.principal || 20000000) }}</strong>
+        <strong class="value primary">{{ formatMoney(data.detail.loanAmount) }}</strong>
       </div>
       <div class="info-item">
         <span class="label">Ngày vay</span>
-        <strong class="value">{{ formatDate(data.summary?.loanDate) || '14/11/2025' }}</strong>
+        <strong class="value">{{ formatDate(data.detail.loanDate) }}</strong>
       </div>
       <div class="info-item">
-        <span class="label">Kiểu vay</span>
-        <strong class="value">Cầm đồ</strong>
+        <span class="label">Lãi suất hiện tại</span>
+        <strong class="value warning">
+          {{ data.detail.currentInterestRate }} {{ data.detail.interestRateUnit === 'PER_MILLION' ? 'đ/triệu/ngày' : '‰/ngày' }}
+        </strong>
       </div>
     </div>
   </div>
 
-  <!-- 2. CHI TIẾT ĐÓNG LÃI HIỆN TẠI -->
+  <!-- 2. TÌNH TRẠNG HIỆN TẠI -->
   <div class="section">
     <h3 class="section-title">
       <mat-icon class="section-icon">calculator</mat-icon>
@@ -40,15 +42,19 @@
     <div class="summary-grid">
       <div class="summary-item">
         <span>Gốc còn lại</span>
-        <b class="big">{{ formatMoney(data.summary?.remainingPrincipal || 20000000) }}</b>
+        <b class="big">{{ formatMoney(data.detail.remainingPrincipal) }}</b>
       </div>
       <div class="summary-item">
-        <span>Lãi suất hiện tại</span>
-        <b class="big warning">{{ data.summary?.currentRate || 2.0 }}‰/ngày</b>
+        <span>Tổng lãi đến nay</span>
+        <b class="big">{{ formatMoney(data.detail.remainingPrincipal) }}</b>
       </div>
       <div class="summary-item">
-        <span>Tổng lãi đến hôm nay</span>
-        <b class="big">{{ formatMoney(data.summary?.interestToday || 160000) }}</b>
+        <span>Phạt quá hạn</span>
+        <b class="big text-danger">{{ formatMoney(data.detail.penaltyInterest) }}</b>
+      </div>
+      <div class="summary-item">
+        <span class="text-danger font-bold">Tổng còn nợ</span>
+        <b class="big text-danger font-bold">{{ formatMoney(data.detail.remainingAmount) }}</b>
       </div>
     </div>
   </div>
@@ -65,7 +71,7 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-50">
           <mat-label>Tên khách hàng</mat-label>
-          <input matInput formControlName="payerName" [value]="data.customerName" readonly>
+          <input matInput formControlName="payerName" [value]="data.detail.customerName" readonly>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-50">
@@ -81,17 +87,19 @@
         <input matInput type="text" appCurrencyFormat formControlName="amount" required>
         <span matTextSuffix>đ</span>
         <mat-hint align="end">
-          <span [class]="getAmountStatusClass()">
-            {{ getAmountStatusText() }}
-          </span>
+<!--          <span [class]="getAmountStatusClass()">-->
+<!--            {{ getAmountStatusText() }}-->
+<!--          </span>-->
         </mat-hint>
-        <mat-error>Không được vượt quá gốc còn lại</mat-error>
+        <mat-error *ngIf="getAmountStatus() === 'exceed'">
+          Không được vượt quá gốc còn lại
+        </mat-error>
       </mat-form-field>
 
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-50">
           <mat-label>Lãi suất cũ</mat-label>
-          <input matInput [value]="(data.summary?.currentRate || 2.0) + '‰/ngày'" readonly>
+          <input matInput [value]="data.detail.currentInterestRate + (data.detail.interestRateUnit === 'PER_MILLION' ? ' đ/triệu/ngày' : ' ‰/ngày')" readonly>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-50">
@@ -111,7 +119,12 @@
       <!-- TỔNG TIỀN KHÁCH NỘP -->
       <div class="total-box">
         <div class="total-label">TỔNG TIỀN KHÁCH NỘP</div>
-        <div class="total-amount">{{ formatMoney(getTotalPaid()) }}</div>
+        <div class="total-amount" [class.success]="getDiff() >= 0">
+          {{ formatMoney(getTotalPaid()) }}
+        </div>
+        <div class="total-note" [class]="getDiffClass()">
+          {{ getDiffText() }}
+        </div>
       </div>
 
       <mat-form-field appearance="outline" class="full">
@@ -124,14 +137,13 @@
   </div>
 
   <!-- 4. LỊCH SỬ TRẢ BỚT GỐC -->
-  <!-- LỊCH SỬ TRẢ BỚT GỐC -->
-  <div class="section" *ngIf="data.summary?.principalReductionHistory?.length">
+  <div class="section" *ngIf="data.detail.principalReductionHistory?.length">
     <h3 class="section-title">
       <mat-icon class="section-icon">history</mat-icon>
-      Lịch sử trả bớt gốc ({{ data.summary.principalReductionHistory.length }} lần)
+      Lịch sử trả bớt gốc ({{ data.detail.principalReductionHistory.length }} lần)
     </h3>
 
-    <table mat-table [dataSource]="data.summary.principalReductionHistory" class="history-table">
+    <table mat-table [dataSource]="data.detail.principalReductionHistory" class="history-table mat-elevation-z2">
 
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef> Ngày </th>
@@ -141,31 +153,31 @@
       <ng-container matColumnDef="amount">
         <th mat-header-cell *matHeaderCellDef> Trả bớt </th>
         <td mat-cell *matCellDef="let h">
-          <strong class="text-primary">{{ h.amount | number:'1.0-0' }} đ</strong>
+          <strong class="text-primary">{{ formatMoney(h.amount) }}</strong>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="rate">
         <th mat-header-cell *matHeaderCellDef> Lãi suất </th>
         <td mat-cell *matCellDef="let h">
-        <span [class.text-success]="h.newInterestRate">
-          {{ h.oldInterestRate }}
-          <mat-icon *ngIf="h.newInterestRate" class="small-icon">arrow_forward</mat-icon>
-          {{ h.newInterestRate || h.oldInterestRate }}
-          {{ h.interestRateUnit === 'PER_MILLION' ? 'đ/triệu/ngày' : '‰/ngày' }}
-        </span>
+          <span [class.text-success]="h.newInterestRate">
+            {{ h.oldInterestRate }}
+            <mat-icon *ngIf="h.newInterestRate" class="small-icon">arrow_forward</mat-icon>
+            {{ h.newInterestRate || h.oldInterestRate }}
+            {{ h.interestRateUnit === 'PER_MILLION' ? 'đ/triệu/ngày' : '‰/ngày' }}
+          </span>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="fee">
         <th mat-header-cell *matHeaderCellDef> Phí khác </th>
-        <td mat-cell *matCellDef="let h"> {{ h.otherFee | number:'1.0-0' }} đ </td>
+        <td mat-cell *matCellDef="let h"> {{ formatMoney(h.otherFee) }} </td>
       </ng-container>
 
       <ng-container matColumnDef="total">
         <th mat-header-cell *matHeaderCellDef> Tổng nộp </th>
         <td mat-cell *matCellDef="let h">
-          <b class="text-danger">{{ h.totalPaidThisTime | number:'1.0-0' }} đ</b>
+          <b class="text-danger">{{ formatMoney(h.totalPaidThisTime) }}</b>
         </td>
       </ng-container>
 

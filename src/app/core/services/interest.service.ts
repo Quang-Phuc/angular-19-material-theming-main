@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import {PledgeDetailResponse} from '../models/pledge-detail.model';
 
 export interface ApiResponse<T> {
   timeStamp: string;
@@ -269,6 +270,11 @@ export class InterestService {
     const endpoint = `/v1/interests/${pledgeId}/export/${tab}`;
     return this.api.download(endpoint, { type });
   }
+
+  // // interest.service.ts
+  // getPledgeDetail(pledgeId: number): Observable<PledgeDetailResponse> {
+  //   return this.api.get<ApiResponse<PledgeDetailResponse>>(`/v1/pledges/${pledgeId}/detail`);
+  // }
 
   /** Đóng lãi một kỳ cụ thể */
   // interest.service.ts
