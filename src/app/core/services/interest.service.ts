@@ -55,8 +55,102 @@ export interface InterestSummary {
   remainingPrincipal: number;    // gốc còn lại
   interestToday: number;         // lãi đến hôm nay
   totalPaid: number;             // tổng đã thu
+  /** LỊCH SỬ TRẢ BỚT GỐC – CHI TIẾT NHẤT */
+  principalReductionHistory: PrincipalReductionHistoryItem[];
 }
 
+export interface PrincipalReductionHistoryItem {
+  /** ID bản ghi (nếu có) */
+  id?: number;
+
+  /** Ngày khách trả bớt gốc */
+  date: string;                          // yyyy-MM-dd
+
+  /** Tên người thực hiện (nhân viên thu tiền) */
+  createdBy: string;                     // VD: "Nguyễn Thị Thu"
+
+  /** Tên khách hàng (để hiển thị, tránh lỗi khi đổi tên sau này) */
+  customerName: string;
+
+  /** Số tiền trả bớt gốc */
+  amount: number;                        // 5.000.000
+
+  /** Gốc còn lại SAU khi trả bớt */
+  remainingPrincipalAfter: number;       // 15.000.000
+
+  /** Lãi suất TRƯỚC khi trả bớt */
+  oldInterestRate: number;               // 2.5
+
+  /** Lãi suất MỚI (nếu được giảm) – có thể null */
+  newInterestRate?: number | null;       // 1.8
+
+  /** Đơn vị lãi suất */
+  interestRateUnit: 'PER_MILLE' | 'PER_MILLION';
+
+  /** Phí khác (phí xử lý, phí giảm lãi suất…) */
+  otherFee: number;                      // 200.000
+
+  /** Tổng tiền khách nộp lần này */
+  totalPaidThisTime: number;             // amount + otherFee
+
+  /** Ghi chú */
+  note?: string;
+
+  /** Thời gian tạo bản ghi */
+  createdAt: string;                     // 2025-11-18T10:30:00
+}
+export interface InterestSummary2 {
+  // === THÔNG TIN HỢP ĐỒNG ===
+  contractCode: string;                    // CĐ251411-002
+  customerName: string;                    // Nguyễn Văn A
+  phoneNumber: string;                     // 0901234567
+  loanDate: string;                        // yyyy-MM-dd
+  dueDate?: string | null;                 // ngày đến hạn (nếu có kỳ hạn cố định)
+  follower?: string;                       // Nhân viên phụ trách
+  pledgeStatus?: string;                   // DANG_VAY, QUA_HAN, DA_TRA_HET, DA_DONG
+
+  // === SỐ LIỆU GỐC & HIỆN TẠI ===
+  loanAmount: number;                      // Số tiền vay ban đầu: 100.000.000
+  remainingPrincipal: number;              // Gốc còn lại sau các lần trả bớt: 75.000.000
+
+  // === LÃI & PHẠT ===
+  interestRatePerDay: number;              // Lãi suất hiện tại (‰/ngày hoặc đ/triệu/ngày) → VD: 2.0 hoặc 5000
+  interestRateUnit: 'PER_MILLE' | 'PER_MILLION'; // ‰/ngày hay đ/triệu/ngày
+  interestToday: number;                   // Tổng lãi tính đến hôm nay (các kỳ + dôi)
+  totalInterestAllPeriods: number;         // Tổng lãi tất cả các kỳ đã tạo
+  penaltyInterest: number;                 // Tổng phạt quá hạn hiện tại
+
+  // === PHÍ & KHO BÃI ===
+  totalWarehouseFee: number;               // Tổng phí kho bãi đến nay
+  totalServiceFee: number;                 // Tổng phí dịch vụ (thẩm định, quản lý…)
+
+  // === TỔNG HỢP ===
+  totalReceivable: number;                 // Tổng phải thu = gốc + lãi + phạt + phí kho + phí DV
+  totalPaid: number;                       // Tổng đã thanh toán (gốc + lãi + phí)
+  remainingAmount: number;                 // Còn phải thu = totalReceivable - totalPaid
+
+  // === TRẠNG THÁI & NGÀY ===
+  daysOverdue?: number;                    // Số ngày quá hạn (nếu có)
+  totalDaysLoan?: number;                  // Tổng số ngày đã vay tính đến nay
+  nextDueDate?: string;                    // Ngày đến hạn kỳ tiếp theo (nếu có lịch kỳ)
+
+  // === LỊCH SỬ TRẢ BỚT GỐC (dùng cho popup trả bớt) ===
+  principalReductionHistory?: Array<{
+    date: string;                          // yyyy-MM-dd
+    amount: number;                        // Số tiền trả bớt
+    oldRate: number;                       // Lãi suất trước khi giảm
+    newRate?: number;                      // Lãi suất sau khi giảm (nếu có)
+    otherFee: number;                      // Phí khác (nếu có)
+    note?: string;
+  }>;
+
+  // === THÔNG TIN TÀI SẢN (nếu cần hiển thị) ===
+  assets?: Array<{
+    name: string;
+    type: string;
+    valuation: number;
+  }>;
+}
 export interface CloseInterestDetailRow {
   id: number;
   contractId: number;

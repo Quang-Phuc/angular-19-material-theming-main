@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { InterestService, InterestSummary } from '../../../../../core/services/interest.service';
+import {InterestService, InterestSummary} from '../../../../../core/services/interest.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../../core/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -34,15 +34,66 @@ export class PartialPrincipalDialogComponent implements OnInit {
     private notify: NotificationService,
     private dialogRef: MatDialogRef<PartialPrincipalDialogComponent>,
     private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: { pledgeId: number; summary?: InterestSummary }
+    // ĐÃ SỬA – BẮT BUỘC CÓ SUMMARY + THÊM CÁC TRƯỜNG TIỆN DỤNG
+    @Inject(MAT_DIALOG_DATA) public data: {
+      pledgeId: number;
+      contractCode?: string;        // Dùng để hiển thị tiêu đề luôn
+      customerName?: string;        // Hiển thị tên khách ngay
+      summary: InterestSummary;     // BẮT BUỘC có (không còn optional)
+    }
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
+      payerName: [{ value: this.data.customerName || '', disabled: true }],
+      payDate: [new Date().toISOString().substring(0, 10), Validators.required],
       amount: [0, [Validators.required, Validators.min(1)]],
-      date: [new Date().toISOString().substring(0, 10), Validators.required],
+      newRate: [''],
+      otherFee: [0],
       note: ['']
     });
+
+    // Tự động focus + validate realtime
+    this.form.get('amount')?.valueChanges.subscribe(() => this.cdr.detectChanges());
+  }
+
+  getAmountStatus(): 'valid' | 'exceed' | 'zero' {
+    const amount = this.parseAmount(this.form.value.amount);
+    const remaining = this.data.summary?.remainingPrincipal || 0;
+    if (amount <= 0) return 'zero';
+    if (amount > remaining) return 'exceed';
+    return 'valid';
+  }
+
+  getAmountStatusText(): string {
+    const status = this.getAmountStatus();
+    const amount = this.parseAmount(this.form.value.amount);
+    const remaining = this.data.summary?.remainingPrincipal || 0;
+
+    if (status === 'exceed') return `Vượt quá gốc còn lại ${this.formatMoney(remaining - amount)}`;
+    if (status === 'zero') return 'Số tiền phải lớn hơn 0';
+    return `Còn lại sau trả: ${this.formatMoney(remaining - amount)}`;
+  }
+
+  getAmountStatusClass(): string {
+    const status = this.getAmountStatus();
+    return status === 'valid' ? 'text-success' : 'text-danger';
+  }
+
+  getTotalPaid(): number {
+    return this.parseAmount(this.form.value.amount) + this.parseAmount(this.form.value.otherFee);
+  }
+
+  private parseAmount(val: any): number {
+    return Number(String(val || '0').replace(/[^\d]/g, '')) || 0;
+  }
+
+  formatMoney(amount: number): string {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+  }
+
+  formatDate(date: string | Date): string {
+    return new Date(date).toLocaleDateString('vi-VN');
   }
 
   confirm(): void {

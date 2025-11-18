@@ -1,39 +1,194 @@
-<h2 mat-dialog-title>
+<h2 mat-dialog-title class="title">
   <mat-icon color="primary" class="title-icon">account_balance_wallet</mat-icon>
-  Trả bớt gốc
+  Trả bớt gốc – Hợp đồng: <strong>{{ data.contractCode || 'CĐ251411-002' }}</strong>
 </h2>
 
-<mat-dialog-content>
-  <div class="summary" *ngIf="data.summary">
-    <div class="summary-item">
-      <span>Gốc còn lại</span>
-      <b>{{ data.summary.remainingPrincipal | number:'1.0-0' }} đ</b>
+<mat-dialog-content class="content">
+
+  <!-- 1. THÔNG TIN HỢP ĐỒNG -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">description</mat-icon>
+      Thông tin hợp đồng
+    </h3>
+    <div class="grid">
+      <div class="info-item">
+        <span class="label">Tên khách hàng</span>
+        <strong class="value">{{ data.customerName || 'Abc 123 000' }}</strong>
+      </div>
+      <div class="info-item">
+        <span class="label">Số tiền vay</span>
+        <strong class="value primary">{{ formatMoney(data.summary?.principal || 20000000) }}</strong>
+      </div>
+      <div class="info-item">
+        <span class="label">Ngày vay</span>
+        <strong class="value">{{ formatDate(data.summary?.loanDate) || '14/11/2025' }}</strong>
+      </div>
+      <div class="info-item">
+        <span class="label">Kiểu vay</span>
+        <strong class="value">Cầm đồ</strong>
+      </div>
     </div>
   </div>
 
-  <form [formGroup]="form" class="form">
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Số tiền trả bớt</mat-label>
-      <input matInput type="number" formControlName="amount" placeholder="Nhập số tiền">
-    </mat-form-field>
+  <!-- 2. CHI TIẾT ĐÓNG LÃI HIỆN TẠI -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">calculator</mat-icon>
+      Tình trạng hiện tại
+    </h3>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span>Gốc còn lại</span>
+        <b class="big">{{ formatMoney(data.summary?.remainingPrincipal || 20000000) }}</b>
+      </div>
+      <div class="summary-item">
+        <span>Lãi suất hiện tại</span>
+        <b class="big warning">{{ data.summary?.currentRate || 2.0 }}‰/ngày</b>
+      </div>
+      <div class="summary-item">
+        <span>Tổng lãi đến hôm nay</span>
+        <b class="big">{{ formatMoney(data.summary?.interestToday || 160000) }}</b>
+      </div>
+    </div>
+  </div>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Ngày trả</mat-label>
-      <input matInput type="date" formControlName="date">
-    </mat-form-field>
+  <!-- 3. NỘI DUNG TRẢ BỚT GỐC -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">receipt_long</mat-icon>
+      Nội dung trả bớt gốc
+    </h3>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Ghi chú</mat-label>
-      <textarea matInput rows="2" formControlName="note"></textarea>
-    </mat-form-field>
-  </form>
+    <form [formGroup]="form" class="form">
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Tên khách hàng</mat-label>
+          <input matInput formControlName="payerName" [value]="data.customerName" readonly>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Ngày trả gốc</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="payDate" required>
+          <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Tiền trả bớt gốc</mat-label>
+        <input matInput type="text" appCurrencyFormat formControlName="amount" required>
+        <span matTextSuffix>đ</span>
+        <mat-hint align="end">
+          <span [class]="getAmountStatusClass()">
+            {{ getAmountStatusText() }}
+          </span>
+        </mat-hint>
+        <mat-error>Không được vượt quá gốc còn lại</mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Lãi suất cũ</mat-label>
+          <input matInput [value]="(data.summary?.currentRate || 2.0) + '‰/ngày'" readonly>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-50">
+          <mat-label>Lãi suất mới (sau trả bớt)</mat-label>
+          <input matInput type="text" formControlName="newRate" placeholder="VD: 1.8">
+          <span matTextSuffix>‰/ngày</span>
+          <mat-hint>Nếu không đổi, để trống</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Phí khác (nếu có)</mat-label>
+        <input matInput type="text" appCurrencyFormat formControlName="otherFee">
+        <span matTextSuffix>đ</span>
+      </mat-form-field>
+
+      <!-- TỔNG TIỀN KHÁCH NỘP -->
+      <div class="total-box">
+        <div class="total-label">TỔNG TIỀN KHÁCH NỘP</div>
+        <div class="total-amount">{{ formatMoney(getTotalPaid()) }}</div>
+      </div>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Ghi chú</mat-label>
+        <textarea matInput rows="3" formControlName="note"
+                  placeholder="VD: Khách trả bớt 5 triệu, giảm lãi suất từ 2‰ xuống 1.8‰"></textarea>
+      </mat-form-field>
+
+    </form>
+  </div>
+
+  <!-- 4. LỊCH SỬ TRẢ BỚT GỐC -->
+  <!-- LỊCH SỬ TRẢ BỚT GỐC -->
+  <div class="section" *ngIf="data.summary?.principalReductionHistory?.length">
+    <h3 class="section-title">
+      <mat-icon class="section-icon">history</mat-icon>
+      Lịch sử trả bớt gốc ({{ data.summary.principalReductionHistory.length }} lần)
+    </h3>
+
+    <table mat-table [dataSource]="data.summary.principalReductionHistory" class="history-table">
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Ngày </th>
+        <td mat-cell *matCellDef="let h"> {{ h.date | date:'dd/MM/yyyy' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef> Trả bớt </th>
+        <td mat-cell *matCellDef="let h">
+          <strong class="text-primary">{{ h.amount | number:'1.0-0' }} đ</strong>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="rate">
+        <th mat-header-cell *matHeaderCellDef> Lãi suất </th>
+        <td mat-cell *matCellDef="let h">
+        <span [class.text-success]="h.newInterestRate">
+          {{ h.oldInterestRate }}
+          <mat-icon *ngIf="h.newInterestRate" class="small-icon">arrow_forward</mat-icon>
+          {{ h.newInterestRate || h.oldInterestRate }}
+          {{ h.interestRateUnit === 'PER_MILLION' ? 'đ/triệu/ngày' : '‰/ngày' }}
+        </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="fee">
+        <th mat-header-cell *matHeaderCellDef> Phí khác </th>
+        <td mat-cell *matCellDef="let h"> {{ h.otherFee | number:'1.0-0' }} đ </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef> Tổng nộp </th>
+        <td mat-cell *matCellDef="let h">
+          <b class="text-danger">{{ h.totalPaidThisTime | number:'1.0-0' }} đ</b>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="by">
+        <th mat-header-cell *matHeaderCellDef> Nhân viên </th>
+        <td mat-cell *matCellDef="let h"> {{ h.createdBy }} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-stroked-button mat-dialog-close color="warn">
+<mat-dialog-actions align="end" class="actions">
+  <button mat-stroked-button color="warn" mat-dialog-close>
     <mat-icon>close</mat-icon> Hủy
   </button>
-  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">
-    <mat-icon>check_circle</mat-icon> Xác nhận
+  <button mat-flat-button color="primary" class="confirm-btn"
+          [disabled]="form.invalid || getAmountStatus() !== 'valid'"
+          (click)="confirm()">
+    <mat-icon>check_circle</mat-icon>
+    Xác nhận trả bớt gốc
   </button>
 </mat-dialog-actions>
