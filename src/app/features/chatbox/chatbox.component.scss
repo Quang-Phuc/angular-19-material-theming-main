@@ -2,13 +2,13 @@
   position:fixed; right:14px; bottom:18px; width:58px; height:58px;
   border-radius:16px; background:linear-gradient(135deg,#FFD54A,#FFC107);
   color:#111; display:grid; place-items:center; font-size:26px;
-  box-shadow:0 16px 36px rgba(255,193,7,.35); z-index:90;
+  box-shadow:0 16px 36px rgba(255,193,7,.35); z-index:200; /* FIX: Tăng từ 90 lên 200 (trên Header 100) */
 }
 
 .chat{
   position:fixed; right:10px; bottom:90px; width:min(520px,94vw); height:min(70vh,620px);
   display:none; flex-direction:column; border:1px solid #2a2a2a; border-radius:16px;
-  background:#0f0f0f; box-shadow:0 28px 60px rgba(0,0,0,.6); z-index:95;
+  background:#0f0f0f; box-shadow:0 28px 60px rgba(0,0,0,.6); z-index:201; /* FIX: Tăng từ 95 lên 201 (trên FAB 200) */
   &.show{ display:flex; }
   header{
     display:flex; align-items:center; gap:10px; padding:10px;

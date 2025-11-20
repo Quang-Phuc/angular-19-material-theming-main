@@ -1,12 +1,14 @@
 .overlay{
   position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
-  opacity:0; pointer-events:none; transition:.25s; z-index:95;
+  opacity:0; pointer-events:none; transition:.25s;
+  z-index: 1000; /* Tăng từ 95 lên 1000. Đảm bảo nằm dưới Drawer nhưng trên Header */
   &.show{ opacity:1; pointer-events:auto }
 }
 .drawer{
   position:fixed; left:-360px; top:0; height:100%; width:min(360px,92vw);
   background:#0f0f0f; border-right:1px solid #2a2a2a; box-shadow:20px 0 60px rgba(0,0,0,.5);
-  z-index:99; transition:left .25s;
+  z-index: 1001; /* Tăng từ 99 lên 1001. Đảm bảo nằm trên mọi thứ */
+  transition:left .25s;
   &.show{ left:0 }
 }
 .drawer header{
