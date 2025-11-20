@@ -1,0 +1,25 @@
+<!-- src/app/features/live-results/live-results.component.html -->
+<section class="card">
+  <header>
+    <strong>XSMB — Hôm nay (đang quay)</strong>
+    <div class="muted">Shimmer: sắp quay • Pop-in: vừa ra • Glow: giải hiện tại</div>
+  </header>
+  <div class="body" *ngIf="(live$|async) as live">
+    <div *ngFor="let pr of ORDER" class="prize-row" [class.current]="live.currentPrize===pr">
+      <div class="p-label">{{ pr }}</div>
+      <div class="p-numbers">
+        <ng-container *ngIf="pr==='DB'; else others">
+          <div class="ball big">{{ live.prizes.DB[0] }}</div>
+        </ng-container>
+        <ng-template #others>
+          <ng-container *ngFor="let s of live.prizes[pr]; let i = index">
+            <div [class]="(s.includes('•')||s.includes('—')) ? 'ball shimmer ghost' : 'ball'" *ngFor="let n of (s.includes('•')||s.includes('—')) ? [s] : chunk2(s)">
+              {{ n }}
+            </div>
+            <span class="sep" *ngIf="i < live.prizes[pr].length-1">•</span>
+          </ng-container>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>

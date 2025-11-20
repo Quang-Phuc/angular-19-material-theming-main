@@ -1,0 +1,9 @@
+/* src/app/features/past-days/past-days.component.css */
+.block{margin-bottom:10px}
+.block-title{font-weight:800;color:var(--gold);margin:6px 0}
+.past-rows .prize-row{display:flex;gap:12px;align-items:center;border:1px solid var(--border);border-radius:16px;background:#121315;padding:10px 12px;margin-bottom:10px}
+.p-label{min-width:58px;text-align:center;font-weight:900;color:#fff;background:linear-gradient(135deg, rgba(255,213,74,.14), rgba(255,193,7,.08));border:1px solid #2f2f2f;border-radius:10px;padding:6px 0}
+.p-numbers{display:flex;flex-wrap:wrap;gap:10px}
+.ball{height:42px;padding:0 14px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#1a1a1a,#101010);border:1px solid #2f2f2f}
+.ball.big{height:54px;padding:0 18px;border-radius:14px}
+.sep{opacity:.6;color:#bdbdbd;align-self:center}

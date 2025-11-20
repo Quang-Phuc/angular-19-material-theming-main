@@ -1,0 +1,19 @@
+<!-- src/app/features/chatbox/chatbox.component.html -->
+<button class="chat-fab" (click)="ui.toggleChat()">🧞</button>
+<div class="chat" [class.show]="(ui.chat$|async)">
+  <header>
+    <div class="ava">🧞</div>
+    <div class="title">Xổ Số Thần Đèn</div>
+    <div class="toolbar">
+      <button class="circle" (click)="ui.toggleChat()">—</button>
+      <button class="circle" (click)="ui.closeChat()">✕</button>
+    </div>
+  </header>
+  <div class="body">
+    <div *ngFor="let m of msgs" class="msg" [ngClass]="m.who==='me' ? 'me' : 'bot'">{{ m.text }}</div>
+  </div>
+  <div class="input-wrap">
+    <input [(ngModel)]="msg" placeholder="Nhập câu hỏi..." (keyup.enter)="send()">
+    <button (click)="send()">Gửi</button>
+  </div>
+</div>

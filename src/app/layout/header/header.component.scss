@@ -1,0 +1,17 @@
+/* src/app/layout/header/header.component.css */
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(10,10,10,.96),rgba(10,10,10,.78));backdrop-filter:saturate(140%) blur(12px);border-bottom:1px solid var(--border)}
+.inner{max-width:1100px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:12px;background:conic-gradient(from 120deg,var(--gold),var(--gold-2),var(--gold-3),var(--gold));display:grid;place-items:center;font-weight:900;color:#111}
+.gold{color:var(--gold)}
+.hamb,.user{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);display:grid;place-items:center}
+.spacer{flex:1}
+.tabs1{position:relative;background:#101010;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.tabs-strip{display:flex;gap:12px;overflow-x:auto;padding:10px 44px}
+.tab{white-space:nowrap;font-weight:900;color:#fff;padding:6px 12px;border-radius:999px}
+.tab.active{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#111;box-shadow:0 6px 16px rgba(255,193,7,.22)}
+.tabs-arrow{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#0f0f0f;color:#fff}
+.tabs-left{left:6px}.tabs-right{right:6px}
+.days-wrap{background:#0f0f0f;border-bottom:1px solid var(--border)}
+.days{display:flex;gap:10px;overflow-x:auto;padding:8px 44px}
+.day{font-weight:800;color:#ddd;border:1px solid #2e2e2e;border-radius:999px;padding:6px 12px}
+.day.active{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#111;border-color:var(--gold)}

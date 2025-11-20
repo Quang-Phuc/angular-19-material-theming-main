@@ -1,0 +1,42 @@
+<!-- src/app/layout/header/header.component.html -->
+<header class="header">
+  <div class="inner">
+    <button class="hamb" (click)="ui.toggleDrawer()">☰</button>
+    <div class="brand">
+      <div class="logo">MB</div>
+      <div class="brand-text">
+        <div class="title">Xổ Số <span class="gold">THẦN ĐÈN</span></div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="user">👤</div>
+  </div>
+
+  <!-- Tabs vùng -->
+  <div class="tabs1">
+    <button #left1 class="tabs-arrow tabs-left">◀</button>
+    <div #regionStrip class="tabs-strip" scrollArrows [leftBtn]="left1" [rightBtn]="right1">
+      <a class="tab active">XSMB</a>
+      <a class="tab">XSMN</a>
+      <a class="tab">XSMT</a>
+      <a class="tab">VIETLOTT</a>
+    </div>
+    <button #right1 class="tabs-arrow tabs-right">▶</button>
+  </div>
+
+  <!-- Tabs ngày -->
+  <div class="days-wrap">
+    <button #left2 class="tabs-arrow tabs-left">◀</button>
+    <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2">
+      <span class="day active" (click)="setActiveDay($event.target)">T2</span>
+      <span class="day" (click)="setActiveDay($event.target)">T3</span>
+      <span class="day" (click)="setActiveDay($event.target)">T4</span>
+      <span class="day" (click)="setActiveDay($event.target)">T5</span>
+      <span class="day" (click)="setActiveDay($event.target)">T6</span>
+      <span class="day" (click)="setActiveDay($event.target)">T7</span>
+      <span class="day" (click)="setActiveDay($event.target)">CN</span>
+    </div>
+    <button #right2 class="tabs-arrow tabs-right">▶</button>
+  </div>
+</header>
+<app-drawer></app-drawer>

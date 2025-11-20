@@ -1,0 +1,15 @@
+<!-- src/app/features/heads-table/heads-table.component.html -->
+<section class="card">
+  <header><strong>Thống kê đầu (hôm nay)</strong><span class="muted">Từ số đã về</span></header>
+  <div class="body">
+    <table class="heads">
+      <thead><tr><th class="head-cell">Đầu</th><th>Lô tô</th></tr></thead>
+      <tbody>
+      <tr *ngFor="let h of ( [].constructor(10) ); let i = index">
+        <td class="head-cell">{{ i }}</td>
+        <td class="nums-cell" [innerHTML]="(heads[i] && heads[i].length ? heads[i].sort().map(x=>'<span class=\'pill\'>'+x+'</span>').join('') : '<span class=\'muted\'>—</span>')"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

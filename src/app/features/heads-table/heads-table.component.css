@@ -1,0 +1,11 @@
+/* src/app/features/heads-table/heads-table.component.css */
+.card{background:linear-gradient(180deg,var(--glass),transparent),var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:12px}
+.card header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.body{padding:12px}
+.heads{width:100%;border-collapse:separate;border-spacing:0 10px}
+.heads th, .heads td{font-size:14px;padding:10px;border-top:1px solid #2f2f2f;border-bottom:1px solid #2f2f2f;background:#111214}
+.heads th:first-child, .heads td:first-child{border-left:1px solid #2f2f2f;border-top-left-radius:12px;border-bottom-left-radius:12px}
+.heads th:last-child, .heads td:last-child{border-right:1px solid #2f2f2f;border-top-right-radius:12px;border-bottom-right-radius:12px}
+.head-cell{font-weight:900;color:#fff;min-width:44px;text-align:center;background:linear-gradient(180deg, rgba(255,213,74,.16), rgba(255,193,7,.08));border-radius:8px}
+.nums-cell{display:flex;flex-wrap:wrap;gap:8px}
+.pill{padding:6px 10px;border-radius:10px;border:1px solid #3a3a3a;background:linear-gradient(135deg,#171717,#0f0f0f);font-weight:800}

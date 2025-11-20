@@ -1,31 +1,16 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+// src/app/app.component.ts
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+// Nếu bạn đã tạo 2 component này ở dạng standalone:
+import { HeaderComponent } from './layout/header/header.component';
+import { ChatboxComponent } from './features/chatbox/chatbox.component';
 
 @Component({
+  standalone: true,
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss'],
+  imports: [RouterOutlet, HeaderComponent, ChatboxComponent]
 })
-export class AppComponent {
-
-  private readonly document = inject(DOCUMENT);
-
-  isDarkTheme = signal(false);
-
-  constructor() {
-    effect(() => {
-      if (this.isDarkTheme()) {
-        this.document.documentElement.classList.add('dark');
-      }
-      else {
-        this.document.documentElement.classList.remove('dark');
-      }
-    })
-  }
-
-  toggleTheme() {
-    this.isDarkTheme.update(isDark => !isDark);
-  }
-}
+export class AppComponent {}

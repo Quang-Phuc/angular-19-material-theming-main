@@ -1,0 +1,12 @@
+/* src/app/layout/drawer/drawer.component.css */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:.25s;z-index:95}
+.overlay.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;left:-360px;top:0;height:100%;width:min(360px,92vw);background:#0f0f0f;border-right:1px solid var(--border);box-shadow:20px 0 60px rgba(0,0,0,.5);z-index:99;transition:left .25s}
+.drawer.show{left:0}
+.drawer header{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--border);background:#141414}
+.ava{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-2));display:grid;place-items:center;color:#111;font-weight:900}
+.circle{width:30px;height:30px;border-radius:8px;background:#101010;border:1px solid #2b2b2b;color:#fff}
+.content{padding:12px;display:grid;gap:12px}
+.c-item{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:14px;padding:12px;background:linear-gradient(180deg,var(--glass),transparent)}
+.c-ico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-2));display:grid;place-items:center;color:#111;font-weight:900}
+.c-title{font-weight:900}.c-sub{color:#cfcfcf;font-size:12px}

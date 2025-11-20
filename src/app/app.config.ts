@@ -1,35 +1,15 @@
-// src/app/app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { provideRouter, withViewTransitions, withInMemoryScrolling } from '@angular/router';
 import { routes } from './app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { importProvidersFrom } from '@angular/core';
-
-import { provideNativeDateAdapter } from '@angular/material/core';
-
-// ✅ IMPORT CẢ HAI INTERCEPTOR
-import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import {MATERIAL} from './shared/material/material.module';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideAnimationsAsync(),
-
-    // ✅ Đăng ký 1 lần, truyền mảng interceptor theo thứ tự
-    // Gợi ý: để auth trước, error sau.
-    provideHttpClient(
-      withInterceptors([
-        authInterceptor,
-        errorInterceptor,
-      ])
-    ),
-
-    importProvidersFrom(MatSnackBarModule),
-
-    provideNativeDateAdapter(),
+    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
+    provideAnimations(),
+    provideHttpClient(),
+    importProvidersFrom(...MATERIAL), // <— cấp 1 lần
   ]
 };

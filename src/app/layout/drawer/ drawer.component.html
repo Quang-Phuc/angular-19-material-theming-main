@@ -1,0 +1,15 @@
+<!-- src/app/layout/drawer/drawer.component.html -->
+<div class="overlay" [class.show]="(ui.drawer$|async)" (click)="close()"></div>
+<aside class="drawer" [class.show]="(ui.drawer$|async)">
+  <header>
+    <div class="ava">🧞</div>
+    <div class="title">Menu Thần Đèn</div>
+    <div class="spacer"></div>
+    <button class="circle" (click)="close()">✕</button>
+  </header>
+  <div class="content">
+    <a class="c-item" routerLink="/phong-thuy"><div class="c-ico">🧭</div><div><div class="c-title">Dự Đoán Số Phong Thuỷ</div><div class="c-sub">Theo mạng, ngũ hành, tuổi</div></div></a>
+    <a class="c-item" routerLink="/ai"><div class="c-ico">🤖</div><div><div class="c-title">Dự Đoán Xổ Số Bằng AI</div><div class="c-sub">Thống kê + mô hình</div></div></a>
+    <a class="c-item" routerLink="/giac-mo"><div class="c-ico">💭</div><div><div class="c-title">Dự Đoán Số Qua Giấc Mơ</div><div class="c-sub">Từ điển giấc mơ + AI</div></div></a>
+  </div>
+</aside>

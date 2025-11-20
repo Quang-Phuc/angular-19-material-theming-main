@@ -1,0 +1,25 @@
+<!-- src/app/features/past-days/past-days.component.html -->
+<section class="card">
+  <header><strong>3 ngày gần nhất</strong></header>
+  <div class="body">
+    <div *ngFor="let d of days" class="block">
+      <div class="block-title">{{ d.title }}</div>
+      <div class="past-rows">
+        <div *ngFor="let pr of ORDER" class="prize-row">
+          <div class="p-label">{{ pr }}</div>
+          <div class="p-numbers">
+            <ng-container *ngIf="pr==='DB'; else others">
+              <div class="ball big">{{ d.data.prizes.DB[0] }}</div>
+            </ng-container>
+            <ng-template #others>
+              <ng-container *ngFor="let s of d.data.prizes[pr]; let i = index">
+                <div class="ball" *ngFor="let n of chunk2(s)">{{ n }}</div>
+                <span class="sep" *ngIf="i < d.data.prizes[pr].length-1">•</span>
+              </ng-container>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
