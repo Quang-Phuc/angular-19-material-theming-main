@@ -1,11 +1,9 @@
 <header class="header">
   <div class="inner">
-    <!-- mở Drawer -->
-    <button class="icon-btn hamb" (click)="ui.toggleDrawer()" aria-label="Mở menu">
-      <span>☰</span>
-    </button>
+    <!-- Drawer -->
+    <button class="icon-btn hamb" (click)="ui.toggleDrawer()" aria-label="Mở menu">☰</button>
 
-    <!-- logo + brand -->
+    <!-- Brand -->
     <a routerLink="/" class="brand">
       <div class="logo">MB</div>
       <div class="brand-text">
@@ -16,7 +14,7 @@
 
     <div class="spacer"></div>
 
-    <!-- kebab menu -->
+    <!-- Kebab -->
     <div class="more-wrap">
       <button class="icon-btn more" (click)="toggleMore()" aria-label="Mở menu nhanh">⋮</button>
       <div class="more-menu" [class.show]="moreOpen">
@@ -38,11 +36,34 @@
     <div class="user" aria-label="Tài khoản">👤</div>
   </div>
 
-  <!-- tabs vùng có mũi tên 2 chiều -->
+  <!-- GOLD RIBBON -->
+  <div class="ribbon-wrap">
+    <button class="arrow-btn arrow-left" #rbLeft>◀</button>
+
+    <div class="ribbon"
+         #ribbon
+         scrollArrows
+         [leftBtn]="rbLeft"
+         [rightBtn]="rbRight"
+         [step]="240">
+      <a class="item" *ngFor="let it of ribbonItems" [routerLink]="it.link || '/'">
+        <div class="tag">{{ it.tag }}</div>
+        <div class="icon">{{ it.icon }}</div>
+        <div class="title">
+          {{ it.title }}
+          <span class="badge" *ngIf="it.badge">{{ it.badge }}</span>
+        </div>
+        <div class="muted">{{ it.sub }}</div>
+      </a>
+    </div>
+
+    <button class="arrow-btn arrow-right" #rbRight>▶</button>
+  </div>
+
+  <!-- Tabs vùng -->
   <div class="tabs1">
     <button #left1 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
-    <div #regionStrip class="tabs-strip"
-         scrollArrows [leftBtn]="left1" [rightBtn]="right1" [step]="220">
+    <div #regionStrip class="tabs-strip" scrollArrows [leftBtn]="left1" [rightBtn]="right1" [step]="220">
       <a class="tab active" routerLink="/">XSMB</a>
       <a class="tab" routerLink="/">XSMN</a>
       <a class="tab" routerLink="/">XSMT</a>
@@ -51,7 +72,7 @@
     <button #right1 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
 
-  <!-- dãy thứ/ngày có mũi tên 2 chiều -->
+  <!-- Dải thứ/ngày -->
   <div class="days-wrap">
     <button #left2 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
     <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2" [step]="200">
