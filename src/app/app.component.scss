@@ -1,8 +1,10 @@
 :root{
   --bg:#0a0a0a; --panel:#111214; --text:#FAFAFA; --muted:#D7D7D7;
   --gold:#FFD54A; --gold-2:#FFC107; --border:#2a2a2a;
-  --frame-w: 1120px;   /* bề rộng tối đa desktop */
-  --frame-pad: 12px;   /* padding nội dung trong khung */
+
+  /* khung desktop */
+  --frame-w: 1120px;         /* max width của khung */
+  --frame-pad: 12px;         /* padding trong khung */
   --frame-radius: 18px;
 }
 
@@ -14,27 +16,27 @@ body{
     radial-gradient(900px 600px at 110% 0%, rgba(255,193,7,.10) 0%, transparent 60%),
     var(--bg);
   color:var(--text);
-  -webkit-tap-highlight-color:transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Mobile: full-bleed */
-.site-shell{ padding: 0; }
+/* Mobile full-bleed */
+.site-shell{ padding:0 }
 .site-frame{
   min-height: 100dvh;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  background: transparent;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  background:transparent;
 }
 
-/* Desktop: gói trong khung giữa */
-@media (min-width: 1024px){
+/* Desktop: đặt toàn site trong khung giữa */
+@media (min-width:1024px){
   .site-shell{
-    display: grid;
-    place-content: start center;
-    padding: 18px; /* khoảng hở với mép màn */
+    display:grid;
+    place-content:start center;
+    padding: clamp(8px, 2vw, 18px);
   }
   .site-frame{
-    width: min(var(--frame-w), 100vw - 48px);
+    width: min(var(--frame-w), 100vw - clamp(16px, 4vw, 48px));
     border: 1px solid var(--border);
     border-radius: var(--frame-radius);
     background:
@@ -47,7 +49,7 @@ body{
   }
 }
 
-/* Nội dung bên trong khung dùng chung padding */
+/* Padding ngang mặc định của các section bên trong khung */
 .site-frame > *:not(app-header){
-  padding-inline: var(--frame-pad);
+  padding-inline: clamp(8px, 3vw, var(--frame-pad));
 }
