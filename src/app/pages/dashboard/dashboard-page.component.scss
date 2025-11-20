@@ -1,4 +1,8 @@
-/* src/app/pages/dashboard/dashboard-page.component.scss */
-.container{
-  margin: 12px 0; /* bám theo frame padding rồi, ko cần set max-width */
+.dashboard-main {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  margin: 0 !important;
+  padding: 12px 12px 80px; /* thêm bottom để không bị che bởi FAB nếu có */
+  box-sizing: border-box;
+  background: transparent;
 }

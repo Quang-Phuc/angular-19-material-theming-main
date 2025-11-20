@@ -27,12 +27,7 @@
   <!-- RIBBON -->
   <div class="ribbon-wrap">
     <button class="arrow-btn arrow-left" #rbLeft>◀</button>
-
-    <div class="ribbon" id="ribbon"
-         scrollArrows
-         [leftBtn]="rbLeft"
-         [rightBtn]="rbRight"
-         [step]="240">
+    <div class="ribbon" id="ribbon" scrollArrows [leftBtn]="rbLeft" [rightBtn]="rbRight" [step]="240">
       <a class="item" *ngFor="let it of ribbonItems" [routerLink]="it.link || '/'">
         <div class="tag">{{ it.tag }}</div>
         <div class="icon">{{ it.icon }}</div>
@@ -43,33 +38,31 @@
         <div class="muted">{{ it.sub }}</div>
       </a>
     </div>
-
     <button class="arrow-btn arrow-right" #rbRight>▶</button>
   </div>
 
-  <!-- Tabs vùng - FULL WIDTH MOBILE -->
-  <div class="tabs1 full">
+  <!-- Tabs vùng - FULL 100% + FIX WEBVIEW -->
+  <div class="tabs1 full-width">
     <div class="tabs-strip">
-      <a class="tab active" routerLink="/">XSMB</a>
-      <a class="tab" routerLink="/">XSMN</a>
-      <a class="tab" routerLink="/">XSMT</a>
+      <a class="tab" [class.active]="isActiveTab('mb')" routerLink="/">XSMB</a>
+      <a class="tab" [class.active]="isActiveTab('mn')" routerLink="/">XSMN</a>
+      <a class="tab" [class.active]="isActiveTab('mt')" routerLink="/">XSMT</a>
       <a class="tab" routerLink="/vietlott">VIETLOTT</a>
     </div>
   </div>
 
-  <!-- Dải thứ/ngày - FULL WIDTH MOBILE -->
-  <div class="days-wrap full">
+  <!-- Thanh ngày thứ - FULL 100% + FIX WEBVIEW -->
+  <div class="days-wrap full-width">
     <div class="days">
       <span #d2  class="day active" (click)="setActiveDay(d2)">T2</span>
-      <span #d3  class="day"        (click)="setActiveDay(d3)">T3</span>
-      <span #d4  class="day"        (click)="setActiveDay(d4)">T4</span>
-      <span #d5  class="day"        (click)="setActiveDay(d5)">T5</span>
-      <span #d6  class="day"        (click)="setActiveDay(d6)">T6</span>
-      <span #d7  class="day"        (click)="setActiveDay(d7)">T7</span>
-      <span #dcn class="day"        (click)="setActiveDay(dcn)">CN</span>
+      <span #d3  class="day" (click)="setActiveDay(d3)">T3</span>
+      <span #d4  class="day" (click)="setActiveDay(d4)">T4</span>
+      <span #d5  class="day" (click)="setActiveDay(d5)">T5</span>
+      <span #d6  class="day" (click)="setActiveDay(d6)">T6</span>
+      <span #d7  class="day" (click)="setActiveDay(d7)">T7</span>
+      <span #dcn class="day" (click)="setActiveDay(dcn)">CN</span>
     </div>
   </div>
 </header>
 
-<!-- Drawer -->
 <app-drawer></app-drawer>

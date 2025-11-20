@@ -1,9 +1,10 @@
-import { Component, ElementRef, ViewChild, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { UiService } from '../../core/services/ui.service';
 import { ScrollArrowsDirective } from '../../shared/directives/scroll-arrows.directive';
 import { DrawerComponent } from '../drawer/drawer.component';
+import { filter } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -13,16 +14,12 @@ import { DrawerComponent } from '../drawer/drawer.component';
   imports: [CommonModule, RouterLink, ScrollArrowsDirective, DrawerComponent]
 })
 export class HeaderComponent {
-  @ViewChild('regionStrip') regionStrip!: ElementRef<HTMLElement>;
-  @ViewChild('daysStrip')   daysStrip!: ElementRef<HTMLElement>;
-
+  private router = inject(Router);
   public ui = inject(UiService);
 
   moreOpen = false;
-  toggleMore(){ this.moreOpen = !this.moreOpen; }
-  closeMore(){ this.moreOpen = false; }
+  currentRegion: 'mb' | 'mn' | 'mt' | 'vietlott' = 'mb';
 
-  // dữ liệu cho Gold Ribbon
   ribbonItems = [
     { tag: 'XSMB',      icon:'📍', title:'Điểm Mua Vé Số',        sub:'Tìm đại lý gần bạn',   link:'/mua-ve' },
     { tag: 'AI',        icon:'💭', title:'Đoán Số Giấc Mơ',       badge:32, sub:'Từ điển + thống kê', link:'/giac-mo' },
@@ -31,16 +28,33 @@ export class HeaderComponent {
     { tag: 'Phong Thuỷ',icon:'🧭', title:'Số Phong Thuỷ',         badge:35, sub:'Mạng & tuổi',        link:'/phong-thuy' },
   ];
 
-  // set active cho dải thứ/ngày (truyền thẳng element ref)
-  setActiveDay(el: HTMLElement) {
-    const parent = el.parentElement; if (!parent) return;
-    parent.querySelectorAll('.day').forEach(x => x.classList.remove('active'));
-    el.classList.add('active');
+  constructor() {
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: NavigationEnd) => {
+      const url = e.urlAfterRedirects;
+      if (url.includes('vietlott')) this.currentRegion = 'vietlott';
+      else if (url.includes('xsmn') || url.includes('mn')) this.currentRegion = 'mn';
+      else if (url.includes('xsmt') || url.includes('mt')) this.currentRegion = 'mt';
+      else this.currentRegion = 'mb';
+    });
   }
 
+  isActiveTab(region: 'mb' | 'mn' | 'mt' | 'vietlott'): boolean {
+    return this.currentRegion === region;
+  }
+
+  toggleMore() { this.moreOpen = !this.moreOpen; }
+
   @HostListener('document:click', ['$event'])
-  onDocClick(e: MouseEvent) {
-    const t = e.target as HTMLElement | null;
-    if (!t?.closest('.more-wrap')) this.moreOpen = false;
+  onClick(e: MouseEvent) {
+    if (!(e.target as HTMLElement)?.closest('.more-wrap')) this.moreOpen = false;
+  }
+
+  setActiveDay(el: HTMLElement) {
+    const parent = el.parentElement;
+    if (!parent) return;
+    parent.querySelectorAll('.day').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
   }
 }
