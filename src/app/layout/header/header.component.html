@@ -12,57 +12,66 @@
 
     <div class="spacer"></div>
 
-    <!-- Menu nhanh: thêm class container để desktop không full màn -->
     <div class="more-wrap">
       <button class="icon-btn more" (click)="toggleMore()" aria-label="Menu nhanh">⋮</button>
       <div class="more-menu" [class.show]="moreOpen">
-        <a routerLink="/phong-thuy" class="mm-item"><span class="mm-ico">🧭</span><div><div class="mm-title">Dự Đoán Số Phong Thuỷ</div><div class="mm-sub">Theo tuổi, mệnh</div></div></a>
-        <a routerLink="/ai" class="mm-item"><span class="mm-ico">🤖</span><div><div class="mm-title">Dự Đoán Xổ Số Bằng AI</div><div class="mm-sub">Thống kê + mô hình</div></div></a>
-        <a routerLink="/giac-mo" class="mm-item"><span class="mm-ico">💭</span><div><div class="mm-title">Dự Đoán Số Qua Giấc Mơ</div><div class="mm-sub">Từ điển giấc mơ + AI</div></div></a>
+        <a routerLink="/phong-thuy" class="mm-item">
+          <span class="mm-ico">🧭</span>
+          <div>
+            <div class="mm-title">Dự Đoán Số Phong Thuỷ</div>
+            <div class="mm-sub">Theo tuổi, mệnh</div>
+          </div>
+        </a>
+        <a routerLink="/ai" class="mm-item">
+          <span class="mm-ico">🤖</span>
+          <div>
+            <div class="mm-title">Dự Đoán Xổ Số Bằng AI</div>
+            <div class="mm-sub">Thống kê + mô hình</div>
+          </div>
+        </a>
+        <a routerLink="/giac-mo" class="mm-item">
+          <span class="mm-ico">💭</span>
+          <div>
+            <div class="mm-title">Dự Đoán Số Qua Giấc Mơ</div>
+            <div class="mm-sub">Từ điển giấc mơ + AI</div>
+          </div>
+        </a>
       </div>
     </div>
 
     <div class="user">👤</div>
   </div>
 
-  <!-- RIBBON: thêm class container để desktop vừa khít -->
+  <!-- RIBBON: vẫn cuộn ngang bằng mũi tên -->
   <div class="ribbon-wrap">
     <button class="arrow-btn arrow-left" #rbLeft>◀</button>
-    <div class="ribbon" id="ribbon" scrollArrows [leftBtn]="rbLeft" [rightBtn]="rbRight" [step]="240">
-      <a class="item" *ngFor="let it of ribbonItems" [routerLink]="it.link || '/'">
-        <div class="tag">{{ it.tag }}</div>
-        <div class="icon">{{ it.icon }}</div>
-        <div class="title">
-          {{ it.title }}
-          <span class="badge" *ngIf="it.badge">{{ it.badge }}</span>
-        </div>
-        <div class="muted">{{ it.sub }}</div>
-      </a>
+
+    <div class="ribbon"
+         scrollArrows
+         [leftBtn]="rbLeft"
+         [rightBtn]="rbRight"
+         [step]="240">
+
+      <ng-container *ngFor="let it of ribbonItems">
+        <a class="item" *ngIf="it?.title" [routerLink]="it.link || '/'">
+          <div class="tag">{{ it.tag }}</div>
+          <div class="icon">{{ it.icon }}</div>
+          <div class="title">
+            {{ it.title }}
+            <span class="badge" *ngIf="it.badge">{{ it.badge }}</span>
+          </div>
+          <div class="muted">{{ it.sub }}</div>
+        </a>
+      </ng-container>
+
     </div>
+
+
     <button class="arrow-btn arrow-right" #rbRight>▶</button>
   </div>
 
-  <!-- Tabs vùng & ngày: mobile full, desktop căn giữa -->
-  <div class="tabs1 full-width-mobile container">
-    <div class="tabs-strip">
-      <a class="tab" [class.active]="isActiveTab('mb')" routerLink="/">XSMB</a>
-      <a class="tab" [class.active]="isActiveTab('mn')" routerLink="/">XSMN</a>
-      <a class="tab" [class.active]="isActiveTab('mt')" routerLink="/">XSMT</a>
-      <a class="tab" routerLink="/vietlott">VIETLOTT</a>
-    </div>
-  </div>
 
-  <div class="days-wrap full-width-mobile container">
-    <div class="days">
-      <span #d2  class="day active" (click)="setActiveDay(d2)">T2</span>
-      <span #d3  class="day" (click)="setActiveDay(d3)">T3</span>
-      <span #d4  class="day" (click)="setActiveDay(d4)">T4</span>
-      <span #d5  class="day" (click)="setActiveDay(d5)">T5</span>
-      <span #d6  class="day" (click)="setActiveDay(d6)">T6</span>
-      <span #d7  class="day" (click)="setActiveDay(d7)">T7</span>
-      <span #dcn class="day" (click)="setActiveDay(dcn)">CN</span>
-    </div>
-  </div>
 </header>
 
+<!-- Drawer global -->
 <app-drawer></app-drawer>

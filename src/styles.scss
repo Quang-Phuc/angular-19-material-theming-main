@@ -37,3 +37,33 @@ html, body {
 }
 
 a { color: inherit; text-decoration: none; }
+/* ===== Global mobile-safe reset (THÊM) ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, app-root {
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+}
+
+/* Container mặc định: giữa trên desktop, full trên mobile */
+.container {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+@media (max-width: 768px) {
+  .container { width: 100%; }
+}
+
+/* Tránh phần tử cha nào đó che con bằng overflow */
+header, .ribbon-wrap, .tabs1, .days-wrap {
+  overflow: visible;
+}
+app-header .tabs1 .tabs-strip,
+app-header .days-wrap .days{
+  display: flex !important;
+  justify-content: center !important;
+  min-height: 44px;
+}
