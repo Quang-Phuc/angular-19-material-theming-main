@@ -1,4 +1,19 @@
+<!-- src/app/features/live-results/live-results.component.html -->
 <section class="live-wrapper">
+  <!-- TAB REGION: XSMB / VIETLOTT -->
+  <nav class="region-tabs">
+    <div class="region-tabs-inner">
+      <button
+        type="button"
+        class="region-pill"
+        *ngFor="let r of regions"
+        [class.active]="r.key === activeRegion"
+        (click)="setActiveRegion(r.key)">
+        {{ r.label }}
+      </button>
+    </div>
+  </nav>
+
   <!-- TAB 7 NGÀY TRONG TUẦN -->
   <nav class="day-tabs">
     <button
@@ -11,112 +26,133 @@
     </button>
   </nav>
 
-  <!-- KẾT QUẢ HÔM NAY (ĐANG QUAY) -->
-  <section class="card live-card">
-    <header class="card-header">
-      <div class="title">
-        {{ live.regionLabel }} — {{ live.dateLabel }}
-        <span class="status-dot"></span>
-        <span class="status-text">{{ live.status }}</span>
-      </div>
-      <div class="hint">
-        Ô sáng là giải đang quay • các ô đang quay nhảy số 00–99, khi dừng là số chính thức
-      </div>
-    </header>
+  <!-- ================== VIEW XSMB ================== -->
+  <ng-container *ngIf="activeRegion === 'XSMB'; else vietlottView">
+    <section class="card live-card" *ngIf="currentXsmb as cur">
+      <header class="card-header">
+        <div class="title">
+          {{ cur.regionLabel }} — {{ cur.dateLabel }}
+          <span class="status-dot" [class.off]="cur.status !== 'Đang quay'"></span>
+          <span class="status-text">{{ cur.status }}</span>
+        </div>
+        <div class="hint">
+          Ô vàng là giải đang quay • Các ô đang quay nhảy 00–99 •
+          Giải đặc biệt nháy và 2 số cuối màu đỏ.
+        </div>
+      </header>
 
-    <div class="card-body">
-      <div
-        *ngFor="let pr of ORDER"
-        class="prize-row"
-        [class.current]="live.currentPrize === pr">
-        <div class="p-label">{{ pr === 'DB' ? 'G.ĐB' : pr }}</div>
+      <div class="card-body fade-in">
+        <div
+          *ngFor="let pr of ORDER"
+          class="prize-row"
+          [class.current]="cur.currentPrize === pr"
+          [class.db-row]="pr === 'DB'">
 
-        <div class="p-numbers">
-          <!-- Đặc biệt giữ nguyên 1 khối lớn -->
-          <ng-container *ngIf="pr === 'DB'; else others">
-            <div class="ball big">
-              {{ live.prizes.DB[0] }}
-            </div>
-          </ng-container>
+          <div class="p-label">{{ pr === 'DB' ? 'G.ĐB' : pr }}</div>
 
-          <!-- Các giải khác: tách 2 số / viên -->
-          <ng-template #others>
-            <ng-container *ngFor="let s of live.prizes[pr]; let idx = index">
+          <div class="p-numbers">
+            <!-- G. ĐẶC BIỆT -->
+            <ng-container *ngIf="pr === 'DB'; else otherPrizes">
               <div
-                *ngFor="let n of chunk2(s)"
-                class="ball"
-                [class.spin]="isSpinning(pr, idx)">
-                {{ n }}
+                class="ball big db-big"
+                [class.blink]="isViewingLiveXsmb">
+                <span class="num-main">
+                  {{ cur.prizes.DB[0] | slice:0:-2 }}
+                </span>
+                <span class="num-last2">
+                  {{ cur.prizes.DB[0] | slice:-2 }}
+                </span>
               </div>
-              <span class="sep" *ngIf="idx < live.prizes[pr].length - 1">•</span>
             </ng-container>
-          </ng-template>
+
+            <!-- CÁC GIẢI KHÁC: MỖI SỐ 1 Ô, 2 SỐ CUỐI ĐỎ -->
+            <ng-template #otherPrizes>
+              <ng-container *ngFor="let s of cur.prizes[pr]; let idx = index">
+                <div
+                  class="ball"
+                  [class.spin]="isSpinning(pr, idx)">
+                  <ng-container *ngIf="(s || '').length > 2; else only2">
+                    <span class="num-main">
+                      {{ s | slice:0:-2 }}
+                    </span>
+                    <span class="num-last2">
+                      {{ s | slice:-2 }}
+                    </span>
+                  </ng-container>
+                  <ng-template #only2>
+                    <span class="num-last2">{{ s }}</span>
+                  </ng-template>
+                </div>
+                <span class="sep" *ngIf="idx < cur.prizes[pr].length - 1">•</span>
+              </ng-container>
+            </ng-template>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- THỐNG KÊ ĐẦU SỐ HÔM NAY -->
-  <section class="card heads-card">
-    <header class="card-header">
-      <div class="title">Thống kê đầu số hôm nay</div>
-      <div class="hint">Tính từ toàn bộ giải đã về của {{ live.regionLabel }}</div>
-    </header>
-    <div class="card-body">
-      <table class="heads-table">
-        <thead>
-        <tr>
-          <th>Đầu</th>
-          <th>Lô tô</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let row of headStats">
-          <td class="head-cell">{{ row.head }}</td>
-          <td>
-            <ng-container *ngIf="row.nums.length; else none">
-              <span class="pill" *ngFor="let n of row.nums">{{ n }}</span>
-            </ng-container>
-            <ng-template #none>
-              <span class="muted">—</span>
-            </ng-template>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- 4 NGÀY GẦN NHẤT -->
-  <section class="card past-card">
-    <header class="card-header">
-      <div class="title">4 ngày gần nhất</div>
-    </header>
-    <div class="card-body past-body">
-      <div class="past-block" *ngFor="let d of past; let i = index">
-        <div class="past-title">
-          {{ i === 0 ? 'Hôm qua' : i + 1 + ' ngày trước' }} — {{ d.dateLabel }}
+    <!-- THỐNG KÊ ĐẦU SỐ HÔM NAY -->
+    <section class="card heads-card" *ngIf="headStats.length">
+      <header class="card-header">
+        <div class="title">Thống kê đầu số hôm nay</div>
+        <div class="hint">
+          Tính theo toàn bộ giải đã về của {{ currentXsmb?.regionLabel }}
         </div>
-
-        <div class="past-rows">
-          <div *ngFor="let pr of ORDER" class="prize-row mini">
-            <div class="p-label">{{ pr === 'DB' ? 'G.ĐB' : pr }}</div>
-            <div class="p-numbers">
-              <ng-container *ngIf="pr === 'DB'; else pastOthers">
-                <div class="ball big small">{{ d.prizes.DB[0] }}</div>
+      </header>
+      <div class="card-body fade-in">
+        <table class="heads-table">
+          <thead>
+          <tr>
+            <th>Đầu</th>
+            <th>Lô tô</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let row of headStats">
+            <td class="head-cell">{{ row.head }}</td>
+            <td>
+              <ng-container *ngIf="row.nums.length; else none">
+                <span class="pill" *ngFor="let n of row.nums">{{ n }}</span>
               </ng-container>
-              <ng-template #pastOthers>
-                <ng-container *ngFor="let s of d.prizes[pr]; let idx = index">
-                  <div *ngFor="let n of chunk2(s)" class="ball small">
-                    {{ n }}
-                  </div>
-                  <span class="sep" *ngIf="idx < d.prizes[pr].length - 1">•</span>
-                </ng-container>
+              <ng-template #none>
+                <span class="muted">—</span>
               </ng-template>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ================== VIEW VIETLOTT ================== -->
+  <ng-template #vietlottView>
+    <section class="card vietlott-card" *ngIf="currentVietlott as vlt">
+      <header class="card-header">
+        <div class="title">
+          VIETLOTT — {{ vlt.dateLabel }}
+          <span class="status-dot" [class.off]="vlt.status !== 'Đang quay'"></span>
+          <span class="status-text">{{ vlt.status }}</span>
+        </div>
+        <div class="hint">
+          Demo Power 6/55 &amp; Mega 6/45 • Mỗi số là 1 bóng vàng.
+        </div>
+      </header>
+
+      <div class="card-body fade-in">
+        <div class="vietlott-game" *ngFor="let g of vlt.games">
+          <div class="game-meta">
+            <div class="game-name">{{ g.name }}</div>
+            <div class="game-code">{{ g.code }}</div>
+            <div class="jackpot" *ngIf="g.jackpot">Jackpot: {{ g.jackpot }}</div>
+          </div>
+          <div class="game-balls">
+            <div class="v-ball" *ngFor="let n of g.result">
+              {{ n }}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </ng-template>
 </section>
