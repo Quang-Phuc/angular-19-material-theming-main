@@ -1,0 +1,147 @@
+<section class="points-page">
+  <!-- HEADER MINI -->
+  <header class="points-header">
+    <div class="title-wrap">
+      <div class="icon">📍</div>
+      <div>
+        <h1>Điểm Mua Vé Số</h1>
+        <p>Tìm đại lý / điểm bán xổ số &amp; Vietlott gần bạn</p>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-main">
+        <input
+          type="text"
+          [(ngModel)]="keyword"
+          (ngModelChange)="onKeywordChange()"
+          placeholder="Nhập tên đại lý, đường, quận, tỉnh..."
+        />
+
+        <select [(ngModel)]="regionFilter" (change)="setRegionFilter(regionFilter)">
+          <option value="ALL">Tất cả vùng</option>
+          <option value="MB">Miền Bắc</option>
+          <option value="MN">Miền Nam</option>
+          <option value="MT">Miền Trung</option>
+        </select>
+
+        <select
+          [(ngModel)]="provinceFilter"
+          (change)="setProvinceFilter(provinceFilter)">
+          <option value="ALL">Tất cả tỉnh / TP</option>
+          <option *ngFor="let p of provincesOfRegion" [value]="p">
+            {{ p }}
+          </option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="nearby-btn"
+        [class.active]="nearbyMode"
+        (click)="toggleNearby()">
+        <span *ngIf="!loadingGeo; else loading">
+          {{ nearbyMode ? 'Tắt chế độ gần tôi' : 'Tìm điểm gần tôi' }}
+        </span>
+        <ng-template #loading>Đang lấy vị trí…</ng-template>
+      </button>
+
+      <p class="geo-error" *ngIf="geoError">{{ geoError }}</p>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT: LIST + MAP -->
+  <div class="points-layout">
+    <!-- LIST -->
+    <section class="points-list">
+      <div class="list-head">
+        <h2>
+          {{ filtered.length }} điểm bán
+          <span *ngIf="nearbyMode && myLocation">• sắp xếp theo khoảng cách</span>
+        </h2>
+        <p *ngIf="!filtered.length" class="muted">
+          Không tìm thấy điểm bán nào phù hợp bộ lọc hiện tại.
+        </p>
+      </div>
+
+      <div class="point-card"
+           *ngFor="let p of filtered; trackBy: trackById"
+           [class.selected]="p === selected"
+           (click)="selectPoint(p)">
+        <div class="point-main">
+          <div class="point-name">{{ p.name }}</div>
+          <div class="point-address">
+            {{ p.address }}
+          </div>
+          <div class="point-meta">
+            <span class="tag region-tag">
+              {{ p.region === 'MB' ? 'Miền Bắc'
+              : p.region === 'MN' ? 'Miền Nam'
+                : 'Miền Trung' }}
+            </span>
+            <span class="tag small">{{ p.province }}</span>
+            <span class="tag small">{{ p.district }}</span>
+            <span
+              class="tag distance"
+              *ngIf="nearbyMode && p.distanceKm !== undefined">
+              ~ {{ p.distanceKm }} km
+            </span>
+          </div>
+          <div class="tags-line" *ngIf="p.tags?.length">
+            <span class="chip" *ngFor="let t of p.tags">{{ t }}</span>
+          </div>
+        </div>
+
+        <div class="point-side">
+          <div class="open-time" *ngIf="p.openTime">
+            ⏰ {{ p.openTime }}
+          </div>
+          <a
+            *ngIf="p.hotline"
+            class="call-link"
+            [href]="'tel:' + p.hotline">
+            ☎ Gọi {{ p.hotline }}
+          </a>
+          <a
+            class="direction-link"
+            [href]="buildDirectionsUrl(p)"
+            target="_blank"
+            rel="noopener">
+            ➜ Chỉ đường
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="points-map">
+      <div class="map-card">
+        <div class="map-header">
+          <div class="map-title">
+            <span>🗺</span>
+            <strong>Bản đồ &amp; chỉ đường</strong>
+          </div>
+          <div class="map-desc" *ngIf="selected">
+            Đang chọn:
+            <span class="map-place">{{ selected.name }}</span>
+          </div>
+        </div>
+
+        <div class="map-body" *ngIf="mapUrl as mUrl; else noPoint">
+          <iframe
+            [src]="mUrl"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <ng-template #noPoint>
+          <div class="map-empty">
+            Chọn một điểm bán trong danh sách để xem bản đồ.
+          </div>
+        </ng-template>
+      </div>
+    </section>
+  </div>
+</section>

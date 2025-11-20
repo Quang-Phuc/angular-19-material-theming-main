@@ -21,7 +21,7 @@ export class HeaderComponent {
   currentRegion: 'mb' | 'mn' | 'mt' | 'vietlott' = 'mb';
 
   ribbonItems = [
-    { tag: 'XSMB',      icon:'📍', title:'Điểm Mua Vé Số',        sub:'Tìm đại lý gần bạn',   link:'/mua-ve' },
+    { tag: 'XSMB',      icon:'📍', title:'Điểm Mua Vé Số',        sub:'Tìm đại lý gần bạn',   link:'/diem-mua-ve-so' },
     { tag: 'AI',        icon:'💭', title:'Đoán Số Giấc Mơ',       badge:32, sub:'Từ điển + thống kê', link:'/giac-mo' },
     { tag: 'AI',        icon:'💡', title:'Dự Đoán Xổ Số Bằng AI', badge:17, sub:'Gợi ý nóng hôm nay', link:'/ai' },
     { tag: '00 → 99',   icon:'🪄', title:'Lọc Số Sáng Nhất',      badge:79, sub:'Theo ngày/tuần',     link:'/loc-so' },
