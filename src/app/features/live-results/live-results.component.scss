@@ -187,10 +187,10 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    110deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.38) 18%,
-    transparent 36%
+      110deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.38) 18%,
+      transparent 36%
   );
   transform: translateX(-150%);
   animation: shine 1.2s linear infinite;
@@ -266,4 +266,46 @@
 }
 
 .past-block {
-  border-radius:
+  border-radius: 14px;
+  background: #101012;
+  padding: 10px 10px 8px;
+  border: 1px solid #262626;
+}
+
+.past-title {
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.past-rows {
+  display: grid;
+  gap: 4px;
+}
+
+/* Mobile tweak */
+@media (max-width: 480px) {
+  .live-wrapper {
+    padding-inline: 8px;
+  }
+
+  .card-body {
+    padding-inline: 10px;
+  }
+
+  .p-label {
+    min-width: 52px;
+    font-size: 12px;
+  }
+
+  .ball {
+    min-width: 48px;
+    font-size: 13px;
+  }
+
+  .ball.big {
+    min-width: 84px;
+    font-size: 20px;
+  }
+}

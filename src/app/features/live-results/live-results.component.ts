@@ -16,7 +16,7 @@ interface LiveState {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './live-results.component.html',
-  styleUrls: ['./live-results.component.css'],
+  styleUrls: ['./live-results.component.scss'],
 })
 export class LiveResultsComponent implements OnInit, OnDestroy {
   readonly ORDER: PrizeCode[] = ['DB', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7'];
