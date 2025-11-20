@@ -1,8 +1,19 @@
+/* Nội dung chính */
 .dashboard-main {
-  width: 100vw !important;
-  min-width: 100vw !important;
-  margin: 0 !important;
-  padding: 12px 12px 80px; /* thêm bottom để không bị che bởi FAB nếu có */
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 16px 80px; /* để trống dưới cho FAB nếu có */
   box-sizing: border-box;
   background: transparent;
+
+  /* Desktop: max ~80% màn hình, căn giữa */
+  @media (min-width: 768px) {
+    max-width: 900px;
+    padding: 16px 0 80px;
+  }
+
+  /* Mobile: full width, không margin */
+  @media (max-width: 767px) {
+    padding: 12px 12px 80px;
+  }
 }

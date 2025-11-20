@@ -12,6 +12,7 @@
 
     <div class="spacer"></div>
 
+    <!-- Menu nhanh: thêm class container để desktop không full màn -->
     <div class="more-wrap">
       <button class="icon-btn more" (click)="toggleMore()" aria-label="Menu nhanh">⋮</button>
       <div class="more-menu" [class.show]="moreOpen">
@@ -24,7 +25,7 @@
     <div class="user">👤</div>
   </div>
 
-  <!-- RIBBON -->
+  <!-- RIBBON: thêm class container để desktop vừa khít -->
   <div class="ribbon-wrap">
     <button class="arrow-btn arrow-left" #rbLeft>◀</button>
     <div class="ribbon" id="ribbon" scrollArrows [leftBtn]="rbLeft" [rightBtn]="rbRight" [step]="240">
@@ -41,8 +42,8 @@
     <button class="arrow-btn arrow-right" #rbRight>▶</button>
   </div>
 
-  <!-- Tabs vùng - FULL 100% + FIX WEBVIEW -->
-  <div class="tabs1 full-width">
+  <!-- Tabs vùng & ngày: mobile full, desktop căn giữa -->
+  <div class="tabs1 full-width-mobile container">
     <div class="tabs-strip">
       <a class="tab" [class.active]="isActiveTab('mb')" routerLink="/">XSMB</a>
       <a class="tab" [class.active]="isActiveTab('mn')" routerLink="/">XSMN</a>
@@ -51,8 +52,7 @@
     </div>
   </div>
 
-  <!-- Thanh ngày thứ - FULL 100% + FIX WEBVIEW -->
-  <div class="days-wrap full-width">
+  <div class="days-wrap full-width-mobile container">
     <div class="days">
       <span #d2  class="day active" (click)="setActiveDay(d2)">T2</span>
       <span #d3  class="day" (click)="setActiveDay(d3)">T3</span>
