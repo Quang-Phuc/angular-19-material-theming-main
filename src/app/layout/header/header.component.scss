@@ -5,7 +5,8 @@
 
 /* ===== HEADER ===== */
 .header{
-  position:sticky; top:0; z-index:100;
+  position:sticky; top:0;
+  z-index:100; /* Tăng z-index của header lên cao */
   background:linear-gradient(180deg, rgba(10,10,10,.96), rgba(10,10,10,.78));
   backdrop-filter:saturate(140%) blur(14px);
   border-bottom:1px solid var(--border);
@@ -44,6 +45,7 @@
   position:absolute; right:0; top:44px; width:min(360px,92vw);
   border:1px solid var(--border); border-radius:14px; background:#0f0f0f;
   box-shadow:0 18px 48px rgba(0,0,0,.6); padding:8px; display:none;
+  z-index: 101; /* Đảm bảo menu nằm trên tất cả, kể cả header/ribbon */
   &.show{ display:block; animation:fadeIn .15s ease }
 }
 @keyframes fadeIn{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)} }
@@ -169,7 +171,25 @@
     box-shadow:0 4px 12px rgba(255,213,74,.30);
   }
 }
+@media (min-width: 768px) {
+  .ribbon-wrap {
+    /* Đặt container ribbon ở trung tâm, giới hạn max-width */
+    max-width: 80%; /* Giới hạn chiều rộng còn 80% */
+    margin: 0 auto; /* Căn giữa */
+    border-radius: 0 0 10px 10px; /* Bo tròn nhẹ góc dưới nếu muốn */
+    /* Loại bỏ border-bottom nếu nó nằm bên trong header */
+  }
 
+  /* Điều chỉnh padding của ribbon bên trong nếu cần */
+  .ribbon {
+    padding: 14px 20px; /* Giảm padding ngang khi không còn arrow */
+  }
+
+  /* Ẩn các nút điều hướng trên desktop vì chúng sẽ không hoạt động tốt khi ribbon không full width */
+  .arrow-btn {
+    display: none;
+  }
+}
 /* ===== MOBILE ===== */
 @media (max-width:480px){
   .icon-btn{ width:40px; height:40px }

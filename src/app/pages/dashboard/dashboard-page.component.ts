@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 // import { LiveResultsComponent } from '../../features/live-results/live-results.component';
 import { HeadsTableComponent } from '../../features/heads-table/heads-table.component';
 import { PastDaysComponent } from '../../features/past-days/past-days.component';
-import {LiveResultsComponent} from '../../features/live-results/ live-results.component';
+import {LiveResultsComponent} from '../../features/live-results/live-results.component';
 
 @Component({
   standalone: true,
