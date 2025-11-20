@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';      // cần cho async pipe
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiService } from '../../core/services/ui.service';
 
@@ -11,10 +11,6 @@ import { UiService } from '../../core/services/ui.service';
   imports: [CommonModule, RouterLink]
 })
 export class DrawerComponent {
-  // Cho template dùng: (ui.drawer$ | async) và gọi hàm
   public ui = inject(UiService);
-
-  close() {
-    this.ui.closeDrawer();
-  }
+  close(){ this.ui.closeDrawer(); }
 }

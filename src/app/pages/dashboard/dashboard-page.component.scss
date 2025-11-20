@@ -1,2 +1,4 @@
-/* src/app/pages/dashboard/dashboard-page.component.css */
-.container{max-width:1100px;margin:0 auto;padding:12px}
+/* src/app/pages/dashboard/dashboard-page.component.scss */
+.container{
+  margin: 12px 0; /* bám theo frame padding rồi, ko cần set max-width */
+}

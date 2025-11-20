@@ -1,11 +1,11 @@
 <header class="header">
   <div class="inner">
-    <!-- Nút mở Drawer lớn (hamburger) -->
+    <!-- mở Drawer -->
     <button class="icon-btn hamb" (click)="ui.toggleDrawer()" aria-label="Mở menu">
       <span>☰</span>
     </button>
 
-    <!-- Logo + Brand -->
+    <!-- logo + brand -->
     <a routerLink="/" class="brand">
       <div class="logo">MB</div>
       <div class="brand-text">
@@ -16,7 +16,7 @@
 
     <div class="spacer"></div>
 
-    <!-- Nút 3 chấm mở menu nhanh -->
+    <!-- kebab menu -->
     <div class="more-wrap">
       <button class="icon-btn more" (click)="toggleMore()" aria-label="Mở menu nhanh">⋮</button>
       <div class="more-menu" [class.show]="moreOpen">
@@ -35,11 +35,10 @@
       </div>
     </div>
 
-    <!-- Avatar giả lập -->
     <div class="user" aria-label="Tài khoản">👤</div>
   </div>
 
-  <!-- Tabs vùng có mũi tên 2 chiều -->
+  <!-- tabs vùng có mũi tên 2 chiều -->
   <div class="tabs1">
     <button #left1 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
     <div #regionStrip class="tabs-strip"
@@ -52,10 +51,7 @@
     <button #right1 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
 
-  <!-- Tabs thứ/ ngày có mũi tên 2 chiều -->
-  <!-- src/app/layout/header/header.component.html -->
-  <!-- ...phần trên giữ nguyên... -->
-
+  <!-- dãy thứ/ngày có mũi tên 2 chiều -->
   <div class="days-wrap">
     <button #left2 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
     <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2" [step]="200">
@@ -69,11 +65,7 @@
     </div>
     <button #right2 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
-
-  <!-- Quan trọng: để dùng được <app-drawer> trong template này,
-       HeaderComponent phải import DrawerComponent (đã thêm ở TS). -->
-  <app-drawer></app-drawer>
-
 </header>
 
-<!-- Drawer tổng thể (đã có sẵn) -->
+<!-- Drawer -->
+<app-drawer></app-drawer>

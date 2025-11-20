@@ -1,10 +1,9 @@
-// src/app/layout/header/header.component.ts
 import { Component, ElementRef, ViewChild, HostListener, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../core/services/ui.service';
 import { ScrollArrowsDirective } from '../../shared/directives/scroll-arrows.directive';
-import {DrawerComponent} from '../drawer/drawer.component';
+import { DrawerComponent } from '../drawer/drawer.component';
 
 @Component({
   standalone: true,
@@ -17,7 +16,7 @@ export class HeaderComponent {
   @ViewChild('regionStrip') regionStrip!: ElementRef<HTMLElement>;
   @ViewChild('daysStrip')   daysStrip!: ElementRef<HTMLElement>;
 
-  public ui = inject(UiService); // <-- dùng inject để có "value" thật
+  public ui = inject(UiService);
 
   moreOpen = false;
   toggleMore(){ this.moreOpen = !this.moreOpen; }

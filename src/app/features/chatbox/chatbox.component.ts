@@ -1,8 +1,7 @@
-// src/app/features/chatbox/chatbox.component.ts
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiService } from '../../core/services/ui.service'; // <-- đúng đường dẫn
+import { CommonModule } from '@angular/common';
+import { UiService } from '../../core/services/ui.service';
 
 @Component({
   standalone: true,
@@ -12,7 +11,7 @@ import { UiService } from '../../core/services/ui.service'; // <-- đúng đư�
   imports: [CommonModule, FormsModule]
 })
 export class ChatboxComponent {
-  public ui = inject(UiService); // <-- property cho template
+  public ui = inject(UiService);
 
   msg = '';
   msgs = [

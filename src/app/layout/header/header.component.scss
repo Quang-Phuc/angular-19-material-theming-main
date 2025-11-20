@@ -9,9 +9,9 @@
   backdrop-filter:saturate(140%) blur(14px);
   border-bottom:1px solid var(--border);
 }
-
-.inner{
-  max-width:1100px; margin:0 auto; padding:10px 12px;
+.header .inner{
+  max-width: 100%; width: 100%;
+  margin: 0; padding:10px 12px;
   display:flex; align-items:center; gap:12px; flex-wrap:wrap;
 }
 
@@ -20,8 +20,7 @@
   display:grid; place-items:center; cursor:pointer; color:#fff; background:#111;
   transition:.2s; &:hover{ box-shadow:0 6px 16px rgba(255,193,7,.15) }
 }
-.hamb{ background:#0f0f0f }
-.more{ background:#0f0f0f }
+.hamb{ background:#0f0f0f } .more{ background:#0f0f0f }
 
 .brand{ display:flex; gap:10px; align-items:center; text-decoration:none; color:inherit }
 .logo{
@@ -39,7 +38,7 @@
   display:grid; place-items:center;
 }
 
-/* Kebab popover */
+/* kebab popover */
 .more-wrap{ position:relative }
 .more-menu{
   position:absolute; right:0; top:44px; width:min(360px,92vw);
@@ -77,7 +76,7 @@
 }
 .tabs-left{ left:6px } .tabs-right{ right:6px }
 
-/* Tabs ngày */
+/* Days strip */
 .days-wrap{ background:#0f0f0f; border-bottom:1px solid var(--border); position:relative }
 .days{
   display:flex; gap:10px; overflow-x:auto; scrollbar-width:none; padding:10px 48px; scroll-behavior:smooth;
@@ -90,4 +89,11 @@
     background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#111; border-color:var(--gold);
     box-shadow:0 4px 12px rgba(255,213,74,.30)
   }
+}
+
+/* mobile tweaks */
+@media (max-width: 480px){
+  .icon-btn{ width:40px; height:40px }
+  .tabs-strip, .days{ padding-inline: 40px }
+  .tabs-arrow{ width:34px; height:34px }
 }
