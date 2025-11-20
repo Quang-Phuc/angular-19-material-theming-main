@@ -1,9 +1,7 @@
 <header class="header">
   <div class="inner">
-    <!-- Drawer -->
     <button class="icon-btn hamb" (click)="ui.toggleDrawer()" aria-label="Mở menu">☰</button>
 
-    <!-- Brand -->
     <a routerLink="/" class="brand">
       <div class="logo">MB</div>
       <div class="brand-text">
@@ -14,34 +12,23 @@
 
     <div class="spacer"></div>
 
-    <!-- Kebab -->
     <div class="more-wrap">
-      <button class="icon-btn more" (click)="toggleMore()" aria-label="Mở menu nhanh">⋮</button>
+      <button class="icon-btn more" (click)="toggleMore()" aria-label="Menu nhanh">⋮</button>
       <div class="more-menu" [class.show]="moreOpen">
-        <a routerLink="/phong-thuy" class="mm-item">
-          <span class="mm-ico">🧭</span>
-          <div><div class="mm-title">Dự Đoán Số Phong Thuỷ</div><div class="mm-sub">Theo tuổi, mệnh, ngũ hành</div></div>
-        </a>
-        <a routerLink="/ai" class="mm-item">
-          <span class="mm-ico">🤖</span>
-          <div><div class="mm-title">Dự Đoán Xổ Số Bằng AI</div><div class="mm-sub">Thống kê + mô hình</div></div>
-        </a>
-        <a routerLink="/giac-mo" class="mm-item">
-          <span class="mm-ico">💭</span>
-          <div><div class="mm-title">Dự Đoán Số Qua Giấc Mơ</div><div class="mm-sub">Từ điển giấc mơ + AI</div></div>
-        </a>
+        <a routerLink="/phong-thuy" class="mm-item"><span class="mm-ico">🧭</span><div><div class="mm-title">Dự Đoán Số Phong Thuỷ</div><div class="mm-sub">Theo tuổi, mệnh</div></div></a>
+        <a routerLink="/ai" class="mm-item"><span class="mm-ico">🤖</span><div><div class="mm-title">Dự Đoán Xổ Số Bằng AI</div><div class="mm-sub">Thống kê + mô hình</div></div></a>
+        <a routerLink="/giac-mo" class="mm-item"><span class="mm-ico">💭</span><div><div class="mm-title">Dự Đoán Số Qua Giấc Mơ</div><div class="mm-sub">Từ điển giấc mơ + AI</div></div></a>
       </div>
     </div>
 
-    <div class="user" aria-label="Tài khoản">👤</div>
+    <div class="user">👤</div>
   </div>
 
-  <!-- GOLD RIBBON -->
+  <!-- RIBBON -->
   <div class="ribbon-wrap">
     <button class="arrow-btn arrow-left" #rbLeft>◀</button>
 
-    <div class="ribbon"
-         #ribbon
+    <div class="ribbon" id="ribbon"
          scrollArrows
          [leftBtn]="rbLeft"
          [rightBtn]="rbRight"
@@ -60,22 +47,19 @@
     <button class="arrow-btn arrow-right" #rbRight>▶</button>
   </div>
 
-  <!-- Tabs vùng -->
-  <div class="tabs1">
-    <button #left1 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
-    <div #regionStrip class="tabs-strip" scrollArrows [leftBtn]="left1" [rightBtn]="right1" [step]="220">
+  <!-- Tabs vùng - FULL WIDTH MOBILE -->
+  <div class="tabs1 full">
+    <div class="tabs-strip">
       <a class="tab active" routerLink="/">XSMB</a>
       <a class="tab" routerLink="/">XSMN</a>
       <a class="tab" routerLink="/">XSMT</a>
       <a class="tab" routerLink="/vietlott">VIETLOTT</a>
     </div>
-    <button #right1 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
 
-  <!-- Dải thứ/ngày -->
-  <div class="days-wrap">
-    <button #left2 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
-    <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2" [step]="200">
+  <!-- Dải thứ/ngày - FULL WIDTH MOBILE -->
+  <div class="days-wrap full">
+    <div class="days">
       <span #d2  class="day active" (click)="setActiveDay(d2)">T2</span>
       <span #d3  class="day"        (click)="setActiveDay(d3)">T3</span>
       <span #d4  class="day"        (click)="setActiveDay(d4)">T4</span>
@@ -84,7 +68,6 @@
       <span #d7  class="day"        (click)="setActiveDay(d7)">T7</span>
       <span #dcn class="day"        (click)="setActiveDay(dcn)">CN</span>
     </div>
-    <button #right2 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
 </header>
 
