@@ -1,7 +1,7 @@
 // src/app/shared/directives/scroll-arrows.directive.ts
 import { AfterViewInit, Directive, ElementRef, Input } from '@angular/core';
 
-@Directive({ selector: '[scrollArrows]' })
+@Directive({standalone: true, selector: '[scrollArrows]'})
 export class ScrollArrowsDirective implements AfterViewInit {
   @Input() leftBtn?: HTMLElement;
   @Input() rightBtn?: HTMLElement;

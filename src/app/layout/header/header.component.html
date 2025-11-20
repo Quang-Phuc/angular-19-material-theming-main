@@ -1,42 +1,79 @@
-<!-- src/app/layout/header/header.component.html -->
 <header class="header">
   <div class="inner">
-    <button class="hamb" (click)="ui.toggleDrawer()">☰</button>
-    <div class="brand">
+    <!-- Nút mở Drawer lớn (hamburger) -->
+    <button class="icon-btn hamb" (click)="ui.toggleDrawer()" aria-label="Mở menu">
+      <span>☰</span>
+    </button>
+
+    <!-- Logo + Brand -->
+    <a routerLink="/" class="brand">
       <div class="logo">MB</div>
       <div class="brand-text">
         <div class="title">Xổ Số <span class="gold">THẦN ĐÈN</span></div>
+        <div class="subtitle">XỔ SỐ THẦN ĐÈN</div>
+      </div>
+    </a>
+
+    <div class="spacer"></div>
+
+    <!-- Nút 3 chấm mở menu nhanh -->
+    <div class="more-wrap">
+      <button class="icon-btn more" (click)="toggleMore()" aria-label="Mở menu nhanh">⋮</button>
+      <div class="more-menu" [class.show]="moreOpen">
+        <a routerLink="/phong-thuy" class="mm-item">
+          <span class="mm-ico">🧭</span>
+          <div><div class="mm-title">Dự Đoán Số Phong Thuỷ</div><div class="mm-sub">Theo tuổi, mệnh, ngũ hành</div></div>
+        </a>
+        <a routerLink="/ai" class="mm-item">
+          <span class="mm-ico">🤖</span>
+          <div><div class="mm-title">Dự Đoán Xổ Số Bằng AI</div><div class="mm-sub">Thống kê + mô hình</div></div>
+        </a>
+        <a routerLink="/giac-mo" class="mm-item">
+          <span class="mm-ico">💭</span>
+          <div><div class="mm-title">Dự Đoán Số Qua Giấc Mơ</div><div class="mm-sub">Từ điển giấc mơ + AI</div></div>
+        </a>
       </div>
     </div>
-    <div class="spacer"></div>
-    <div class="user">👤</div>
+
+    <!-- Avatar giả lập -->
+    <div class="user" aria-label="Tài khoản">👤</div>
   </div>
 
-  <!-- Tabs vùng -->
+  <!-- Tabs vùng có mũi tên 2 chiều -->
   <div class="tabs1">
-    <button #left1 class="tabs-arrow tabs-left">◀</button>
-    <div #regionStrip class="tabs-strip" scrollArrows [leftBtn]="left1" [rightBtn]="right1">
-      <a class="tab active">XSMB</a>
-      <a class="tab">XSMN</a>
-      <a class="tab">XSMT</a>
-      <a class="tab">VIETLOTT</a>
+    <button #left1 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
+    <div #regionStrip class="tabs-strip"
+         scrollArrows [leftBtn]="left1" [rightBtn]="right1" [step]="220">
+      <a class="tab active" routerLink="/">XSMB</a>
+      <a class="tab" routerLink="/">XSMN</a>
+      <a class="tab" routerLink="/">XSMT</a>
+      <a class="tab" routerLink="/vietlott">VIETLOTT</a>
     </div>
-    <button #right1 class="tabs-arrow tabs-right">▶</button>
+    <button #right1 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
 
-  <!-- Tabs ngày -->
+  <!-- Tabs thứ/ ngày có mũi tên 2 chiều -->
+  <!-- src/app/layout/header/header.component.html -->
+  <!-- ...phần trên giữ nguyên... -->
+
   <div class="days-wrap">
-    <button #left2 class="tabs-arrow tabs-left">◀</button>
-    <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2">
-      <span class="day active" (click)="setActiveDay($event.target)">T2</span>
-      <span class="day" (click)="setActiveDay($event.target)">T3</span>
-      <span class="day" (click)="setActiveDay($event.target)">T4</span>
-      <span class="day" (click)="setActiveDay($event.target)">T5</span>
-      <span class="day" (click)="setActiveDay($event.target)">T6</span>
-      <span class="day" (click)="setActiveDay($event.target)">T7</span>
-      <span class="day" (click)="setActiveDay($event.target)">CN</span>
+    <button #left2 class="tabs-arrow tabs-left" aria-label="Cuộn trái">◀</button>
+    <div #daysStrip class="days" scrollArrows [leftBtn]="left2" [rightBtn]="right2" [step]="200">
+      <span #d2  class="day active" (click)="setActiveDay(d2)">T2</span>
+      <span #d3  class="day"        (click)="setActiveDay(d3)">T3</span>
+      <span #d4  class="day"        (click)="setActiveDay(d4)">T4</span>
+      <span #d5  class="day"        (click)="setActiveDay(d5)">T5</span>
+      <span #d6  class="day"        (click)="setActiveDay(d6)">T6</span>
+      <span #d7  class="day"        (click)="setActiveDay(d7)">T7</span>
+      <span #dcn class="day"        (click)="setActiveDay(dcn)">CN</span>
     </div>
-    <button #right2 class="tabs-arrow tabs-right">▶</button>
+    <button #right2 class="tabs-arrow tabs-right" aria-label="Cuộn phải">▶</button>
   </div>
+
+  <!-- Quan trọng: để dùng được <app-drawer> trong template này,
+       HeaderComponent phải import DrawerComponent (đã thêm ở TS). -->
+  <app-drawer></app-drawer>
+
 </header>
-<app-drawer></app-drawer>
+
+<!-- Drawer tổng thể (đã có sẵn) -->

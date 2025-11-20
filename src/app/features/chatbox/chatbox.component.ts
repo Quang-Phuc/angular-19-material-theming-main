@@ -1,28 +1,29 @@
 // src/app/features/chatbox/chatbox.component.ts
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UiService } from '../../core/services/ui.service'; // <-- đúng đường dẫn
 
 @Component({
   standalone: true,
   selector: 'app-chatbox',
-  template: `
-    <div class="chatbox">
-      <div class="log">
-        <div *ngFor="let m of msgs" [class.me]="m.me">{{m.text}}</div>
-      </div>
-      <div class="input">
-        <input [(ngModel)]="msg" (keyup.enter)="send()" placeholder="Nhập câu hỏi...">
-        <button (click)="send()">Gửi</button>
-      </div>
-    </div>
-  `,
-  styles: [`.chatbox{position:fixed;right:12px;bottom:12px;width:320px;background:#111;border:1px solid #333;border-radius:10px}
-  .log{max-height:220px;overflow:auto;padding:8px}
-  .me{text-align:right}
-  .input{display:flex;gap:6px;padding:8px}`],
-  imports: [FormsModule]
+  templateUrl: './chatbox.component.html',
+  styleUrls: ['./chatbox.component.scss'],
+  imports: [CommonModule, FormsModule]
 })
 export class ChatboxComponent {
-  msg = ''; msgs = [{text:'Xin chào! (demo)', me:false}];
-  send(){ const t=this.msg.trim(); if(!t) return; this.msgs.push({text:t,me:true}); this.msg=''; }
+  public ui = inject(UiService); // <-- property cho template
+
+  msg = '';
+  msgs = [
+    { text: 'Xin chào! Em là Thần Đèn AI 👋 (demo)', me: false },
+    { text: 'Hỏi em về giấc mơ / thống kê / soi cầu…', me: false }
+  ];
+
+  send(){
+    const t = this.msg.trim(); if(!t) return;
+    this.msgs.push({ text: t, me: true });
+    this.msg = '';
+    setTimeout(() => this.msgs.push({ text: `Demo: nhận "${t}".`, me: false }), 300);
+  }
 }
