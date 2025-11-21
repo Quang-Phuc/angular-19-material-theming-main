@@ -1,2 +1,170 @@
 <!-- src/app/pages/ai/ai-page.component.html -->
-<main class="container"><h2>AI Dự Đoán</h2><p>Trang nội dung sẽ cập nhật sau.</p></main>
+<main class="ai-page">
+  <header class="ai-header">
+    <div class="ai-title">
+      <span class="spark">✨</span>
+      <div>
+        <h1>Dự Đoán Xổ Số Bằng AI</h1>
+        <p>
+          Kết hợp dữ liệu lịch sử + mô hình GPT-5.1 để gợi ý những con số
+          “sáng” nhất – chỉ dùng cho mục đích tham khảo, không đảm bảo trúng.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <section class="plan-grid">
+    <!-- GÓI 1 – FREE -->
+    <article
+      class="plan-card plan-free"
+      *ngFor="let p of plans"
+      (click)="openPlan(p)">
+      <div class="plan-inner">
+        <div class="plan-top">
+          <div class="plan-label">
+            <span class="star">⭐</span>
+            <span class="code">{{ p.title }}</span>
+          </div>
+          <div class="hero">
+            <div class="hero-avatar">
+              <!-- có thể thay bằng ảnh sau -->
+              <span *ngIf="p.id === 1">🔮</span>
+              <span *ngIf="p.id === 2">🧠</span>
+              <span *ngIf="p.id === 3">👑</span>
+            </div>
+            <div class="hero-text">
+              <div class="hero-sub">{{ p.heroSubtitle }}</div>
+              <div class="hero-name">{{ p.heroName }}</div>
+            </div>
+          </div>
+
+          <div class="price-block">
+            <div class="old-price" *ngIf="p.oldPriceLabel">
+              Giá gốc:
+              <span class="strike">{{ p.oldPriceLabel }}</span>
+            </div>
+            <div class="price-main" [class.free]="p.isFree">
+              {{ p.isFree ? p.priceLabel : p.priceLabel }}
+            </div>
+            <div class="highlight">
+              {{ p.highlightLine }}
+            </div>
+            <div class="highlight-sub" *ngIf="p.highlightSub">
+              {{ p.highlightSub }}
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="perks">
+            <h4>✅ Bao gồm:</h4>
+            <ul>
+              <li *ngFor="let line of p.perks">
+                {{ line }}
+              </li>
+            </ul>
+          </div>
+
+          <p class="note" *ngIf="p.note">{{ p.note }}</p>
+        </div>
+
+        <div class="plan-footer">
+          <button
+            type="button"
+            class="cta"
+            [class.free]="p.isFree"
+            (click)="openPlan(p); $event.stopPropagation()">
+            {{ p.isFree ? 'Xem Dự Đoán Ngay' : 'Mua Gói Ngay' }}
+          </button>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- MODAL: THÔNG TIN CHUYỂN KHOẢN + NHẬP CODE -->
+  <section class="modal-backdrop" *ngIf="showModal">
+    <div class="modal" *ngIf="selectedPlan as sp">
+      <header class="modal-header">
+        <div class="modal-title">
+          <span>Thông Tin {{ sp.isFree ? 'Sử Dụng' : 'Chuyển Khoản' }}</span>
+        </div>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <!-- FREE: chỉ ghi chú -->
+        <ng-container *ngIf="sp.isFree; else paidBlock">
+          <p class="modal-text">
+            Gói <strong>{{ sp.title }}</strong> – {{ sp.heroName }}.
+          </p>
+          <p class="modal-text">
+            Giai đoạn demo: chưa tích hợp quảng cáo, bạn có thể bấm
+            <strong>“Xem Dự Đoán Ngay”</strong> để gọi API soi cầu.
+          </p>
+        </ng-container>
+
+        <!-- PAID PLANS -->
+        <ng-template #paidBlock>
+          <div class="bank-panel">
+            <h3>1. Chuyển khoản gói {{ sp.code }}</h3>
+            <p>Vui lòng chuyển khoản đúng nội dung để hệ thống dễ kiểm tra:</p>
+            <ul>
+              <li>
+                <strong>Ngân hàng:</strong> {{ bankInfo.bankName }}
+              </li>
+              <li>
+                <strong>Chủ TK:</strong> {{ bankInfo.owner }}
+              </li>
+              <li>
+                <strong>Số TK:</strong> {{ bankInfo.number }}
+              </li>
+              <li>
+                <strong>Nội dung:</strong> {{ bankInfo.contentHint }}
+              </li>
+              <li>
+                <strong>Số tiền:</strong> {{ sp.priceLabel }}
+              </li>
+            </ul>
+            <p class="hint">
+              Sau khi nhận được chuyển khoản, admin sẽ gửi
+              <strong>mã code kích hoạt</strong> gói {{ sp.code }} qua Zalo /
+              SMS cho bạn.
+            </p>
+          </div>
+
+          <div class="code-panel">
+            <h3>2. Nhập mã code kích hoạt</h3>
+            <input
+              type="text"
+              [(ngModel)]="codeInput"
+              placeholder="Nhập mã code bạn nhận được..."
+            />
+            <button
+              type="button"
+              class="btn-code"
+              [disabled]="activating"
+              (click)="activateWithCode()">
+              {{ activating ? 'Đang kiểm tra...' : 'Kích Hoạt Mã Code' }}
+            </button>
+          </div>
+        </ng-template>
+
+        <div class="result-panel" *ngIf="activationMsg">
+          {{ activationMsg }}
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          type="button"
+          class="cta full"
+          (click)="viewPrediction()">
+          Xem Dự Đoán Ngay
+        </button>
+        <button type="button" class="secondary" (click)="closeModal()">
+          Đóng
+        </button>
+      </footer>
+    </div>
+  </section>
+</main>
