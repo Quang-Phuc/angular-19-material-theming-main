@@ -1,17 +1,16 @@
-// src/app/pages/ai/ai-page.component.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface AiPlan {
   id: number;
-  code: string;          // G1 / G2 / G3
-  title: string;         // GÓI 1
-  heroName: string;      // GIA CÁT LƯỢNG, EINSTEIN...
+  code: string;
+  title: string;
+  heroName: string;
   heroSubtitle: string;
-  priceLabel: string;    // "Giá: 0đ" hoặc "50.000đ"
+  priceLabel: string;
   oldPriceLabel?: string;
-  highlightLine: string; // dòng đỏ to
+  highlightLine: string;
   highlightSub?: string;
   perks: string[];
   note?: string;
@@ -31,132 +30,148 @@ export class AiPageComponent {
     {
       id: 1,
       code: 'G1',
-      title: 'GÓI 1',
+      title: 'Gói 1 • Siêu Cơ Bản',
       heroName: 'GIA CÁT LƯỢNG',
       heroSubtitle: 'Siêu Máy Tính AI',
-      priceLabel: 'Giá: 0đ',
-      highlightLine: 'Chỉ cần xem 3 giây quảng cáo là dùng ngay',
-      highlightSub: '(Mỗi ngày chỉ được soi FREE 1 lần)',
+      priceLabel: '0đ',
+      highlightLine: 'Xem FREE 1 lần mỗi ngày',
+      highlightSub: 'Chỉ cần xem ~3s quảng cáo để mở khoá',
       isFree: true,
       perks: [
         'Dự đoán bởi AI GPT-5.1 phiên bản mới nhất',
         'Phân tích dữ liệu 90 kỳ gần nhất (3 tháng)',
-        'Gợi ý 2 số sáng nhất giải đặc biệt + 2 số giải khác (2 số cuối của mỗi giải)',
+        'Gợi ý 2 số sáng nhất giải đặc biệt',
+        'Gợi ý thêm 2 số “ăn theo” ở các giải khác',
         'Chỉ số niềm tin AI (Confidence Index ≥ 63%)',
         'Mở khoá trong 1 chạm – không cần đăng ký'
       ],
-      note: 'Xem một đoạn quảng cáo Shopee / YouTube ~3–5s để mở khoá lượt soi miễn phí ngày hôm nay.'
+      note: 'Phù hợp để thử nghiệm cảm giác “soi số bằng AI” mà chưa cần bỏ tiền.'
     },
     {
       id: 2,
       code: 'G2',
-      title: 'GÓI 2',
+      title: 'Gói 2 • Albert Einstein',
       heroName: 'ALBERT EINSTEIN',
       heroSubtitle: 'Thiên tài giải mã số học',
       priceLabel: '50.000đ',
       oldPriceLabel: '100.000đ',
-      highlightLine: 'Ưu đãi đặc biệt: 50.000đ / lần mở khoá',
-      highlightSub: 'Mua một lần – mở khoá cấp độ tối thượng',
+      highlightLine: 'Ưu đãi đặc biệt: 50.000đ / lần',
+      highlightSub: 'Phân tích sâu cho 1 lần cầu chuẩn',
       isFree: false,
       perks: [
         'Phân tích AI kép: GPT-5.1 + Gemini Advanced',
         'Dữ liệu 200 ngày gần nhất',
-        'Gợi ý 2 số sáng nhất giải đặc biệt + 3 số giải khác (2 số cuối của mỗi giải)',
+        'Gợi ý 2 số sáng nhất G.DB + 3 số giải khác',
         'Chỉ số niềm tin AI (Confidence Index ≥ 80%)',
-        'Giải thích logic rõ ràng, dễ hiểu',
-        'Loại nhiễu – giữ lại những chu kỳ mạnh'
+        'Giải thích logic rõ ràng kèm nhận xét chu kỳ',
+        'Loại nhiễu – ưu tiên các đường kèo mạnh'
       ],
-      note: 'Sau khi chuyển khoản, bạn sẽ nhận được 01 mã code kích hoạt gửi qua Zalo / SMS để xem dự đoán ngay.'
+      note: 'Sau khi chuyển khoản, bạn nhận mã code kích hoạt G2 qua Zalo / SMS để xem dự đoán.'
     },
     {
       id: 3,
       code: 'G3',
-      title: 'GÓI 3',
+      title: 'Gói 3 • VIP Chuyên Sâu',
       heroName: 'NHÓM CHUYÊN GIA ELITE',
       heroSubtitle: 'AI + Mô hình nâng cao',
       priceLabel: '199.000đ',
       oldPriceLabel: '299.000đ',
-      highlightLine: 'Gói VIP – dành cho người chơi nghiêm túc',
-      highlightSub: 'Mở khoá 7 ngày dùng liên tục',
+      highlightLine: 'Gói VIP – mở khoá 7 ngày dùng liên tục',
+      highlightSub: 'Dành cho người chơi nghiêm túc',
       isFree: false,
       perks: [
         'Kết hợp 3 mô hình AI: GPT-5.1, Gemini Advanced, Claude-Next',
-        'Phân tích sâu 365 kỳ gần nhất + chu kỳ theo tuần / tháng',
-        'Gợi ý combo: đề, lô, xiên 2 – theo chiến lược vốn an toàn',
+        'Phân tích 365 kỳ + chu kỳ theo tuần / tháng',
+        'Gợi ý combo: đề, lô, xiên 2 với chiến lược vốn',
         'Bảng sức mạnh từng số (0–99) và điểm rủi ro',
-        'Ưu tiên xử lý nhanh, hạn chế giới hạn lượt sử dụng',
-        'Nhận báo cáo PDF ngắn gọn (tương lai có thể gửi qua Zalo / Email)'
+        'Ưu tiên xử lý nhanh, hạn chế giới hạn lượt dùng',
+        'Tương lai có thể nhận báo cáo PDF hoặc gửi qua Zalo / Email'
       ],
-      note: 'Gói VIP có thể bán theo tuần, bạn tự quy định thêm điều kiện sử dụng ở phần backend.'
+      note: 'Có thể bán theo tuần (7 ngày), chi tiết xử lý ở backend / trang quản lý mã code.'
     }
   ];
 
-  selectedPlan: AiPlan | null = null;
-  showModal = false;
+  // Bật popup bảng giá NGAY khi vào trang
+  showPricingModal = true;
 
-  // bước nhập code
+  // popup chi tiết gói
+  showDetailModal = false;
+  selectedPlan: AiPlan | null = null;
+
+  expandedPlan = new Set<number>();
+
   codeInput = '';
   activationMsg = '';
   activating = false;
 
-  // thông tin demo tài khoản ngân hàng
   readonly bankInfo = {
     bankName: 'Ngân hàng ABC',
     owner: 'NGUYEN VAN A',
     number: '0123 456 789',
-    contentHint: 'SĐT + GÓI (VD: 0989xxxxxx G2)',
+    contentHint: 'SĐT + GÓI (VD: 0989xxxxxx G2)'
   };
 
-  openPlan(plan: AiPlan): void {
-    this.selectedPlan = plan;
-    this.activationMsg = '';
-    this.codeInput = '';
-    this.showModal = true;
+  // vẫn giữ để sau này gọi từ chỗ khác nếu cần
+  openPricing(): void {
+    this.showPricingModal = true;
+  }
 
-    // với gói free: ở giai đoạn đầu có thể chỉ show hướng dẫn xem quảng cáo
-    if (plan.isFree) {
-      this.activationMsg =
-        'Gói Free: bạn sẽ được mở khoá 1 lần / ngày sau khi xem quảng cáo. ' +
-        'Giai đoạn demo: bấm Xem Dự Đoán Ngay để gọi API AI trực tiếp.';
+  closePricing(): void {
+    this.showPricingModal = false;
+  }
+
+  toggleExpand(plan: AiPlan, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.expandedPlan.has(plan.id)) {
+      this.expandedPlan.delete(plan.id);
+    } else {
+      this.expandedPlan.add(plan.id);
     }
   }
 
-  closeModal(): void {
-    this.showModal = false;
+  openPlanDetail(plan: AiPlan, event?: MouseEvent): void {
+    if (event) { event.stopPropagation(); }
+    this.selectedPlan = plan;
+    this.codeInput = '';
+    this.activationMsg = plan.isFree
+      ? 'Gói FREE: giai đoạn demo chưa gắn quảng cáo, bạn có thể bấm "Xem dự đoán ngay" để gọi API AI trực tiếp.'
+      : '';
+    this.showPricingModal = false;
+    this.showDetailModal = true;
   }
 
-  /**
-   * Giả lập việc gửi mã code lên backend để kích hoạt.
-   * Sau này bạn chỉ cần thay phần này bằng HTTP call thực.
-   */
+  closeDetail(): void {
+    this.showDetailModal = false;
+  }
+
   activateWithCode(): void {
+    if (!this.selectedPlan || this.selectedPlan.isFree) {
+      return;
+    }
     if (!this.codeInput.trim()) {
       this.activationMsg = 'Vui lòng nhập mã code kích hoạt.';
       return;
     }
+
     this.activating = true;
     this.activationMsg = '';
 
-    // demo: giả lập gọi backend trong 800ms
     setTimeout(() => {
       this.activating = false;
-      // Ở bản thật, kiểm tra response từ server
-      // ví dụ: if (res.valid) ...
       this.activationMsg =
-        '✅ Mã code hợp lệ. Gói ' +
-        (this.selectedPlan?.code || '') +
-        ' đã được mở khoá, bạn có thể gọi API soi cầu AI.';
+        `✅ Mã code hợp lệ. Gói ${this.selectedPlan?.code} đã được mở khoá, bạn có thể xem dự đoán AI.`;
     }, 800);
   }
 
-  // click "Xem dự đoán ngay" – ở đây chỉ demo
   viewPrediction(): void {
-    if (this.selectedPlan?.isFree) {
+    if (!this.selectedPlan) { return; }
+
+    if (this.selectedPlan.isFree) {
       this.activationMsg =
-        'Demo Free: sẽ gọi API dự đoán AI ngay lập tức (chưa tích hợp quảng cáo).';
+        'Demo: sẽ gọi API dự đoán AI cho gói FREE (chưa tích hợp quảng cáo).';
     } else {
       this.activationMsg =
-        'Sau khi mã code được kích hoạt thành công, frontend sẽ chuyển sang màn hình kết quả soi cầu AI.';
+        'Sau khi mã code kích hoạt hợp lệ, frontend sẽ chuyển sang màn hình kết quả soi cầu AI.';
     }
   }
 }
