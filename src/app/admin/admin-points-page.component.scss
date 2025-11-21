@@ -1,0 +1,157 @@
+@use '../shared/admin-theme' as *; // nếu không có, bỏ dòng này đi
+
+.admin-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 10px 32px;
+  color: #fafafa;
+}
+
+.admin-header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.admin-header p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 14px;
+}
+
+.admin-card {
+  background: #111214;
+  border-radius: 16px;
+  border: 1px solid #2a2a2a;
+  padding: 12px 14px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.75);
+}
+
+.admin-card h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* form fields */
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.field-row.two {
+  flex-direction: row;
+  gap: 8px;
+
+  > div {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+label {
+  font-size: 12px;
+  color: #e0e0e0;
+}
+
+input,
+select,
+textarea {
+  background: #181920;
+  border-radius: 10px;
+  border: 1px solid #30313a;
+  padding: 6px 9px;
+  color: #f5f5f5;
+  font-size: 13px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.btn {
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 14px;
+}
+
+.btn.primary {
+  color: #111;
+  background: linear-gradient(135deg, #ffd54a, #ffc107);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+/* table */
+
+.points-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.points-table th,
+.points-table td {
+  border-bottom: 1px solid #262626;
+  padding: 6px 6px;
+  text-align: left;
+}
+
+.points-table th {
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: #7db8ff;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.link.danger {
+  color: #ff6b6b;
+}
+
+.empty {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* responsive */
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

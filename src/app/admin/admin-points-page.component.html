@@ -1,0 +1,100 @@
+<main class="admin-page">
+  <header class="admin-header">
+    <h1>Quản lý Điểm mua vé số</h1>
+    <p>Nhập danh sách điểm bán: vùng, tỉnh, địa chỉ, hotline…</p>
+  </header>
+
+  <section class="admin-grid">
+    <!-- Form -->
+    <form class="admin-card form" (ngSubmit)="save()">
+      <h2>{{ editingId ? 'Sửa điểm bán' : 'Thêm điểm bán mới' }}</h2>
+
+      <div class="field-row">
+        <label>Tên điểm bán *</label>
+        <input [(ngModel)]="form.name" name="name" placeholder="VD: Đại lý vé số Ngọc Lan" />
+      </div>
+
+      <div class="field-row two">
+        <div>
+          <label>Vùng</label>
+          <select [(ngModel)]="form.region" name="region" (change)="onRegionChange()">
+            <option *ngFor="let r of regions" [ngValue]="r">
+              {{ getRegionLabel(r) }} ({{ r }})
+            </option>
+          </select>
+        </div>
+        <div>
+          <label>Tỉnh / Thành phố</label>
+          <select [(ngModel)]="form.province" name="province">
+            <option *ngFor="let p of provincesByRegion[form.region]" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <div>
+          <label>Quận / Huyện</label>
+          <input [(ngModel)]="form.district" name="district" placeholder="VD: Hai Bà Trưng" />
+        </div>
+        <div>
+          <label>Hotline</label>
+          <input [(ngModel)]="form.hotline" name="hotline" placeholder="VD: 09xx xxx xxx" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label>Địa chỉ chi tiết *</label>
+        <input [(ngModel)]="form.address" name="address" placeholder="Số nhà, đường, phường…" />
+      </div>
+
+      <div class="field-row">
+        <label>Ghi chú</label>
+        <textarea [(ngModel)]="form.note" name="note" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn primary">
+          {{ editingId ? 'Lưu thay đổi' : 'Thêm mới' }}
+        </button>
+        <button type="button" class="btn ghost" (click)="resetForm()">Làm lại</button>
+      </div>
+    </form>
+
+    <!-- List -->
+    <section class="admin-card list">
+      <h2>Danh sách điểm bán ({{ points.length }})</h2>
+
+      <div *ngIf="!points.length" class="empty">
+        Chưa có điểm nào. Hãy thêm mới bên trái.
+      </div>
+
+      <table *ngIf="points.length" class="points-table">
+        <thead>
+        <tr>
+          <th>Tên</th>
+          <th>Vùng</th>
+          <th>Tỉnh</th>
+          <th>Quận/Huyện</th>
+          <th>Địa chỉ</th>
+          <th>Hotline</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let p of points">
+          <td>{{ p.name }}</td>
+          <td>{{ p.region }}</td>
+          <td>{{ p.province }}</td>
+          <td>{{ p.district }}</td>
+          <td>{{ p.address }}</td>
+          <td>{{ p.hotline }}</td>
+          <td class="actions">
+            <button type="button" class="link" (click)="edit(p)">Sửa</button>
+            <button type="button" class="link danger" (click)="remove(p)">Xoá</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </section>
+</main>
