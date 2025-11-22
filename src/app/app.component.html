@@ -1,8 +1,12 @@
-<!-- Khung toàn trang: desktop sẽ ở giữa, mobile full-bleed -->
-<div class="site-shell">
-  <div class="site-frame">
-    <app-header></app-header>
+<!-- src/app/app.component.html -->
+<ng-container *ngIf="!isAdmin; else adminShell">
+  <app-header></app-header>
+  <main class="site-frame">
     <router-outlet></router-outlet>
-    <app-chatbox></app-chatbox>
-  </div>
-</div>
+  </main>
+  <app-chatbox></app-chatbox>
+</ng-container>
+
+<ng-template #adminShell>
+  <router-outlet></router-outlet>
+</ng-template>
