@@ -1,26 +1,25 @@
 <main class="admin-page">
   <header class="admin-header">
     <h1>Quản lý Điểm mua vé số</h1>
-    <p>Nhập danh sách điểm bán: vùng, tỉnh, địa chỉ, hotline…</p>
+    <p>Nhập danh sách điểm bán: vùng, tỉnh, giờ mở cửa, dịch vụ & vị trí bản đồ để “Chỉ đường”.</p>
   </header>
 
   <section class="admin-grid">
-    <!-- Form -->
+
+    <!-- FORM -->
     <form class="admin-card form" (ngSubmit)="save()">
       <h2>{{ editingId ? 'Sửa điểm bán' : 'Thêm điểm bán mới' }}</h2>
 
       <div class="field-row">
         <label>Tên điểm bán *</label>
-        <input [(ngModel)]="form.name" name="name" placeholder="VD: Đại lý vé số Ngọc Lan" />
+        <input [(ngModel)]="form.name" name="name" placeholder="VD: Cửa hàng vé số Thần Đèn" />
       </div>
 
       <div class="field-row two">
         <div>
           <label>Vùng</label>
           <select [(ngModel)]="form.region" name="region" (change)="onRegionChange()">
-            <option *ngFor="let r of regions" [ngValue]="r">
-              {{ getRegionLabel(r) }} ({{ r }})
-            </option>
+            <option *ngFor="let r of regions" [ngValue]="r">{{ r }}</option>
           </select>
         </div>
         <div>
@@ -34,11 +33,11 @@
       <div class="field-row two">
         <div>
           <label>Quận / Huyện</label>
-          <input [(ngModel)]="form.district" name="district" placeholder="VD: Hai Bà Trưng" />
+          <input [(ngModel)]="form.district" name="district" placeholder="VD: Hoàn Kiếm" />
         </div>
         <div>
           <label>Hotline</label>
-          <input [(ngModel)]="form.hotline" name="hotline" placeholder="VD: 09xx xxx xxx" />
+          <input [(ngModel)]="form.hotline" name="hotline" placeholder="VD: 0903 555 777" />
         </div>
       </div>
 
@@ -47,47 +46,75 @@
         <input [(ngModel)]="form.address" name="address" placeholder="Số nhà, đường, phường…" />
       </div>
 
+      <!-- DỊCH VỤ -->
+      <div class="field-row chips">
+        <label>Dịch vụ</label>
+        <label class="chip"><input type="checkbox" [(ngModel)]="form.hasXsmb" name="hasXsmb"> XSMB</label>
+        <label class="chip"><input type="checkbox" [(ngModel)]="form.hasVietlott" name="hasVietlott"> Vietlott</label>
+      </div>
+
+      <!-- GIỜ MỞ CỬA -->
+      <div class="field-row two">
+        <div>
+          <label>Giờ mở cửa</label>
+          <input type="time" [(ngModel)]="form.openTime" name="openTime">
+        </div>
+        <div>
+          <label>Giờ đóng cửa</label>
+          <input type="time" [(ngModel)]="form.closeTime" name="closeTime">
+        </div>
+      </div>
+
+      <!-- BẢN ĐỒ -->
+      <div class="field-row two">
+        <div>
+          <label>Vĩ độ (lat)</label>
+          <input type="number" step="0.000001" [(ngModel)]="form.lat" name="lat">
+        </div>
+        <div>
+          <label>Kinh độ (lng)</label>
+          <input type="number" step="0.000001" [(ngModel)]="form.lng" name="lng">
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn ghost" type="button" (click)="openPickMap()">Chọn trên bản đồ</button>
+        <span class="hint" *ngIf="form.lat && form.lng">Đã chọn: {{form.lat | number:'1.6-6'}}, {{form.lng | number:'1.6-6'}}</span>
+      </div>
+
       <div class="field-row">
         <label>Ghi chú</label>
         <textarea [(ngModel)]="form.note" name="note" rows="2"></textarea>
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn primary">
-          {{ editingId ? 'Lưu thay đổi' : 'Thêm mới' }}
-        </button>
-        <button type="button" class="btn ghost" (click)="resetForm()">Làm lại</button>
+        <button type="submit" class="btn primary">{{ editingId ? 'Lưu thay đổi' : 'Thêm mới' }}</button>
+        <button type="button" class="btn" (click)="resetForm()">Làm lại</button>
       </div>
     </form>
 
-    <!-- List -->
+    <!-- LIST -->
     <section class="admin-card list">
       <h2>Danh sách điểm bán ({{ points.length }})</h2>
 
-      <div *ngIf="!points.length" class="empty">
-        Chưa có điểm nào. Hãy thêm mới bên trái.
-      </div>
+      <div *ngIf="!points.length" class="empty">Chưa có điểm nào. Hãy thêm mới bên trái.</div>
 
       <table *ngIf="points.length" class="points-table">
         <thead>
         <tr>
-          <th>Tên</th>
-          <th>Vùng</th>
-          <th>Tỉnh</th>
-          <th>Quận/Huyện</th>
-          <th>Địa chỉ</th>
-          <th>Hotline</th>
-          <th></th>
+          <th>Tên</th><th>Vùng</th><th>Tỉnh</th><th>Địa chỉ</th><th>Giờ</th><th>Dịch vụ</th><th></th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let p of points">
-          <td>{{ p.name }}</td>
-          <td>{{ p.region }}</td>
-          <td>{{ p.province }}</td>
-          <td>{{ p.district }}</td>
-          <td>{{ p.address }}</td>
-          <td>{{ p.hotline }}</td>
+          <td>{{p.name}}</td>
+          <td>{{p.region}}</td>
+          <td>{{p.province}}</td>
+          <td>{{p.address}}</td>
+          <td>⏰ {{p.openTime || '—'}} – {{p.closeTime || '—'}}</td>
+          <td>
+            <span class="pill" *ngIf="p.hasXsmb">XSMB</span>
+            <span class="pill" *ngIf="p.hasVietlott">Vietlott</span>
+          </td>
           <td class="actions">
             <button type="button" class="link" (click)="edit(p)">Sửa</button>
             <button type="button" class="link danger" (click)="remove(p)">Xoá</button>
@@ -97,4 +124,19 @@
       </table>
     </section>
   </section>
+
+  <!-- Modal chọn bản đồ -->
+  <div class="map-modal" *ngIf="picking">
+    <div class="map-card">
+      <header>
+        <strong>Chọn vị trí trên bản đồ</strong>
+        <button class="btn" (click)="closePickMap()">Đóng</button>
+      </header>
+      <div id="pickMap"></div>
+      <footer>
+        <span>⇧ Kéo thả pin hoặc chạm để đặt vị trí</span>
+        <button class="btn primary" (click)="closePickMap()">Xong</button>
+      </footer>
+    </div>
+  </div>
 </main>

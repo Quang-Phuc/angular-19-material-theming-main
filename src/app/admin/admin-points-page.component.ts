@@ -1,9 +1,8 @@
-// src/app/admin/admin-points-page.component.ts (bản dùng API)
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TicketPoint, Region } from './models/ticket-point.model';
-import {TicketPointService} from '../core/services/ticket-point.service';
+import * as L from 'leaflet';
+import {TicketPoint} from './models/ticket-point.model';
 
 @Component({
   standalone: true,
@@ -13,87 +12,120 @@ import {TicketPointService} from '../core/services/ticket-point.service';
   imports: [CommonModule, FormsModule]
 })
 export class AdminPointsPageComponent implements OnInit {
-  regions: Region[] = ['MB', 'MN', 'MT'];
 
-  provincesByRegion: Record<Region, string[]> = {
-    MB: ['Hà Nội', 'Hải Phòng', 'Quảng Ninh', 'Bắc Ninh', 'Nam Định'],
-    MN: ['Hồ Chí Minh', 'Đồng Nai', 'Bình Dương', 'Cần Thơ', 'Vũng Tàu'],
-    MT: ['Đà Nẵng', 'Huế', 'Nha Trang', 'Quảng Nam', 'Bình Định']
+  regions: Array<'MB'|'MN'|'MT'> = ['MB','MN','MT'];
+  provincesByRegion: Record<string,string[]> = {
+    MB: ['Hà Nội','Hải Phòng','Quảng Ninh','Thái Bình','Nam Định'],
+    MN: ['TP. Hồ Chí Minh','Đồng Nai','Bình Dương','Tây Ninh'],
+    MT: ['Đà Nẵng','Huế','Khánh Hòa','Quảng Nam']
   };
 
   points: TicketPoint[] = [];
-  editingId: number | null = null;
+  editingId?: number;
 
-  form: TicketPoint = this.createEmpty('MB');
+  form: TicketPoint = {
+    name: '', region: 'MB', province: 'Hà Nội', address: '',
+    hasXsmb: true, hasVietlott: true,
+    openTime: '08:00', closeTime: '22:00'
+  };
 
-  constructor(private pointService: TicketPointService) {}
+  // map
+  map?: L.Map;
+  marker?: L.Marker;
+  picking = false;   // bật modal chọn map
 
-  ngOnInit(): void {
-    this.load();
-  }
-
-  load() {
-    this.pointService.list().subscribe(res => this.points = res);
-  }
-
-  private createEmpty(region: Region): TicketPoint {
-    return {
-      name: '',
-      region,
-      province: this.provincesByRegion[region][0],
-      district: '',
-      address: '',
-      hotline: '',
-      note: ''
-    };
+  ngOnInit() {
+    // TODO: load points từ API
   }
 
   onRegionChange() {
-    const region = this.form.region;
-    const list = this.provincesByRegion[region];
-    if (!list.includes(this.form.province)) {
-      this.form.province = list[0];
-    }
-  }
-
-  resetForm() {
-    const region = this.form.region;
-    this.editingId = null;
-    this.form = this.createEmpty(region);
-  }
-
-  save() {
-    if (!this.form.name.trim() || !this.form.address.trim()) {
-      alert('Tên điểm bán và địa chỉ là bắt buộc.');
-      return;
-    }
-
-    if (this.editingId == null) {
-      this.pointService.create(this.form).subscribe(() => {
-        this.load();
-        this.resetForm();
-      });
-    } else {
-      this.pointService.update(this.editingId, this.form).subscribe(() => {
-        this.load();
-        this.resetForm();
-      });
+    const first = this.provincesByRegion[this.form.region][0];
+    if (!this.form.province || !this.provincesByRegion[this.form.region].includes(this.form.province)) {
+      this.form.province = first;
     }
   }
 
   edit(p: TicketPoint) {
-    this.editingId = p.id!;
-    this.form = { ...p };
+    this.editingId = p.id;
+    this.form = { ...p }; // clone
+    this.onRegionChange();
   }
 
   remove(p: TicketPoint) {
-    if (!confirm(`Xoá "${p.name}"?`)) return;
-    this.pointService.delete(p.id!).subscribe(() => this.load());
+    if (!confirm('Xóa điểm bán này?')) return;
+    // TODO: call API delete
+    this.points = this.points.filter(x => x !== p);
   }
 
-  getRegionLabel(r: Region): string {
-    if (r === 'MB') return 'Miền Bắc';
-    if (r === 'MN') return 'Miền Nam';
-    return 'Miền Trung';
+  resetForm() {
+    this.editingId = undefined;
+    this.form = {
+      name: '', region: 'MB', province: 'Hà Nội', address: '',
+      hasXsmb: true, hasVietlott: true,
+      openTime: '08:00', closeTime: '22:00'
+    };
+  }
+
+  save() {
+    // Validate tối thiểu
+    if (!this.form.name?.trim() || !this.form.address?.trim()) {
+      alert('Tên & địa chỉ là bắt buộc.');
+      return;
+    }
+    // TODO: call API create/update
+    if (this.editingId) {
+      const i = this.points.findIndex(p => p.id === this.editingId);
+      this.points[i] = { ...this.form };
+    } else {
+      this.points.unshift({ ...this.form, id: Date.now() });
+    }
+    this.resetForm();
+  }
+
+  // ===== Map modal (Leaflet + OSM) =====
+  openPickMap() {
+    this.picking = true;
+    setTimeout(() => this.initMap(), 0);
+  }
+
+  closePickMap() {
+    this.picking = false;
+    // destroy map để tránh leak
+    this.map?.remove();
+    this.map = undefined;
+    this.marker = undefined;
+  }
+
+  private initMap() {
+    const lat = this.form.lat ?? 21.0278; // Hà Nội
+    const lng = this.form.lng ?? 105.8342;
+
+    this.map = L.map('pickMap', { center: [lat, lng], zoom: 13 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { attribution: '&copy; OpenStreetMap' }).addTo(this.map);
+
+    this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+    this.marker.on('dragend', () => {
+      const c = (this.marker as L.Marker).getLatLng();
+      this.form.lat = c.lat;
+      this.form.lng = c.lng;
+    });
+
+    // click đặt marker
+    this.map.on('click', (e: any) => {
+      const c = e.latlng;
+      (this.marker as L.Marker).setLatLng(c);
+      this.form.lat = c.lat; this.form.lng = c.lng;
+    });
+
+    // dùng vị trí hiện tại
+    if (navigator.geolocation && (!this.form.lat || !this.form.lng)) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const c = L.latLng(pos.coords.latitude, pos.coords.longitude);
+        this.map?.setView(c, 15);
+        (this.marker as L.Marker).setLatLng(c);
+        this.form.lat = c.lat; this.form.lng = c.lng;
+      });
+    }
   }
 }
