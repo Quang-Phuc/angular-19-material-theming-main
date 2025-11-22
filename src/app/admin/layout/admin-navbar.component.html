@@ -1,0 +1,22 @@
+<header class="admin-header">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">AD</div>
+      <div class="texts">
+        <div class="title">Thần Đèn — Admin</div>
+        <div class="sub">Bảng điều khiển</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a routerLink="/admin/diem-mua-ve-so" routerLinkActive="active">Điểm bán</a>
+      <a routerLink="/admin/vietlott" routerLinkActive="active">Vietlott</a>
+      <a routerLink="/admin/lottery" routerLinkActive="active">Xổ số</a>
+    </nav>
+
+    <div class="actions">
+      <a routerLink="/" class="link">← Về trang người dùng</a>
+      <button class="btn danger" (click)="logout()">Đăng xuất</button>
+    </div>
+  </div>
+</header>

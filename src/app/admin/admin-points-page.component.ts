@@ -1,19 +1,9 @@
+// src/app/admin/admin-points-page.component.ts (bản dùng API)
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-type Region = 'MB' | 'MN' | 'MT';
-
-interface TicketPoint {
-  id: number;
-  name: string;
-  region: Region;
-  province: string;
-  district: string;
-  address: string;
-  hotline: string;
-  note?: string;
-}
+import { TicketPoint, Region } from './models/ticket-point.model';
+import {TicketPointService} from '../core/services/ticket-point.service';
 
 @Component({
   standalone: true,
@@ -22,7 +12,7 @@ interface TicketPoint {
   styleUrls: ['./admin-points-page.component.scss'],
   imports: [CommonModule, FormsModule]
 })
-export class AdminPointsPageComponent {
+export class AdminPointsPageComponent implements OnInit {
   regions: Region[] = ['MB', 'MN', 'MT'];
 
   provincesByRegion: Record<Region, string[]> = {
@@ -32,15 +22,22 @@ export class AdminPointsPageComponent {
   };
 
   points: TicketPoint[] = [];
-  private nextId = 1;
-
   editingId: number | null = null;
 
   form: TicketPoint = this.createEmpty('MB');
 
+  constructor(private pointService: TicketPointService) {}
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load() {
+    this.pointService.list().subscribe(res => this.points = res);
+  }
+
   private createEmpty(region: Region): TicketPoint {
     return {
-      id: 0,
       name: '',
       region,
       province: this.provincesByRegion[region][0],
@@ -60,8 +57,9 @@ export class AdminPointsPageComponent {
   }
 
   resetForm() {
+    const region = this.form.region;
     this.editingId = null;
-    this.form = this.createEmpty(this.form.region);
+    this.form = this.createEmpty(region);
   }
 
   save() {
@@ -71,27 +69,26 @@ export class AdminPointsPageComponent {
     }
 
     if (this.editingId == null) {
-      const copy: TicketPoint = { ...this.form, id: this.nextId++ };
-      this.points = [...this.points, copy];
+      this.pointService.create(this.form).subscribe(() => {
+        this.load();
+        this.resetForm();
+      });
     } else {
-      this.points = this.points.map(p =>
-        p.id === this.editingId ? { ...this.form, id: this.editingId! } : p
-      );
+      this.pointService.update(this.editingId, this.form).subscribe(() => {
+        this.load();
+        this.resetForm();
+      });
     }
-    this.resetForm();
   }
 
-  edit(point: TicketPoint) {
-    this.editingId = point.id;
-    this.form = { ...point };
+  edit(p: TicketPoint) {
+    this.editingId = p.id!;
+    this.form = { ...p };
   }
 
-  remove(point: TicketPoint) {
-    if (!confirm(`Xoá điểm "${point.name}"?`)) return;
-    this.points = this.points.filter(p => p.id !== point.id);
-    if (this.editingId === point.id) {
-      this.resetForm();
-    }
+  remove(p: TicketPoint) {
+    if (!confirm(`Xoá "${p.name}"?`)) return;
+    this.pointService.delete(p.id!).subscribe(() => this.load());
   }
 
   getRegionLabel(r: Region): string {

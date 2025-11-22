@@ -1,0 +1,107 @@
+<main class="admin-page">
+  <header class="admin-header">
+    <h1>Nhập kết quả Vietlott</h1>
+    <p>Chọn loại hình, ngày quay và nhập dãy số.</p>
+  </header>
+
+  <section class="admin-grid">
+    <!-- Form -->
+    <form class="admin-card form" (ngSubmit)="save()">
+      <h2>{{ editingId ? 'Sửa kỳ quay' : 'Thêm kỳ quay mới' }}</h2>
+
+      <div class="field-row two">
+        <div>
+          <label>Loại Vietlott</label>
+          <select [(ngModel)]="form.game" name="game">
+            <option *ngFor="let g of games" [ngValue]="g.value">
+              {{ g.label }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label>Ngày quay</label>
+          <input type="date" [(ngModel)]="form.drawDate" name="drawDate" />
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <div>
+          <label>Kỳ quay (nếu có)</label>
+          <input [(ngModel)]="form.code" name="code" placeholder="VD: #01023" />
+        </div>
+        <div>
+          <label>Giá trị Jackpot</label>
+          <input [(ngModel)]="form.jackpot" name="jackpot" placeholder="VD: 45 tỷ" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label>Dãy số chính *</label>
+        <input
+          [(ngModel)]="form.numbers"
+          name="numbers"
+          placeholder="VD: 01 05 12 23 30 55"
+        />
+        <small>Tuỳ loại hình, có thể cách nhau bằng khoảng trắng hoặc dấu phẩy.</small>
+      </div>
+
+      <div class="field-row">
+        <label>Số phụ / Extra (nếu có)</label>
+        <input [(ngModel)]="form.extra" name="extra" placeholder="VD: 10, 23" />
+      </div>
+
+      <div class="field-row">
+        <label>Ghi chú</label>
+        <textarea [(ngModel)]="form.note" name="note" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn primary">
+          {{ editingId ? 'Lưu thay đổi' : 'Thêm mới' }}
+        </button>
+        <button type="button" class="btn ghost" (click)="reset()">Làm lại</button>
+      </div>
+    </form>
+
+    <!-- List -->
+    <section class="admin-card list">
+      <h2>
+        Danh sách Vietlott
+        <span *ngIf="loading">(loading…)</span>
+        <span *ngIf="!loading">({{ results.length }})</span>
+      </h2>
+
+      <div *ngIf="!loading && !results.length" class="empty">
+        Chưa có dữ liệu. Hãy nhập kỳ quay mới.
+      </div>
+
+      <table *ngIf="results.length" class="points-table">
+        <thead>
+        <tr>
+          <th>Ngày</th>
+          <th>Loại</th>
+          <th>Kỳ</th>
+          <th>Dãy số</th>
+          <th>Extra</th>
+          <th>Jackpot</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let r of results">
+          <td>{{ r.drawDate }}</td>
+          <td>{{ gameLabel(r.game) }}</td>
+          <td>{{ r.code }}</td>
+          <td>{{ r.numbers }}</td>
+          <td>{{ r.extra }}</td>
+          <td>{{ r.jackpot }}</td>
+          <td class="actions">
+            <button type="button" class="link" (click)="edit(r)">Sửa</button>
+            <button type="button" class="link danger" (click)="remove(r)">Xoá</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </section>
+</main>

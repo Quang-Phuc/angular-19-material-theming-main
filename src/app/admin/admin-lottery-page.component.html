@@ -1,0 +1,165 @@
+<main class="admin-page">
+  <header class="admin-header">
+    <h1>Nhập kết quả Xổ số truyền thống</h1>
+    <p>Chọn vùng, ngày quay và nhập các giải (cách nhau bởi dấu phẩy hoặc khoảng trắng).</p>
+  </header>
+
+  <section class="admin-grid">
+    <!-- Form -->
+    <form class="admin-card form" (ngSubmit)="save()">
+      <h2>{{ editingId ? 'Sửa kỳ quay' : 'Thêm kỳ quay mới' }}</h2>
+
+      <div class="field-row two">
+        <div>
+          <label>Vùng</label>
+          <select [(ngModel)]="form.region" name="region" (change)="onRegionChange()">
+            <option *ngFor="let r of regions" [ngValue]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div>
+          <label>Tỉnh / Đài</label>
+          <select [(ngModel)]="form.province" name="province">
+            <option *ngFor="let p of provincesByRegion[form.region]" [value]="p">
+              {{ p }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label>Ngày quay</label>
+        <input type="date" [(ngModel)]="form.drawDate" name="drawDate" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải ĐB *</label>
+        <input [(ngModel)]="form.gDB" name="gDB" placeholder="VD: 27079" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 1</label>
+        <input [(ngModel)]="form.g1" name="g1" placeholder="VD: 91353" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 2</label>
+        <input [(ngModel)]="form.g2" name="g2" placeholder="VD: 05930, 06646" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 3</label>
+        <input
+          [(ngModel)]="form.g3"
+          name="g3"
+          placeholder="VD: 84484 85281 28117 47788 04174 75509"
+        />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 4</label>
+        <input [(ngModel)]="form.g4" name="g4" placeholder="VD: 7699 0835 4175 7378" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 5</label>
+        <input
+          [(ngModel)]="form.g5"
+          name="g5"
+          placeholder="VD: 4266 2498 9210 3795 8653 3860"
+        />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 6</label>
+        <input [(ngModel)]="form.g6" name="g6" placeholder="VD: 184 940 675" />
+      </div>
+
+      <div class="field-row">
+        <label>Giải 7</label>
+        <input [(ngModel)]="form.g7" name="g7" placeholder="VD: 60 95 65 43" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn primary">
+          {{ editingId ? 'Lưu thay đổi' : 'Thêm mới' }}
+        </button>
+        <button type="button" class="btn ghost" (click)="reset()">Làm lại</button>
+      </div>
+    </form>
+
+    <!-- List + preview -->
+    <section class="admin-card list">
+      <h2>
+        Danh sách kỳ quay
+        <span *ngIf="loading">(loading…)</span>
+        <span *ngIf="!loading">({{ draws.length }})</span>
+      </h2>
+
+      <div *ngIf="!loading && !draws.length" class="empty">
+        Chưa có dữ liệu. Hãy nhập kỳ quay mới.
+      </div>
+
+      <div *ngFor="let d of draws" class="draw-card">
+        <div class="draw-header">
+          <div>
+            <div class="draw-title">
+              {{ d.region }} • {{ d.province }}
+            </div>
+            <div class="draw-sub">Ngày: {{ d.drawDate }}</div>
+          </div>
+          <div class="draw-actions">
+            <button type="button" class="link" (click)="edit(d)">Sửa</button>
+            <button type="button" class="link danger" (click)="remove(d)">Xoá</button>
+          </div>
+        </div>
+
+        <div class="draw-body">
+          <div class="row">
+            <span class="label db">ĐB</span>
+            <span class="nums big">{{ d.gDB }}</span>
+          </div>
+          <div class="row" *ngIf="d.g1">
+            <span class="label">G1</span>
+            <span class="nums">{{ d.g1 }}</span>
+          </div>
+          <div class="row" *ngIf="d.g2">
+            <span class="label">G2</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g2)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+          <div class="row" *ngIf="d.g3">
+            <span class="label">G3</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g3)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+          <div class="row" *ngIf="d.g4">
+            <span class="label">G4</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g4)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+          <div class="row" *ngIf="d.g5">
+            <span class="label">G5</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g5)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+          <div class="row" *ngIf="d.g6">
+            <span class="label">G6</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g6)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+          <div class="row" *ngIf="d.g7">
+            <span class="label">G7</span>
+            <span class="nums">
+              <span *ngFor="let n of formatMulti(d.g7)" class="chip">{{ n }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>

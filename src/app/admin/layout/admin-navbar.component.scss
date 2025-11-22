@@ -1,0 +1,38 @@
+:root{ --gold:#FFD54A; --gold2:#FFC107; --border:#2a2a2a; --panel:#111214; --text:#FAFAFA; }
+
+.admin-header{
+  position: sticky; top:0; z-index:100;
+  backdrop-filter: saturate(140%) blur(10px);
+  background: linear-gradient(180deg, rgba(10,10,10,.96), rgba(10,10,10,.8));
+  border-bottom: 1px solid var(--border);
+}
+.inner{
+  max-width: 1100px; margin: 0 auto; padding: 10px 12px;
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap; color:var(--text);
+}
+.brand{ display:flex; gap:10px; align-items:center; }
+.logo{
+  width:36px;height:36px;border-radius:12px;
+  background: conic-gradient(from 120deg, var(--gold), var(--gold2), #FFB300, var(--gold));
+  display:grid;place-items:center;font-weight:900;color:#111; box-shadow:0 8px 22px rgba(255,213,74,.3)
+}
+.title{ font-weight:900 }
+.sub{ font-size:12px; opacity:.8 }
+.menu{ display:flex; gap:10px; margin-left:auto; }
+.menu a{
+  padding:8px 12px; border-radius:999px; border:1px solid var(--border); color:#fff; text-decoration:none;
+}
+.menu a.active{
+  color:#111; background: linear-gradient(135deg, var(--gold), var(--gold2));
+  box-shadow: 0 6px 14px rgba(255,193,7,.25);
+  border-color: transparent;
+}
+.actions{ display:flex; gap:8px; align-items:center; }
+.link{ color:#9fd0ff; text-decoration:none; }
+.btn{ border:0; border-radius:10px; padding:8px 12px; font-weight:800; cursor:pointer; }
+.btn.danger{ background:#2a0f12; color:#ff8686; border:1px solid #4a1d22; }
+
+@media (max-width:768px){
+  .menu{ width:100%; order:3; margin-left:0 }
+  .actions{ margin-left:auto; }
+}

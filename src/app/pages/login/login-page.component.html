@@ -1,0 +1,39 @@
+<main class="login-wrap">
+  <div class="login-card">
+    <div class="logo">TD</div>
+    <h1>Đăng nhập Admin</h1>
+    <p class="sub">Truy cập khu quản trị Thần Đèn Xổ Số.</p>
+
+    <form (ngSubmit)="login()" class="form">
+      <div class="field">
+        <label>Tài khoản</label>
+        <input
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="admin"
+        />
+      </div>
+
+      <div class="field">
+        <label>Mật khẩu</label>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="12345678aA@"
+        />
+      </div>
+
+      <div class="error" *ngIf="error">{{ error }}</div>
+
+      <button type="submit" class="btn" [disabled]="loading">
+        {{ loading ? 'Đang kiểm tra...' : 'Đăng nhập' }}
+      </button>
+
+      <p class="hint">
+        Demo: <strong>admin / 12345678aA</strong>
+      </p>
+    </form>
+  </div>
+</main>
