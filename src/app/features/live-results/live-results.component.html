@@ -56,7 +56,7 @@
               <div
                 class="ball big db-big"
                 [class.blink]="isViewingLiveXsmb">
-                <span class="num-main">
+                <span class="num-last2">
                   {{ cur.prizes.DB[0] | slice:0:-2 }}
                 </span>
                 <span class="num-last2">
@@ -65,22 +65,26 @@
               </div>
             </ng-container>
 
-            <!-- CÁC GIẢI KHÁC: MỖI SỐ 1 Ô, 2 SỐ CUỐI ĐỎ -->
+            <!-- CÁC GIẢI KHÁC: MỖI SỐ 1 Ô, 2 SỐ CUỐI ĐỎ → BỎ ĐỎ TOÀN BỘ, CHỈ ĐỎ GIẢI ĐẶC BIỆT -->
             <ng-template #otherPrizes>
               <ng-container *ngFor="let s of cur.prizes[pr]; let idx = index">
                 <div
                   class="ball"
                   [class.spin]="isSpinning(pr, idx)">
                   <ng-container *ngIf="(s || '').length > 2; else only2">
-                    <span class="num-main">
-                      {{ s | slice:0:-2 }}
-                    </span>
-                    <span class="num-last2">
-                      {{ s | slice:-2 }}
-                    </span>
+                    <!-- Từ G1 → G6: toàn bộ trắng -->
+                    <span class="num-main"
+                          [style.color]="pr === 'DB' ? '#ff3333' : '#fff'">
+          {{ s | slice:0:-2 }}
+        </span>
+                    <span class="num-last2"
+                          [style.color]="pr === 'DB' ? '#ff3333' : '#fff'">
+          {{ s | slice:-2 }}
+        </span>
                   </ng-container>
                   <ng-template #only2>
-                    <span class="num-last2">{{ s }}</span>
+                    <!-- G7 chỉ có 2 số → trắng hoàn toàn (trừ DB nhưng DB không vào đây) -->
+                    <span class="num-last2" style="color: #ff3333">{{ s }}</span>
                   </ng-template>
                 </div>
                 <span class="sep" *ngIf="idx < cur.prizes[pr].length - 1">•</span>

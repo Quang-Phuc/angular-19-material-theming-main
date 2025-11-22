@@ -477,3 +477,52 @@
     text-align: left;
   }
 }
+/* ================= MOBILE: 3 DÃY SỐ TRÊN 1 DÒNG (G1-G6) ================= */
+@media (max-width: 640px) {
+  .p-numbers {
+    justify-content: space-between;
+    gap: 6px 4px !important;
+  }
+
+  /* Các giải có từ 2–6 số (G1–G6): chia đều 3 cột */
+  .prize-row:not(.db-row) .p-numbers {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-items: center;
+  }
+
+  /* G2 (2 số) → vẫn căn giữa đẹp */
+  .prize-row .p-numbers:has(.ball:nth-child(2):last-child) {
+    grid-template-columns: 1fr 1fr;
+    max-width: 260px;
+    margin: 0 auto;
+  }
+
+  /* G1 (1 số) → căn giữa */
+  .prize-row .p-numbers:has(.ball:nth-child(1):last-child) {
+    grid-template-columns: 1fr;
+    max-width: 140px;
+    margin: 0 auto;
+  }
+
+  /* G7 (4 số) vẫn flex đều, không cần grid */
+  .prize-row .p-numbers .ball {
+    min-width: 68px !important;
+    font-size: 14px !important;
+    padding: 0 8px;
+  }
+
+  /* Separator nhỏ hơn trên mobile */
+  .sep {
+    font-size: 14px;
+    opacity: 0.6;
+  }
+}
+
+/* Tablet nhỏ vẫn đẹp (tối đa 4–5 số trên 1 dòng) */
+@media (min-width: 641px) and (max-width: 820px) {
+  .p-numbers {
+    gap: 10px 12px;
+    justify-content: center;
+  }
+}
