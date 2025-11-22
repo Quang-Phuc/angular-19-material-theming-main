@@ -25,7 +25,6 @@ export class HeaderComponent {
     { tag: 'AI',        icon:'💭', title:'Đoán Số Giấc Mơ',       badge:32, sub:'Từ điển + thống kê', link:'/giac-mo' },
     { tag: 'AI',        icon:'💡', title:'Dự Đoán Xổ Số Bằng AI', badge:17, sub:'Gợi ý nóng hôm nay', link:'/ai' },
     { tag: '00 → 99',   icon:'🪄', title:'Lọc Số Sáng Nhất',      badge:79, sub:'Theo ngày/tuần',     link:'/loc-so' },
-    { tag: 'Phong Thuỷ',icon:'🧭', title:'Số Phong Thuỷ',         badge:35, sub:'Mạng & tuổi',        link:'/phong-thuy' },
   ];
 
   constructor() {

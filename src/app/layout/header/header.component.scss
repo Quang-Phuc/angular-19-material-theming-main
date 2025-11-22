@@ -58,29 +58,37 @@
 .mm-sub{ font-size:12px; color:#cfcfcf }
 
 /* ===== GOLD RIBBON (1 hàng – cuộn ngang) ===== */
-.ribbon-wrap{
-  position:relative;
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg,#121212,#0e0e0e);
-  overflow:hidden;
+.ribbon-wrap {
+  position: relative;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #121212, #0e0e0e);
+  overflow: hidden;
+  padding: 6px 0; /* Giảm padding dọc một chút cho gọn */
 }
-.ribbon{
-  display:flex !important;
-  flex-wrap:nowrap !important;
-  align-items:stretch;
-  gap:14px;
-  padding:14px 50px;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
+.ribbon {
+  display: flex !important;
+  justify-content: center;        /* CĂN GIỮA CHÍNH XÁC */
+  align-items: stretch;
+  gap: 16px;
+  padding: 14px 20px;             /* Padding vừa đủ, không cần quá rộng */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 20px;
 }
-.ribbon::-webkit-scrollbar{ display:none }
+.ribbon::-webkit-scrollbar {
+  display: none;
+}
 
-.ribbon > .item{
-  flex:0 0 auto;
-  min-width:218px;
+.ribbon > .item {
+  flex: 0 0 218px;                /* Giữ width cố định */
+  scroll-snap-align: center;      /* Cuộn mượt, dừng giữa item */
 }
+
+/* Ẩn hoàn toàn nút mũi tên trên mọi màn hình vì giờ đã căn giữa + scroll mượt */
+
 .item{
   background:#0f0f0f; border:1px solid var(--border);
   border-radius:14px; padding:12px; color:#fff; display:grid; gap:6px;
@@ -187,7 +195,7 @@
 
   /* Ẩn các nút điều hướng trên desktop vì chúng sẽ không hoạt động tốt khi ribbon không full width */
   .arrow-btn {
-    display: none;
+    display: none !important;
   }
 }
 /* ===== MOBILE ===== */
